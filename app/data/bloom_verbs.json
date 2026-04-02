@@ -1,0 +1,41 @@
+{
+  "Beginner": {
+    "levels": [
+      "Remember",
+      "Understand"
+    ],
+    "verbs": [
+      "define",
+      "identify",
+      "list",
+      "describe",
+      "explain"
+    ]
+  },
+  "Intermediate": {
+    "levels": [
+      "Apply",
+      "Analyze"
+    ],
+    "verbs": [
+      "apply",
+      "demonstrate",
+      "solve",
+      "analyze",
+      "compare"
+    ]
+  },
+  "Advanced": {
+    "levels": [
+      "Evaluate",
+      "Create"
+    ],
+    "verbs": [
+      "evaluate",
+      "justify",
+      "design",
+      "create",
+      "propose"
+    ]
+  }
+}

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduCarib AI - User Management</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <aside class="sidebar">
+      <div class="brand-wrap">
+        <div class="brand">EduCarib AI</div>
+        <p class="muted">Admin user management.</p>
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Navigation</h3>
+        <div class="sidebar-actions">
+          <a href="/" class="nav-link-btn">Back to Dashboard</a>
+          <a href="/admin" class="nav-link-btn">Curriculum Admin</a>
+          <a href="/logout" class="nav-link-btn">Log Out</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="builder-header">
+        <div>
+          <div class="eyebrow">Admin</div>
+          <h2>User Management</h2>
+          <p class="muted small-text">Manage roles, plans, and billing placeholders.</p>
+        </div>
+      </section>
+
+      <section class="builder-grid">
+        <div class="builder-card">
+          <div class="section-head">
+            <h2>Users</h2>
+            <p class="muted small-text">Select a user to update role, plan, and billing data.</p>
+          </div>
+          <div id="adminUserList" class="admin-framework-list"></div>
+        </div>
+
+        <div class="output-card">
+          <div class="section-head">
+            <h2>User Billing Editor</h2>
+            <p class="muted small-text">Manual billing controls before live PayPal integration.</p>
+          </div>
+
+          <input type="hidden" id="adminUserId" value="" />
+
+          <div class="form-grid">
+            <label class="field field-full">
+              <span>Email</span>
+              <input type="text" id="user_email" readonly />
+            </label>
+
+            <label class="field">
+              <span>Role</span>
+              <select id="user_role">
+                <option value="user">user</option>
+                <option value="admin">admin</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Plan</span>
+              <select id="user_plan">
+                <option value="free">free</option>
+                <option value="pro">pro</option>
+                <option value="admin">admin</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Subscription Status</span>
+              <select id="user_subscription_status">
+                <option value="inactive">inactive</option>
+                <option value="trialing">trialing</option>
+                <option value="active">active</option>
+                <option value="past_due">past_due</option>
+                <option value="cancelled">cancelled</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Payment Provider</span>
+              <input type="text" id="user_payment_provider" placeholder="manual or paypal" />
+            </label>
+
+            <label class="field">
+              <span>PayPal Customer ID</span>
+              <input type="text" id="user_paypal_customer_id" placeholder="Optional" />
+            </label>
+
+            <label class="field">
+              <span>PayPal Subscription ID</span>
+              <input type="text" id="user_paypal_subscription_id" placeholder="Optional" />
+            </label>
+
+            <label class="field">
+              <span>Subscription Started At</span>
+              <input type="text" id="user_subscription_started_at" placeholder="YYYY-MM-DD or ISO datetime" />
+            </label>
+
+            <label class="field">
+              <span>Subscription Renews At</span>
+              <input type="text" id="user_subscription_renews_at" placeholder="YYYY-MM-DD or ISO datetime" />
+            </label>
+
+            <label class="field field-full">
+              <span>Billing Notes</span>
+              <textarea id="user_billing_notes" rows="5" placeholder="Manual billing notes..."></textarea>
+            </label>
+
+            <label class="field field-full">
+              <span>Created At</span>
+              <input type="text" id="user_created_at" readonly />
+            </label>
+          </div>
+
+          <div class="output-actions">
+            <button type="button" id="saveUserBtn">Save Billing Changes</button>
+          </div>
+
+          <div id="adminUserStatus" class="status"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/admin_users.js"></script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+[
+  {
+    "id": "02b864ae-825e-445e-89cc-d8505ba10ef6",
+    "title": "Information Technology Lesson Plan - psuedo code",
+    "curriculum": "CSEC",
+    "subject": "Information Technology",
+    "grade_level": "Grades 10-11",
+    "topic": "psuedo code",
+    "created_at": "2026-04-02T14:00:57.986066",
+    "updated_at": "2026-04-02T14:00:57.986066",
+    "data": {
+      "title": "Information Technology Lesson Plan - psuedo code",
+      "curriculum_match": {
+        "name": "Productivity Tools, Databases, and Programming",
+        "keywords": [
+          "word processing",
+          "spreadsheets",
+          "database",
+          "program design",
+          "program implementation",
+          "web page design"
+        ],
+        "objectives": [
+          {
+            "text": "Create solutions using productivity tools, databases, and web technologies.",
+            "bloom": "Create"
+          },
+          {
+            "text": "Design and implement simple algorithms or programs to solve problems.",
+            "bloom": "Apply"
+          },
+          {
+            "text": "Interpret user needs and select appropriate technological solutions.",
+            "bloom": "Analyze"
+          }
+        ],
+        "resources": [],
+        "framework_id": "csec_grades_10_11_information_technology_productivity_tools,_databases,_and_programming",
+        "level": "Grades 10-11",
+        "curriculum": "CSEC",
+        "subject": "Information Technology",
+        "strand": "Sections 4-8",
+        "topic_group": "Applications and Problem Solving"
+      },
+      "lesson": {
+        "curriculum": "CSEC",
+        "subject": "Information Technology",
+        "grade_level": "Grades 10-11",
+        "topic": "psuedo code",
+        "subtopic": "",
+        "structure": "5Es",
+        "difficulty": "Intermediate",
+        "lesson_type": "Discussion",
+        "duration_minutes": 60,
+        "description": "",
+        "objectives": [
+          "Design and implement simple algorithms or programs to solve problems.",
+          "Interpret user needs and select appropriate technological solutions.",
+          "Create solutions using productivity tools, databases, and web technologies."
+        ],
+        "suggested_standards": [
+          "Sections 4-8"
+        ],
+        "prior_knowledge_questions": [
+          "What is an algorithm in simple terms?",
+          "Name three control structures (sequence, selection, iteration).",
+          "How does a flowchart relate to writing psuedo code?"
+        ],
+        "resources": [
+          "Information Technology textbook section on psuedo code",
+          "Projector or whiteboard and markers",
+          "Printed worksheet with 2 short problem prompts",
+          "YouTube title suggestion: psuedo code explained for Information Technology"
+        ],
+        "sections": {
+          "Engagement": [
+            "Teacher presents a short real-life scenario (e.g., making a class attendance list and marking late students) and asks students to list the steps verbally; record steps on the board in sequence.",
+            "Students call out step-by-step actions, identify missing details (inputs, outputs, conditions), and vote on the clearest sequence."
+          ],
+          "Exploration": [
+            "Teacher gives each pair a worksheet with two tasks (e.g., calculate average grade; determine pass/fail based on threshold) and explains simple psuedo code conventions to use (INPUT, PROCESS, OUTPUT, IF, FOR/WHILE).",
+            "Students work in pairs for 10 minutes to write plain-language steps then convert them into structured psuedo code using the conventions; prepare one solution to present."
+          ],
+          "Explanation": [
+            "Teacher invites 2–3 pairs to present their psuedo code on the board, highlights correct use of variables, control structures, and handling of edge cases; ask targeted questions to probe reasoning.",
+            "Students explain why they chose particular structures, respond to teacher prompts about user needs (e.g., what if no input provided), and update their psuedo code when given suggestions."
+          ],
+          "Evaluation": [
+            "Teacher issues a 7-minute individual exit task: write psuedo code to find the largest of five numbers; provide a short rubric (correct logic, clear steps, use of control structures) and collect responses.",
+            "Students complete the exit task independently, hand it in, and if time remains, quickly peer-check a neighbour’s solution for clarity against the rubric."
+          ],
+          "Extension": [
+            "Teacher assigns a take-home mini-project: design psuedo code for a simple database search (e.g., find student by ID) to be submitted via shared document next lesson; include required inputs/outputs and one test case.",
+            "Students outline inputs, expected outputs, and write psuedo code; they walk through the logic with a sample record to ensure the solution meets the user need."
+          ]
+        },
+        "assessment": [
+          "Collected exit task: graded against rubric for correct logic, appropriate control structures, and clarity.",
+          "Pair presentation contributions and group discussion participation recorded informally.",
+          "Take-home mini-project reviewed for ability to interpret user needs and produce a workable psuedo code solution."
+        ],
+        "reflection": [
+          "Note which control structures students used confidently and which required re-teaching.",
+          "Assess whether students linked user needs to required inputs/outputs effectively.",
+          "Decide if more practice with edge cases or converting psuedo code to code is needed next lesson.",
+          "Record any resource or timing changes (e.g., more time for pair work or clearer worksheet prompts)."
+        ],
+        "generation_mode": "ai"
+      }
+    }
+  },
+  {
+    "id": "d7c5de0e-93ef-450a-b98e-83940481f84e",
+    "owner_email": "monairmatthew@gmail.com",
+    "title": "Language Arts Lesson Plan - singular and plural",
+    "curriculum": "CSEC",
+    "subject": "Language Arts",
+    "grade_level": "Grade 1",
+    "topic": "singular and plural",
+    "created_at": "2026-04-02T18:16:56.934391",
+    "updated_at": "2026-04-02T18:16:56.934391",
+    "data": {
+      "title": "Language Arts Lesson Plan - singular and plural",
+      "curriculum_match": {},
+      "lesson": {
+        "curriculum": "CSEC",
+        "subject": "Language Arts",
+        "grade_level": "Grade 1",
+        "topic": "singular and plural",
+        "subtopic": "",
+        "structure": "",
+        "difficulty": "Beginner",
+        "lesson_type": "",
+        "duration_minutes": 60,
+        "description": "",
+        "objectives": [],
+        "suggested_standards": [
+          "General Strand"
+        ],
+        "prior_knowledge_questions": [
+          "Can you name one toy you have?",
+          "Do you know a word for more than one cat?",
+          "How many apples are here? (show 1 vs 3)"
+        ],
+        "resources": [
+          "Language Arts textbook section on singular and plural",
+          "Picture/word cards showing one item and many of the same item",
+          "Small counters or cubes for counting",
+          "Whiteboard and markers"
+        ],
+        "sections": {
+          "Engagement": [
+            "Teacher: Hold up two picture cards (one dog, three dogs) and ask, “Which is one? Which is many?” Students: Point to the correct card and say “one” or “many.”",
+            "Teacher: Lead a short clap chant (clap once for one, clap three times for many). Students: Repeat the chant and clap the correct number."
+          ],
+          "Exploration": [
+            "Teacher: Give each pair of students a mixed set of picture cards and two baskets labelled ONE and MANY. Students: Work in pairs to sort cards into the baskets.",
+            "Teacher: Move around the room, ask each pair to name one card from each basket aloud. Students: Say the singular and the plural word for chosen cards."
+          ],
+          "Explanation": [
+            "Teacher: Write three examples on the board (cat → cats, book → books, box → boxes) and point out the added letter(s). Students: Read the examples aloud with the teacher.",
+            "Teacher: Explain simply: for most words add -s for more than one; show one -es example (box → boxes). Students: Change three of their sorted singular cards into plurals and say them aloud."
+          ],
+          "Evaluation": [
+            "Teacher: Give a short worksheet with 6 items: circle the plural pictures and write the plural form for three nouns. Students: Complete the worksheet independently.",
+            "Teacher: Use a quick exit check — each student shows thumb up if they can make plurals, thumb side if unsure, thumb down if they need help. Students: Show the appropriate thumb."
+          ],
+          "Extension": [
+            "Teacher: Assign a home drawing: draw one item and then draw three of the same; write the words under each drawing. Students: Take the sheet home and complete with a family member.",
+            "Teacher: Tell students to listen for plural words during story time tomorrow and bring one example to share. Students: Listen and bring one plural word to class."
+          ]
+        },
+        "assessment": [
+          "Mark the worksheet: correct identification of plurals and correct written plural forms (3 written items).",
+          "Use the exit-thumb responses and notes from circulation to identify 3 students needing extra support.",
+          "Ask each student to orally give the plural for one pictured item before leaving (quick one-word check)."
+        ],
+        "reflection": [
+          "Note which examples caused errors (e.g., words needing -es) and plan one extra practice activity for those.",
+          "Record pacing: did students finish the worksheet in the given time or need extension?",
+          "Reflect on student engagement during sorting — which pairs needed more teacher prompts?",
+          "Decide next lesson focus (more practice with irregulars or more -s/-es examples) based on assessment results."
+        ],
+        "generation_mode": "ai"
+      }
+    }
+  }
+]

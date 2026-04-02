@@ -1,0 +1,2805 @@
+{
+  "frameworks": [
+    {
+      "id": "nsc_grades_1_3_language_arts_listening_and_speaking_basics",
+      "curriculum": "NSC",
+      "subject": "Language Arts",
+      "level": "Grades 1-3",
+      "bands": [
+        "Grade 1",
+        "Grade 2",
+        "Grade 3"
+      ],
+      "strand": "Listening and Speaking",
+      "topic_group": "Oral Language",
+      "topics": [
+        {
+          "name": "Listening and Speaking Basics",
+          "keywords": [
+            "listening",
+            "speaking",
+            "oral language",
+            "retell story",
+            "describe experiences",
+            "ask questions"
+          ],
+          "objectives": [
+            {
+              "text": "Listen for specific information and respond appropriately in oral activities.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Speak clearly to describe experiences, retell events, and share ideas.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Ask and answer simple questions to clarify meaning and extend discussion.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_1_3_language_arts_phonemic_awareness_and_word_recognition",
+      "curriculum": "NSC",
+      "subject": "Language Arts",
+      "level": "Grades 1-3",
+      "bands": [
+        "Grade 1",
+        "Grade 2",
+        "Grade 3"
+      ],
+      "strand": "Fluency and Recognition",
+      "topic_group": "Phonics and Vocabulary",
+      "topics": [
+        {
+          "name": "Phonemic Awareness and Word Recognition",
+          "keywords": [
+            "phonics",
+            "phonemic awareness",
+            "sight words",
+            "letter sounds",
+            "blend sounds",
+            "segment words"
+          ],
+          "objectives": [
+            {
+              "text": "Identify letter-sound relationships and use them to decode simple words.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Blend and segment sounds in one- and two-syllable words.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use grade-appropriate sight words and context clues to build vocabulary.",
+              "bloom": "Understand"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_1_3_language_arts_reading_comprehension",
+      "curriculum": "NSC",
+      "subject": "Language Arts",
+      "level": "Grades 1-3",
+      "bands": [
+        "Grade 1",
+        "Grade 2",
+        "Grade 3"
+      ],
+      "strand": "Reading for Meaning and Enjoyment",
+      "topic_group": "Comprehension",
+      "topics": [
+        {
+          "name": "Reading Comprehension",
+          "keywords": [
+            "reading comprehension",
+            "main idea",
+            "story elements",
+            "prediction",
+            "fiction nonfiction"
+          ],
+          "objectives": [
+            {
+              "text": "Identify key details, main ideas, and story elements in simple texts.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Make predictions and simple inferences based on what is read.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Respond to fiction and nonfiction texts using personal connections and questions.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_1_3_language_arts_early_writing_and_grammar",
+      "curriculum": "NSC",
+      "subject": "Language Arts",
+      "level": "Grades 1-3",
+      "bands": [
+        "Grade 1",
+        "Grade 2",
+        "Grade 3"
+      ],
+      "strand": "Communication",
+      "topic_group": "Writing",
+      "topics": [
+        {
+          "name": "Early Writing and Grammar",
+          "keywords": [
+            "writing",
+            "grammar",
+            "sentences",
+            "punctuation",
+            "capital letters"
+          ],
+          "objectives": [
+            {
+              "text": "Write simple sentences and short responses using appropriate conventions.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use basic grammar, punctuation, and capitalization in written work.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Organize ideas clearly in short written tasks for different purposes.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_1_3_mathematics_whole_numbers_and_place_value",
+      "curriculum": "NSC",
+      "subject": "Mathematics",
+      "level": "Grades 1-3",
+      "bands": [
+        "Grade 1",
+        "Grade 2",
+        "Grade 3"
+      ],
+      "strand": "Number",
+      "topic_group": "Number Sense",
+      "topics": [
+        {
+          "name": "Whole Numbers and Place Value",
+          "aliases": [],
+          "keywords": [
+            "number",
+            "place value",
+            "counting",
+            "whole numbers",
+            "compare numbers"
+          ],
+          "objectives": [
+            {
+              "text": "Read, write, compare, and order numbers appropriate to the grade level.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use place value understanding to represent and explain numbers.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Solve simple number problems using mental and written strategies.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_1_3_mathematics_basic_operations",
+      "curriculum": "NSC",
+      "subject": "Mathematics",
+      "level": "Grades 1-3",
+      "bands": [
+        "Grade 1",
+        "Grade 2",
+        "Grade 3"
+      ],
+      "strand": "Operations",
+      "topic_group": "Computation",
+      "topics": [
+        {
+          "name": "Basic Operations",
+          "keywords": [
+            "addition",
+            "subtraction",
+            "multiplication",
+            "division",
+            "computation"
+          ],
+          "objectives": [
+            {
+              "text": "Use addition and subtraction accurately in everyday problems.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Develop multiplication and division facts and use them in simple tasks.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Explain strategies used to solve number sentences and word problems.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_1_3_mathematics_time,_length,_mass,_capacity",
+      "curriculum": "NSC",
+      "subject": "Mathematics",
+      "level": "Grades 1-3",
+      "bands": [
+        "Grade 1",
+        "Grade 2",
+        "Grade 3"
+      ],
+      "strand": "Measurement",
+      "topic_group": "Measurement",
+      "topics": [
+        {
+          "name": "Time, Length, Mass, Capacity",
+          "keywords": [
+            "measurement",
+            "time",
+            "length",
+            "mass",
+            "capacity",
+            "temperature"
+          ],
+          "objectives": [
+            {
+              "text": "Estimate and measure using standard units appropriate to the task.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Read and record time and simple measurements accurately.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Choose appropriate units and tools for measuring real objects.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_1_3_mathematics_shapes,_patterns,_and_simple_data",
+      "curriculum": "NSC",
+      "subject": "Mathematics",
+      "level": "Grades 1-3",
+      "bands": [
+        "Grade 1",
+        "Grade 2",
+        "Grade 3"
+      ],
+      "strand": "Geometry and Data",
+      "topic_group": "Shapes and Data",
+      "topics": [
+        {
+          "name": "Shapes, Patterns, and Simple Data",
+          "keywords": [
+            "geometry",
+            "shapes",
+            "patterns",
+            "graphs",
+            "data"
+          ],
+          "objectives": [
+            {
+              "text": "Identify and describe common 2D and 3D shapes and their features.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Create and extend simple number and shape patterns.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Read and interpret simple pictographs, bar graphs, or tables.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_1_3_integrated_studies_self,_family,_and_community",
+      "curriculum": "NSC",
+      "subject": "Integrated Studies",
+      "level": "Grades 1-3",
+      "bands": [
+        "Grade 1",
+        "Grade 2",
+        "Grade 3"
+      ],
+      "strand": "Self and Community",
+      "topic_group": "Identity",
+      "topics": [
+        {
+          "name": "Self, Family, and Community",
+          "keywords": [
+            "family",
+            "community",
+            "roles",
+            "identity",
+            "relationships"
+          ],
+          "objectives": [
+            {
+              "text": "Describe self, family roles, and responsibilities in the community.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Show respect for self and others in classroom and community situations.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Participate in simple projects about family, school, and community life.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_1_3_integrated_studies_environment_and_everyday_life",
+      "curriculum": "NSC",
+      "subject": "Integrated Studies",
+      "level": "Grades 1-3",
+      "bands": [
+        "Grade 1",
+        "Grade 2",
+        "Grade 3"
+      ],
+      "strand": "Environment",
+      "topic_group": "Living and Working Together",
+      "topics": [
+        {
+          "name": "Environment and Everyday Life",
+          "keywords": [
+            "environment",
+            "community helpers",
+            "weather",
+            "plants",
+            "animals"
+          ],
+          "objectives": [
+            {
+              "text": "Observe and describe features of the local environment.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Explain how people, plants, and animals depend on each other.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Use simple inquiry and project work to solve familiar real-world problems.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_1_3_health_and_family_life_education_healthy_habits_and_relationships",
+      "curriculum": "NSC",
+      "subject": "Health and Family Life Education",
+      "level": "Grades 1-3",
+      "bands": [
+        "Grade 1",
+        "Grade 2",
+        "Grade 3"
+      ],
+      "strand": "Wellness",
+      "topic_group": "Healthy Living",
+      "topics": [
+        {
+          "name": "Healthy Habits and Relationships",
+          "keywords": [
+            "hfle",
+            "healthy habits",
+            "safety",
+            "feelings",
+            "relationships"
+          ],
+          "objectives": [
+            {
+              "text": "Identify habits that support personal health, hygiene, and safety.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Demonstrate positive social skills and respectful relationships.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Discuss feelings, choices, and behaviours that promote well-being.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_language_arts_reading_and_writing_for_meaning",
+      "curriculum": "NSC",
+      "subject": "Language Arts",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Listening, Speaking, Reading, Writing",
+      "topic_group": "Comprehension and Expression",
+      "topics": [
+        {
+          "name": "Reading and Writing for Meaning",
+          "keywords": [
+            "language arts",
+            "comprehension",
+            "main idea",
+            "summarize",
+            "writing paragraphs",
+            "grammar"
+          ],
+          "objectives": [
+            {
+              "text": "Read texts independently and identify main ideas, supporting details, and purpose.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Write clear paragraphs and short compositions for different purposes.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Use grammar, spelling, and punctuation more accurately in oral and written communication.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_language_arts_vocabulary,_fluency,_and_response_to_text",
+      "curriculum": "NSC",
+      "subject": "Language Arts",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Literacy",
+      "topic_group": "Vocabulary and Fluency",
+      "topics": [
+        {
+          "name": "Vocabulary, Fluency, and Response to Text",
+          "keywords": [
+            "fluency",
+            "vocabulary",
+            "response to text",
+            "fiction",
+            "nonfiction",
+            "inference"
+          ],
+          "objectives": [
+            {
+              "text": "Use vocabulary, context clues, and word analysis to understand text.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Read with growing fluency, expression, and confidence.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Respond critically and personally to fiction and nonfiction texts.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_mathematics_fractions,_decimals,_and_operations",
+      "curriculum": "NSC",
+      "subject": "Mathematics",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Number",
+      "topic_group": "Number Sense",
+      "topics": [
+        {
+          "name": "Fractions, Decimals, and Operations",
+          "keywords": [
+            "fractions",
+            "decimals",
+            "operations",
+            "number patterns",
+            "place value",
+            "factors"
+          ],
+          "objectives": [
+            {
+              "text": "Solve problems involving whole numbers, fractions, and decimals.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use number properties, factors, and multiples to explain relationships.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Select efficient strategies for computation and checking answers.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_mathematics_area,_perimeter,_time,_and_angles",
+      "curriculum": "NSC",
+      "subject": "Mathematics",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Measurement and Geometry",
+      "topic_group": "Measurement",
+      "topics": [
+        {
+          "name": "Area, Perimeter, Time, and Angles",
+          "keywords": [
+            "area",
+            "perimeter",
+            "time",
+            "angles",
+            "measurement",
+            "volume"
+          ],
+          "objectives": [
+            {
+              "text": "Estimate, measure, and calculate quantities using appropriate units.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Find perimeter and area of common shapes and interpret results.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Identify, describe, and compare angles, lines, and geometric figures.",
+              "bloom": "Understand"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_mathematics_patterns,_algebraic_thinking,_and_data_handling",
+      "curriculum": "NSC",
+      "subject": "Mathematics",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Algebra and Data",
+      "topic_group": "Patterns and Data",
+      "topics": [
+        {
+          "name": "Patterns, Algebraic Thinking, and Data Handling",
+          "keywords": [
+            "patterns",
+            "algebra",
+            "graphs",
+            "mean",
+            "mode",
+            "median",
+            "probability"
+          ],
+          "objectives": [
+            {
+              "text": "Describe and extend number or geometric patterns using rules.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Represent simple relationships using algebraic expressions or equations.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Collect, organize, and interpret data using tables and graphs.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_science_living_things_and_their_environment",
+      "curriculum": "NSC",
+      "subject": "Science",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Life Science",
+      "topic_group": "Living Things",
+      "topics": [
+        {
+          "name": "Living Things and Their Environment",
+          "keywords": [
+            "science",
+            "living things",
+            "plants",
+            "animals",
+            "habitats",
+            "adaptations"
+          ],
+          "objectives": [
+            {
+              "text": "Classify living things and describe how they interact with their environment.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Investigate structures and functions that help organisms survive.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Explain how environmental changes affect living things.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_science_forces,_matter,_and_earth_systems",
+      "curriculum": "NSC",
+      "subject": "Science",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Physical and Earth Science",
+      "topic_group": "Matter and Energy",
+      "topics": [
+        {
+          "name": "Forces, Matter, and Earth Systems",
+          "keywords": [
+            "matter",
+            "force",
+            "energy",
+            "weather",
+            "water cycle",
+            "simple machines"
+          ],
+          "objectives": [
+            {
+              "text": "Describe properties and changes of matter using observations and simple tests.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Investigate forces, motion, and energy in everyday situations.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Explain basic Earth and weather processes using evidence.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_social_studies_people,_places,_and_citizenship",
+      "curriculum": "NSC",
+      "subject": "Social Studies",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Identity and Governance",
+      "topic_group": "Citizenship",
+      "topics": [
+        {
+          "name": "People, Places, and Citizenship",
+          "keywords": [
+            "social studies",
+            "citizenship",
+            "jamaica",
+            "community",
+            "governance",
+            "rights"
+          ],
+          "objectives": [
+            {
+              "text": "Explain roles, rights, and responsibilities within community and nation.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Use maps and spatial information to describe places and regions.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Discuss how culture, history, and government shape society.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_health_and_family_life_education_health,_safety,_and_relationships",
+      "curriculum": "NSC",
+      "subject": "Health and Family Life Education",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Personal Development",
+      "topic_group": "Wellness",
+      "topics": [
+        {
+          "name": "Health, Safety, and Relationships",
+          "keywords": [
+            "health",
+            "safety",
+            "decision making",
+            "relationships",
+            "hfle",
+            "nutrition"
+          ],
+          "objectives": [
+            {
+              "text": "Apply healthy lifestyle choices related to nutrition, hygiene, and safety.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Examine choices and behaviours that affect self and others.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Demonstrate responsible decision-making and interpersonal skills.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_physical_education_movement_skills_and_fitness",
+      "curriculum": "NSC",
+      "subject": "Physical Education",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Movement",
+      "topic_group": "Physical Literacy",
+      "topics": [
+        {
+          "name": "Movement Skills and Fitness",
+          "keywords": [
+            "physical education",
+            "fitness",
+            "movement",
+            "games",
+            "coordination",
+            "teamwork"
+          ],
+          "objectives": [
+            {
+              "text": "Demonstrate movement skills, coordination, and fair play in physical activities.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Explain how exercise supports physical and mental well-being.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Work cooperatively in games and fitness tasks.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_spanish_basic_spanish_communication",
+      "curriculum": "NSC",
+      "subject": "Spanish",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Communication",
+      "topic_group": "Language Learning",
+      "topics": [
+        {
+          "name": "Basic Spanish Communication",
+          "keywords": [
+            "spanish",
+            "greetings",
+            "vocabulary",
+            "conversation",
+            "reading simple spanish"
+          ],
+          "objectives": [
+            {
+              "text": "Use basic Spanish vocabulary and expressions in familiar situations.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Listen to and read simple Spanish texts for meaning.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Respond orally and in writing using simple Spanish structures.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_drama_drama_and_role_play",
+      "curriculum": "NSC",
+      "subject": "Drama",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Drama",
+      "topic_group": "Performance",
+      "topics": [
+        {
+          "name": "Drama and Role Play",
+          "keywords": [
+            "drama",
+            "role play",
+            "performance",
+            "improvisation"
+          ],
+          "objectives": [
+            {
+              "text": "Use voice, movement, and role play to present ideas and stories.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Participate in practical or creative tasks linked to the subject area.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on skills, safety, and responsible participation in the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_music_music_appreciation_and_performance",
+      "curriculum": "NSC",
+      "subject": "Music",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Music",
+      "topic_group": "Performance",
+      "topics": [
+        {
+          "name": "Music Appreciation and Performance",
+          "keywords": [
+            "music",
+            "rhythm",
+            "melody",
+            "singing",
+            "instruments"
+          ],
+          "objectives": [
+            {
+              "text": "Demonstrate understanding of rhythm, melody, and performance skills.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Participate in practical or creative tasks linked to the subject area.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on skills, safety, and responsible participation in the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_visual_arts_visual_expression",
+      "curriculum": "NSC",
+      "subject": "Visual Arts",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Visual Arts",
+      "topic_group": "Art Making",
+      "topics": [
+        {
+          "name": "Visual Expression",
+          "keywords": [
+            "visual arts",
+            "drawing",
+            "painting",
+            "design",
+            "colour"
+          ],
+          "objectives": [
+            {
+              "text": "Create visual pieces using elements and principles of art.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Participate in practical or creative tasks linked to the subject area.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on skills, safety, and responsible participation in the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_resource_and_technology_problem_solving_through_design",
+      "curriculum": "NSC",
+      "subject": "Resource and Technology",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Resource and Technology",
+      "topic_group": "Design",
+      "topics": [
+        {
+          "name": "Problem Solving Through Design",
+          "keywords": [
+            "resource and technology",
+            "design",
+            "making",
+            "tools",
+            "stem"
+          ],
+          "objectives": [
+            {
+              "text": "Use simple design processes, tools, and materials to solve practical problems.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Participate in practical or creative tasks linked to the subject area.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on skills, safety, and responsible participation in the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_agriculture_plants,_animals,_and_agriculture",
+      "curriculum": "NSC",
+      "subject": "Agriculture",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Agriculture",
+      "topic_group": "Food Production",
+      "topics": [
+        {
+          "name": "Plants, Animals, and Agriculture",
+          "keywords": [
+            "agriculture",
+            "farming",
+            "plants",
+            "animals",
+            "soil"
+          ],
+          "objectives": [
+            {
+              "text": "Explain basic agricultural practices related to crops, animals, and the environment.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Participate in practical or creative tasks linked to the subject area.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on skills, safety, and responsible participation in the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_business_basics_money_and_enterprise",
+      "curriculum": "NSC",
+      "subject": "Business Basics",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Business Basics",
+      "topic_group": "Enterprise",
+      "topics": [
+        {
+          "name": "Money and Enterprise",
+          "keywords": [
+            "business",
+            "money",
+            "enterprise",
+            "savings",
+            "needs wants"
+          ],
+          "objectives": [
+            {
+              "text": "Explain basic economic and entrepreneurial concepts in everyday life.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Participate in practical or creative tasks linked to the subject area.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on skills, safety, and responsible participation in the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_engineering_and_mechanisms_structures_and_mechanisms",
+      "curriculum": "NSC",
+      "subject": "Engineering and Mechanisms",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Engineering and Mechanisms",
+      "topic_group": "Structures",
+      "topics": [
+        {
+          "name": "Structures and Mechanisms",
+          "keywords": [
+            "engineering",
+            "mechanisms",
+            "structures",
+            "machines"
+          ],
+          "objectives": [
+            {
+              "text": "Explore how structures and simple mechanisms work in practical contexts.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Participate in practical or creative tasks linked to the subject area.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on skills, safety, and responsible participation in the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_4_6_family_and_consumer_management_consumer_and_home_management",
+      "curriculum": "NSC",
+      "subject": "Family and Consumer Management",
+      "level": "Grades 4-6",
+      "bands": [
+        "Grade 4",
+        "Grade 5",
+        "Grade 6"
+      ],
+      "strand": "Family and Consumer Management",
+      "topic_group": "Home and Family",
+      "topics": [
+        {
+          "name": "Consumer and Home Management",
+          "keywords": [
+            "family consumer management",
+            "home",
+            "consumer",
+            "nutrition",
+            "budget"
+          ],
+          "objectives": [
+            {
+              "text": "Apply basic consumer, nutrition, and home management skills in everyday situations.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Participate in practical or creative tasks linked to the subject area.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on skills, safety, and responsible participation in the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_mathematics_numbers,_ratios,_and_consumer_arithmetic",
+      "curriculum": "NSC",
+      "subject": "Mathematics",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Number",
+      "topic_group": "Number and Consumer Arithmetic",
+      "topics": [
+        {
+          "name": "Numbers, Ratios, and Consumer Arithmetic",
+          "keywords": [
+            "integers",
+            "rational numbers",
+            "ratio",
+            "proportion",
+            "consumer arithmetic",
+            "interest",
+            "profit and loss"
+          ],
+          "objectives": [
+            {
+              "text": "Use real numbers, ratios, and percentages to solve problems in everyday contexts.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Solve consumer arithmetic problems involving cost, profit, discount, and interest.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Explain mathematical reasoning clearly using correct vocabulary and working.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_mathematics_algebra,_graphs,_and_geometry",
+      "curriculum": "NSC",
+      "subject": "Mathematics",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Algebra and Geometry",
+      "topic_group": "Algebra and Geometry",
+      "topics": [
+        {
+          "name": "Algebra, Graphs, and Geometry",
+          "keywords": [
+            "algebra",
+            "equations",
+            "inequalities",
+            "graphs",
+            "transformations",
+            "pythagoras",
+            "trigonometry"
+          ],
+          "objectives": [
+            {
+              "text": "Represent patterns and relationships using expressions, equations, or graphs.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Solve linear equations and inequalities using appropriate methods.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use geometric properties, transformations, and measurement relationships to solve problems.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_mathematics_statistics_and_probability",
+      "curriculum": "NSC",
+      "subject": "Mathematics",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Statistics and Probability",
+      "topic_group": "Data Handling",
+      "topics": [
+        {
+          "name": "Statistics and Probability",
+          "keywords": [
+            "statistics",
+            "probability",
+            "mean",
+            "median",
+            "mode",
+            "charts",
+            "graphs"
+          ],
+          "objectives": [
+            {
+              "text": "Collect, represent, and interpret data using appropriate charts and graphs.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Calculate and interpret statistical measures for a set of data.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use probability ideas to predict and justify likely outcomes.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_english_reading,_writing,_speaking,_and_viewing",
+      "curriculum": "NSC",
+      "subject": "English",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Oral and Written Communication",
+      "topic_group": "Language Use",
+      "topics": [
+        {
+          "name": "Reading, Writing, Speaking, and Viewing",
+          "keywords": [
+            "english",
+            "reading",
+            "writing",
+            "speaking",
+            "listening",
+            "viewing",
+            "language"
+          ],
+          "objectives": [
+            {
+              "text": "Interpret and respond to spoken, written, and visual texts.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Write coherent responses, paragraphs, and compositions for different purposes.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Use standard English appropriately in speaking and writing while engaging critically with ideas.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_english_literary_response_and_language_awareness",
+      "curriculum": "NSC",
+      "subject": "English",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Literature and Expression",
+      "topic_group": "Texts and Meaning",
+      "topics": [
+        {
+          "name": "Literary Response and Language Awareness",
+          "keywords": [
+            "literature",
+            "poetry",
+            "prose",
+            "drama",
+            "theme",
+            "character",
+            "author craft"
+          ],
+          "objectives": [
+            {
+              "text": "Respond to literary texts by identifying ideas, themes, and techniques.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Express opinions about texts using evidence and organized communication.",
+              "bloom": "Evaluate"
+            },
+            {
+              "text": "Use vocabulary, grammar, and language structures to communicate clearly and effectively.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_integrated_science_cells,_reproduction,_and_health",
+      "curriculum": "NSC",
+      "subject": "Integrated Science",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Organisms and Life Processes",
+      "topic_group": "Life Science",
+      "topics": [
+        {
+          "name": "Cells, Reproduction, and Health",
+          "keywords": [
+            "integrated science",
+            "cells",
+            "reproduction",
+            "health",
+            "body systems",
+            "life processes"
+          ],
+          "objectives": [
+            {
+              "text": "Explain basic structures and functions of living organisms and body systems.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Investigate life processes such as nutrition, transport, respiration, and reproduction.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use scientific evidence to explain health-related issues and biological processes.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_integrated_science_energy,_matter,_and_forces",
+      "curriculum": "NSC",
+      "subject": "Integrated Science",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Energy and Matter",
+      "topic_group": "Physical Science",
+      "topics": [
+        {
+          "name": "Energy, Matter, and Forces",
+          "keywords": [
+            "energy",
+            "matter",
+            "forces",
+            "electricity",
+            "heat",
+            "light",
+            "states of matter"
+          ],
+          "objectives": [
+            {
+              "text": "Describe properties and changes of matter using particle ideas and evidence.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Investigate forces, motion, electricity, heat, and light in familiar contexts.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Interpret scientific observations, measurements, and simple data related to physical processes.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_integrated_science_environment,_earth,_and_sustainability",
+      "curriculum": "NSC",
+      "subject": "Integrated Science",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Environment and Earth Systems",
+      "topic_group": "Earth and Environment",
+      "topics": [
+        {
+          "name": "Environment, Earth, and Sustainability",
+          "keywords": [
+            "environment",
+            "ecosystem",
+            "pollution",
+            "earth",
+            "water cycle",
+            "resources",
+            "sustainability"
+          ],
+          "objectives": [
+            {
+              "text": "Explain relationships among organisms, resources, and the environment.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Investigate environmental problems and propose practical solutions.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Evaluate human impact on natural systems and sustainable practices.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_social_studies_citizenship,_governance,_and_development",
+      "curriculum": "NSC",
+      "subject": "Social Studies",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "People and Society",
+      "topic_group": "Citizenship and Development",
+      "topics": [
+        {
+          "name": "Citizenship, Governance, and Development",
+          "keywords": [
+            "social studies",
+            "governance",
+            "citizenship",
+            "development",
+            "resources",
+            "caribbean"
+          ],
+          "objectives": [
+            {
+              "text": "Examine issues related to identity, citizenship, governance, and social participation.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Interpret maps, data, and social information to explain development issues.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Evaluate how decisions affect community, nation, and region.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_information_technology_computer_use,_productivity,_and_digital_citizenship",
+      "curriculum": "NSC",
+      "subject": "Information Technology",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Digital Literacy",
+      "topic_group": "Computing Basics",
+      "topics": [
+        {
+          "name": "Computer Use, Productivity, and Digital Citizenship",
+          "keywords": [
+            "information technology",
+            "computer basics",
+            "word processing",
+            "spreadsheet",
+            "internet",
+            "digital citizenship"
+          ],
+          "objectives": [
+            {
+              "text": "Use common digital tools to create, organize, and communicate information.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Explain safe, ethical, and responsible use of information technology.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Solve simple digital tasks using productivity software and structured thinking.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_geography_human_and_physical_geography",
+      "curriculum": "NSC",
+      "subject": "Geography",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Geography",
+      "topic_group": "Places and Environment",
+      "topics": [
+        {
+          "name": "Human and Physical Geography",
+          "keywords": [
+            "geography",
+            "maps",
+            "population",
+            "climate",
+            "landforms",
+            "resources"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_history_historical_inquiry",
+      "curriculum": "NSC",
+      "subject": "History",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "History",
+      "topic_group": "Past and Present",
+      "topics": [
+        {
+          "name": "Historical Inquiry",
+          "keywords": [
+            "history",
+            "timeline",
+            "jamaica history",
+            "sources",
+            "change continuity"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_health_and_family_life_education_adolescent_development_and_well_being",
+      "curriculum": "NSC",
+      "subject": "Health and Family Life Education",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Health and Family Life Education",
+      "topic_group": "Wellness",
+      "topics": [
+        {
+          "name": "Adolescent Development and Well-being",
+          "keywords": [
+            "hfle",
+            "adolescent development",
+            "health",
+            "relationships",
+            "decision making"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_physical_education_fitness_and_team_participation",
+      "curriculum": "NSC",
+      "subject": "Physical Education",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Physical Education",
+      "topic_group": "Fitness",
+      "topics": [
+        {
+          "name": "Fitness and Team Participation",
+          "keywords": [
+            "physical education",
+            "fitness",
+            "teamwork",
+            "games",
+            "wellness"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_drama_drama_and_theatre_skills",
+      "curriculum": "NSC",
+      "subject": "Drama",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Drama",
+      "topic_group": "Performance",
+      "topics": [
+        {
+          "name": "Drama and Theatre Skills",
+          "keywords": [
+            "drama",
+            "performance",
+            "script",
+            "role play",
+            "theatre"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_music_music_performance_and_appreciation",
+      "curriculum": "NSC",
+      "subject": "Music",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Music",
+      "topic_group": "Performance",
+      "topics": [
+        {
+          "name": "Music Performance and Appreciation",
+          "keywords": [
+            "music",
+            "performance",
+            "rhythm",
+            "melody",
+            "composition"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_visual_arts_creative_visual_expression",
+      "curriculum": "NSC",
+      "subject": "Visual Arts",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Visual Arts",
+      "topic_group": "Art Making",
+      "topics": [
+        {
+          "name": "Creative Visual Expression",
+          "keywords": [
+            "visual arts",
+            "drawing",
+            "design",
+            "composition",
+            "media"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_resource_and_technology_design_and_technology",
+      "curriculum": "NSC",
+      "subject": "Resource and Technology",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Resource and Technology",
+      "topic_group": "Design",
+      "topics": [
+        {
+          "name": "Design and Technology",
+          "keywords": [
+            "resource and technology",
+            "design",
+            "tools",
+            "problem solving",
+            "project"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_agriculture_agricultural_science_basics",
+      "curriculum": "NSC",
+      "subject": "Agriculture",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Agriculture",
+      "topic_group": "Food and Environment",
+      "topics": [
+        {
+          "name": "Agricultural Science Basics",
+          "keywords": [
+            "agriculture",
+            "soil",
+            "crop",
+            "livestock",
+            "farm"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_family_and_consumer_management_family,_nutrition,_and_consumer_skills",
+      "curriculum": "NSC",
+      "subject": "Family and Consumer Management",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Family and Consumer Management",
+      "topic_group": "Family and Living",
+      "topics": [
+        {
+          "name": "Family, Nutrition, and Consumer Skills",
+          "keywords": [
+            "family consumer management",
+            "nutrition",
+            "consumer",
+            "home management"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_industrial_techniques_industrial_techniques_and_safety",
+      "curriculum": "NSC",
+      "subject": "Industrial Techniques",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Industrial Techniques",
+      "topic_group": "Technical Skills",
+      "topics": [
+        {
+          "name": "Industrial Techniques and Safety",
+          "keywords": [
+            "industrial techniques",
+            "tools",
+            "safety",
+            "materials",
+            "making"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_business_basics_business_and_entrepreneurship",
+      "curriculum": "NSC",
+      "subject": "Business Basics",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Business Basics",
+      "topic_group": "Enterprise",
+      "topics": [
+        {
+          "name": "Business and Entrepreneurship",
+          "keywords": [
+            "business basics",
+            "enterprise",
+            "money",
+            "marketing",
+            "entrepreneurship"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_french_spanish_modern_languages_communication",
+      "curriculum": "NSC",
+      "subject": "French/Spanish",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "French/Spanish",
+      "topic_group": "Communication",
+      "topics": [
+        {
+          "name": "Modern Languages Communication",
+          "keywords": [
+            "french",
+            "spanish",
+            "conversation",
+            "vocabulary",
+            "language learning"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_grades_7_9_jace_junior_achievement_entrepreneurship",
+      "curriculum": "NSC",
+      "subject": "JACE",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "JACE",
+      "topic_group": "Entrepreneurship",
+      "topics": [
+        {
+          "name": "Junior Achievement Entrepreneurship",
+          "keywords": [
+            "jace",
+            "entrepreneurship",
+            "company",
+            "business plan",
+            "teamwork"
+          ],
+          "objectives": [
+            {
+              "text": "Develop core knowledge and practical skills in the subject area.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use inquiry, communication, and collaboration to complete subject-based tasks.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on responsible participation, safety, and improvement within the subject.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_mathematics_number,_consumer_arithmetic,_and_sets",
+      "curriculum": "CSEC",
+      "subject": "Mathematics",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Module 1",
+      "topic_group": "Fundamentals",
+      "topics": [
+        {
+          "name": "Number, Consumer Arithmetic, and Sets",
+          "keywords": [
+            "csec mathematics",
+            "number theory",
+            "consumer arithmetic",
+            "sets",
+            "computation",
+            "percentages",
+            "interest"
+          ],
+          "objectives": [
+            {
+              "text": "Solve problems involving number concepts, consumer arithmetic, and sets.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use mathematical reasoning to justify procedures and solutions.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Interpret real-life mathematical situations using appropriate methods.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_mathematics_algebra,_graphs,_geometry,_statistics,_and_probability",
+      "curriculum": "CSEC",
+      "subject": "Mathematics",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Modules 2-3",
+      "topic_group": "Algebra, Geometry, and Data",
+      "topics": [
+        {
+          "name": "Algebra, Graphs, Geometry, Statistics, and Probability",
+          "keywords": [
+            "algebra",
+            "graphs",
+            "geometry",
+            "trigonometry",
+            "statistics",
+            "probability",
+            "functions"
+          ],
+          "objectives": [
+            {
+              "text": "Solve algebraic, geometric, trigonometric, and graphical problems accurately.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Interpret and represent data using appropriate statistical methods.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Select and evaluate methods for solving unfamiliar mathematical problems.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_english_informative,_literary,_and_persuasive_discourse",
+      "curriculum": "CSEC",
+      "subject": "English",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Modules 1-3",
+      "topic_group": "Discourse and Literature",
+      "topics": [
+        {
+          "name": "Informative, Literary, and Persuasive Discourse",
+          "keywords": [
+            "csec english",
+            "english a",
+            "english b",
+            "informative discourse",
+            "literary discourse",
+            "persuasive discourse"
+          ],
+          "objectives": [
+            {
+              "text": "Interpret spoken, written, and visual texts critically and effectively.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Write organized responses for informative, persuasive, and literary purposes.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Use language appropriately for audience, purpose, and context.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_biology_ecology_and_interdependence",
+      "curriculum": "CSEC",
+      "subject": "Biology",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Living Organisms in the Environment",
+      "topic_group": "Ecology",
+      "topics": [
+        {
+          "name": "Ecology and Interdependence",
+          "keywords": [
+            "biology",
+            "ecosystems",
+            "food chains",
+            "habitat",
+            "population",
+            "environment",
+            "ecology"
+          ],
+          "objectives": [
+            {
+              "text": "Explain interactions among organisms and their environment.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze ecological relationships using data, diagrams, and real-world examples.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate human impact on ecosystems and biodiversity.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_biology_cells,_nutrition,_respiration,_transport,_and_health",
+      "curriculum": "CSEC",
+      "subject": "Biology",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Life Processes and Disease",
+      "topic_group": "Life Processes",
+      "topics": [
+        {
+          "name": "Cells, Nutrition, Respiration, Transport, and Health",
+          "keywords": [
+            "cells",
+            "nutrition",
+            "photosynthesis",
+            "respiration",
+            "transport",
+            "digestion",
+            "disease",
+            "homeostasis"
+          ],
+          "objectives": [
+            {
+              "text": "Explain major life processes and the structures that support them.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Interpret biological data and experiments related to life processes.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Apply biological knowledge to health and disease contexts.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_biology_reproduction,_genetics,_and_variation",
+      "curriculum": "CSEC",
+      "subject": "Biology",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Continuity and Variation",
+      "topic_group": "Genetics",
+      "topics": [
+        {
+          "name": "Reproduction, Genetics, and Variation",
+          "keywords": [
+            "genetics",
+            "inheritance",
+            "reproduction",
+            "variation",
+            "dna",
+            "punnett square"
+          ],
+          "objectives": [
+            {
+              "text": "Explain reproduction and inheritance using appropriate biological terms.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze patterns of inheritance and variation.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate the importance of genetics in living organisms and society.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_chemistry_matter,_structure,_bonding,_and_reactions",
+      "curriculum": "CSEC",
+      "subject": "Chemistry",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Section A",
+      "topic_group": "Principles of Chemistry",
+      "topics": [
+        {
+          "name": "Matter, Structure, Bonding, and Reactions",
+          "keywords": [
+            "chemistry",
+            "atoms",
+            "bonding",
+            "equations",
+            "periodic table",
+            "moles",
+            "acids",
+            "bases"
+          ],
+          "objectives": [
+            {
+              "text": "Explain chemical structure, bonding, and reactions using scientific principles.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Apply chemical calculations and equations to solve structured problems.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Interpret practical and theoretical chemical information accurately.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_chemistry_organic_and_inorganic_chemistry",
+      "curriculum": "CSEC",
+      "subject": "Chemistry",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Sections B-C",
+      "topic_group": "Organic and Inorganic Chemistry",
+      "topics": [
+        {
+          "name": "Organic and Inorganic Chemistry",
+          "keywords": [
+            "organic chemistry",
+            "hydrocarbons",
+            "functional groups",
+            "salts",
+            "metals",
+            "nonmetals",
+            "ammonia"
+          ],
+          "objectives": [
+            {
+              "text": "Describe important organic and inorganic compounds and their properties.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Relate chemical principles to industry, daily life, and the environment.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Use practical evidence to explain chemical behaviour and changes.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_physics_mechanics,_thermal_physics,_waves,_electricity,_and_atomic_physics",
+      "curriculum": "CSEC",
+      "subject": "Physics",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Sections A-E",
+      "topic_group": "Physics Concepts",
+      "topics": [
+        {
+          "name": "Mechanics, Thermal Physics, Waves, Electricity, and Atomic Physics",
+          "keywords": [
+            "physics",
+            "forces",
+            "motion",
+            "energy",
+            "waves",
+            "electricity",
+            "magnetism",
+            "atoms"
+          ],
+          "objectives": [
+            {
+              "text": "Apply physical principles to explain motion, energy, waves, and electrical systems.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Interpret graphs, experiments, and calculations in physics contexts.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate physical evidence and communicate scientific reasoning clearly.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_integrated_science_life_processes,_health,_and_systems",
+      "curriculum": "CSEC",
+      "subject": "Integrated Science",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Module 1",
+      "topic_group": "Organisms and Life Processes",
+      "topics": [
+        {
+          "name": "Life Processes, Health, and Systems",
+          "keywords": [
+            "integrated science",
+            "organisms",
+            "health",
+            "transport systems",
+            "reproduction",
+            "sense organs"
+          ],
+          "objectives": [
+            {
+              "text": "Explain major scientific ideas related to organisms and life processes.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Apply inquiry skills to investigate biological and health-related situations.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Interpret evidence and scientific information in everyday contexts.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_integrated_science_energy,_environment,_and_earth_systems",
+      "curriculum": "CSEC",
+      "subject": "Integrated Science",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Modules 2-3",
+      "topic_group": "Energy and Our Planet",
+      "topics": [
+        {
+          "name": "Energy, Environment, and Earth Systems",
+          "keywords": [
+            "energy",
+            "fossil fuels",
+            "electricity",
+            "our planet",
+            "forces",
+            "pollution",
+            "environment"
+          ],
+          "objectives": [
+            {
+              "text": "Explain scientific concepts related to energy, forces, matter, and the environment.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Use scientific investigations and data to solve everyday problems.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Evaluate environmental and technological issues using evidence.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_social_studies_family,_society,_and_governance",
+      "curriculum": "CSEC",
+      "subject": "Social Studies",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Section A",
+      "topic_group": "Individual, Family, and Society",
+      "topics": [
+        {
+          "name": "Family, Society, and Governance",
+          "keywords": [
+            "social studies",
+            "family",
+            "society",
+            "governance",
+            "citizenship",
+            "social issues"
+          ],
+          "objectives": [
+            {
+              "text": "Analyze social relationships, institutions, and governance in Caribbean contexts.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Apply social studies concepts to everyday issues and decision-making.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Evaluate social problems and propose informed responses.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_social_studies_development,_resources,_and_the_region",
+      "curriculum": "CSEC",
+      "subject": "Social Studies",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Section B",
+      "topic_group": "Sustainable Development and Use of Resources",
+      "topics": [
+        {
+          "name": "Development, Resources, and the Region",
+          "keywords": [
+            "sustainable development",
+            "resources",
+            "regional development",
+            "caribbean",
+            "environment",
+            "economy"
+          ],
+          "objectives": [
+            {
+              "text": "Explain sustainable development and the use of resources in the Caribbean.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Interpret information about development, resources, and regional issues.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate policies and actions related to resource use and regional growth.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_information_technology_computer_fundamentals,_networks,_and_social_impact",
+      "curriculum": "CSEC",
+      "subject": "Information Technology",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Sections 1-3",
+      "topic_group": "Foundations",
+      "topics": [
+        {
+          "name": "Computer Fundamentals, Networks, and Social Impact",
+          "keywords": [
+            "information technology",
+            "computer fundamentals",
+            "networks",
+            "web technologies",
+            "cybersecurity",
+            "ict impact"
+          ],
+          "objectives": [
+            {
+              "text": "Explain computer systems, networks, and the social impact of information technology.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Use IT concepts to solve practical and communication problems.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Evaluate responsible and secure use of digital technologies.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_grades_10_11_information_technology_productivity_tools,_databases,_and_programming",
+      "curriculum": "CSEC",
+      "subject": "Information Technology",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Sections 4-8",
+      "topic_group": "Applications and Problem Solving",
+      "topics": [
+        {
+          "name": "Productivity Tools, Databases, and Programming",
+          "keywords": [
+            "word processing",
+            "spreadsheets",
+            "database",
+            "program design",
+            "program implementation",
+            "web page design"
+          ],
+          "objectives": [
+            {
+              "text": "Create solutions using productivity tools, databases, and web technologies.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Design and implement simple algorithms or programs to solve problems.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Interpret user needs and select appropriate technological solutions.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    }
+  ]
+}

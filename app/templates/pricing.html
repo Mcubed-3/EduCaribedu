@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduCarib AI - Pricing</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <aside class="sidebar">
+      <div class="brand-wrap">
+        <div class="brand">EduCarib AI</div>
+        <p class="muted">Pricing and upgrades.</p>
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Navigation</h3>
+        <div class="sidebar-actions">
+          <a href="/" class="nav-link-btn">Back to Dashboard</a>
+          <a href="/logout" class="nav-link-btn">Log Out</a>
+        </div>
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Current Plan</h3>
+        <div class="account-chip">
+          <strong>{{ current_user.email }}</strong>
+          <span class="muted">Plan: {{ current_user.plan|upper }}</span>
+          <span class="muted">Status: {{ plan_status.subscription_status }}</span>
+        </div>
+      </div>
+
+      {% if plan_status.ads_enabled %}
+      <div class="sidebar-card">
+        <div class="ad-placeholder ad-placeholder-sidebar">
+          <div class="ad-label">Ad Placeholder</div>
+          <div class="ad-title">Promote educator brands here</div>
+          <p class="muted small-text">
+            Free users may see sponsored placements. Pro users get no ads.
+          </p>
+        </div>
+      </div>
+      {% endif %}
+    </aside>
+
+    <main class="main">
+      <section class="builder-header">
+        <div>
+          <div class="eyebrow">Pricing</div>
+          <h2>Choose a plan</h2>
+          <p class="muted small-text">USD pricing for Jamaica and the wider Caribbean CSEC market.</p>
+        </div>
+      </section>
+
+      {% if plan_status.ads_enabled %}
+      <section class="ad-banner-row">
+        <div class="ad-placeholder ad-placeholder-horizontal">
+          <div class="ad-label">Sponsored Placeholder</div>
+          <div class="ad-title">Advertise teacher tools, books, or learning services here</div>
+          <p class="muted small-text">
+            This banner appears only on the free plan.
+          </p>
+        </div>
+      </section>
+      {% endif %}
+
+      <section class="pricing-grid">
+        <div class="pricing-card {% if current_user.plan == 'free' %}pricing-card-active{% endif %}">
+          <div class="pricing-badge">Free</div>
+          <h3>Free</h3>
+          <div class="pricing-price">
+            US$0 <span>/ month</span>
+          </div>
+          <p class="muted">A simple starting plan.</p>
+
+          <ul class="pricing-features">
+            <li>10 lesson generations / month</li>
+            <li>5 saved lessons</li>
+            <li>PDF export</li>
+            <li>DOCX export locked</li>
+            <li>Ads may be shown later</li>
+          </ul>
+
+          <button
+            type="button"
+            class="secondary pricing-btn"
+            id="downgradeBtn"
+            {% if current_user.plan == "free" %}disabled{% endif %}
+          >
+            {% if current_user.plan == "free" %}Current Plan{% else %}Switch to Free{% endif %}
+          </button>
+        </div>
+
+        <div class="pricing-card pricing-card-featured {% if current_user.plan == 'pro' or current_user.plan == 'admin' %}pricing-card-active{% endif %}">
+          <div class="pricing-badge">Pro</div>
+          <h3>Pro Teacher</h3>
+          <div class="pricing-price">
+            US$9.99 <span>/ month</span>
+          </div>
+          <div class="pricing-subprice muted">Affordable across CSEC markets</div>
+          <p class="muted">Built for regular classroom use.</p>
+
+          <ul class="pricing-features">
+            <li>Unlimited lesson generations</li>
+            <li>Unlimited saved lessons</li>
+            <li>PDF export</li>
+            <li>DOCX export</li>
+            <li>No ads</li>
+          </ul>
+
+          <button
+            type="button"
+            class="pricing-btn"
+            id="upgradeBtn"
+            {% if current_user.plan == "pro" or current_user.plan == "admin" %}disabled{% endif %}
+          >
+            {% if current_user.plan == "pro" or current_user.plan == "admin" %}Current Plan{% else %}Upgrade to Pro{% endif %}
+          </button>
+
+          <button
+            type="button"
+            class="secondary pricing-btn"
+            id="paypalUpgradeBtn"
+            {% if current_user.plan == "pro" or current_user.plan == "admin" %}disabled{% endif %}
+          >
+            {% if current_user.plan == "pro" or current_user.plan == "admin" %}PayPal Ready Later{% else %}Upgrade with PayPal{% endif %}
+          </button>
+        </div>
+      </section>
+
+      <section class="dashboard-card">
+        <div class="section-head">
+          <h2>Current Usage</h2>
+          <p class="muted small-text">Your current plan details.</p>
+        </div>
+
+        <div class="summary-list">
+          <div class="summary-row">
+            <span>Monthly lesson generations</span>
+            <strong>
+              {% if plan_status.monthly_generations.limit is none %}
+                Unlimited
+              {% else %}
+                {{ plan_status.monthly_generations.used }} / {{ plan_status.monthly_generations.limit }}
+              {% endif %}
+            </strong>
+          </div>
+          <div class="summary-row">
+            <span>Saved lessons</span>
+            <strong>
+              {% if plan_status.saved_lessons.limit is none %}
+                Unlimited
+              {% else %}
+                {{ plan_status.saved_lessons.used }} / {{ plan_status.saved_lessons.limit }}
+              {% endif %}
+            </strong>
+          </div>
+          <div class="summary-row">
+            <span>DOCX export</span>
+            <strong>{{ "Enabled" if plan_status.docx_export else "Locked" }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>PDF export</span>
+            <strong>{{ "Enabled" if plan_status.pdf_export else "Locked" }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Ads</span>
+            <strong>{{ "Enabled" if plan_status.ads_enabled else "Removed" }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Payment provider</span>
+            <strong>{{ current_user.payment_provider or "manual" }}</strong>
+          </div>
+        </div>
+
+        <div id="pricingStatus" class="status"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/pricing.js"></script>
+</body>
+</html>

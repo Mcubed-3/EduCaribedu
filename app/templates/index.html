@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduCarib AI - Dashboard</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <aside class="sidebar">
+      <div class="brand-wrap">
+        <div class="brand">EduCarib AI</div>
+        <p class="muted">Curriculum-aware lesson planning for NSC and CSEC.</p>
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Account</h3>
+        <div class="account-chip">
+          <strong>{{ current_user.email }}</strong>
+          <span class="muted">Role: {{ current_user.role }} • Plan: {{ current_user.plan|upper }}</span>
+          <span class="muted">Status: {{ plan_status.subscription_status }}</span>
+        </div>
+
+        <div class="plan-card">
+          <div class="plan-row">
+            <span>Monthly lesson generations</span>
+            <strong>
+              {% if plan_status.monthly_generations.limit is none %}
+                Unlimited
+              {% else %}
+                {{ plan_status.monthly_generations.used }} / {{ plan_status.monthly_generations.limit }}
+              {% endif %}
+            </strong>
+          </div>
+          <div class="plan-row">
+            <span>Saved lessons</span>
+            <strong>
+              {% if plan_status.saved_lessons.limit is none %}
+                Unlimited
+              {% else %}
+                {{ plan_status.saved_lessons.used }} / {{ plan_status.saved_lessons.limit }}
+              {% endif %}
+            </strong>
+          </div>
+          <div class="plan-row">
+            <span>DOCX export</span>
+            <strong>{{ "Yes" if plan_status.docx_export else "Pro only" }}</strong>
+          </div>
+          <div class="plan-row">
+            <span>Ads</span>
+            <strong>{{ "Shown" if plan_status.ads_enabled else "Removed" }}</strong>
+          </div>
+        </div>
+
+        <div class="sidebar-actions">
+          <button type="button" id="newLessonBtn">Create New Lesson</button>
+          <button type="button" id="refreshLessonsBtn" class="secondary">Refresh Lessons</button>
+          <a href="/pricing" class="nav-link-btn">Pricing</a>
+          {% if current_user.role == "admin" %}
+            <a href="/admin" class="nav-link-btn">Open Curriculum Admin</a>
+          {% endif %}
+          <a href="/logout" class="nav-link-btn">Log Out</a>
+        </div>
+      </div>
+
+      {% if plan_status.ads_enabled %}
+      <div class="sidebar-card">
+        <div class="ad-placeholder ad-placeholder-sidebar">
+          <div class="ad-label">Ad Placeholder</div>
+          <div class="ad-title">Teacher tools sponsor slot</div>
+          <p class="muted small-text">
+            This area can later show classroom resources, books, or educator platform ads.
+          </p>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="sidebar-card">
+        <div class="panel-header">
+          <h3>Saved Lessons</h3>
+        </div>
+        <div id="savedLessonsList" class="saved-lessons-list">
+          <p class="muted">No saved lessons yet.</p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="hero">
+        <div class="hero-card">
+          <div>
+            <div class="eyebrow">Dashboard</div>
+            <h1>Build curriculum-aligned lesson plans faster</h1>
+            <p class="muted hero-text">
+              Generate, edit, save, and export lesson plans across NSC and CSEC subjects with AI-assisted curriculum matching.
+            </p>
+            <div class="hero-actions">
+              <button type="button" id="heroNewLessonBtn">Create New Lesson</button>
+              <button type="button" id="scrollToBuilderBtn" class="secondary">Open Builder</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Saved Lessons</span>
+            <strong class="stat-value" id="savedCount">{{ dashboard.saved_count }}</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Curriculum Entries</span>
+            <strong class="stat-value" id="frameworkCount">{{ dashboard.framework_count }}</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Subjects</span>
+            <strong class="stat-value" id="subjectCount">{{ dashboard.subject_count }}</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Levels</span>
+            <strong class="stat-value" id="levelCount">{{ dashboard.level_count }}</strong>
+          </div>
+        </div>
+      </section>
+
+      {% if plan_status.ads_enabled %}
+      <section class="ad-banner-row">
+        <div class="ad-placeholder ad-placeholder-horizontal">
+          <div class="ad-label">Sponsored Placeholder</div>
+          <div class="ad-title">Promote teacher resources here</div>
+          <p class="muted small-text">
+            Free plan users may see ads here. Pro users get an ad-free experience.
+          </p>
+        </div>
+      </section>
+      {% endif %}
+
+      <section class="dashboard-row">
+        <div class="dashboard-card">
+          <div class="section-head">
+            <div>
+              <h2>Recent Lessons</h2>
+              <p class="muted small-text">Your latest saved plans.</p>
+            </div>
+          </div>
+          <div id="recentLessonsList" class="recent-lessons-list">
+            {% if dashboard.recent_lessons %}
+              {% for lesson in dashboard.recent_lessons %}
+                <div class="recent-lesson-item">
+                  <strong>{{ lesson.title }}</strong>
+                  <small>{{ lesson.subject }} • {{ lesson.grade_level }} • {{ lesson.topic }}</small>
+                </div>
+              {% endfor %}
+            {% else %}
+              <p class="muted">No recent lessons yet.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="section-head">
+            <div>
+              <h2>Curriculum Summary</h2>
+              <p class="muted small-text">Overview of engine coverage.</p>
+            </div>
+          </div>
+          <div class="summary-list">
+            <div class="summary-row">
+              <span>Curricula</span>
+              <strong id="curriculumCount">{{ dashboard.curriculum_count }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Subjects</span>
+              <strong>{{ dashboard.subject_count }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Levels</span>
+              <strong>{{ dashboard.level_count }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Total framework entries</span>
+              <strong>{{ dashboard.framework_count }}</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="subjects-panel">
+        <div class="section-head">
+          <div>
+            <h2>Quick Subject Cards</h2>
+            <p class="muted small-text">Click a subject to prefill the builder.</p>
+          </div>
+        </div>
+        <div id="subjectCards" class="subject-cards">
+          {% for subject in dashboard.subjects %}
+            <button type="button" class="subject-card" data-subject="{{ subject }}">{{ subject }}</button>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section id="builderSection" class="builder-section">
+        <div class="builder-header">
+          <div>
+            <div class="eyebrow">Lesson Builder</div>
+            <h2>Create and refine lesson plans</h2>
+            <p class="muted small-text">Generate, edit, save, and export your current lesson.</p>
+          </div>
+          <input type="hidden" id="currentLessonId" value="" />
+        </div>
+
+        <div class="builder-grid">
+          <form id="lessonForm" class="builder-card">
+            <div class="form-grid">
+              <label class="field">
+                <span>Curriculum</span>
+                <select name="curriculum" id="curriculum"></select>
+              </label>
+
+              <label class="field">
+                <span>Subject</span>
+                <select name="subject" id="subject"></select>
+              </label>
+
+              <label class="field">
+                <span>Grade / Level</span>
+                <select name="grade_level" id="grade_level"></select>
+              </label>
+
+              <label class="field">
+                <span>Structure</span>
+                <select name="structure" id="structure"></select>
+              </label>
+
+              <label class="field">
+                <span>Difficulty</span>
+                <select name="difficulty" id="difficulty"></select>
+              </label>
+
+              <label class="field">
+                <span>Lesson Type</span>
+                <select name="lesson_type" id="lesson_type"></select>
+              </label>
+
+              <label class="field field-wide">
+                <span>Topic</span>
+                <input
+                  type="text"
+                  name="topic"
+                  id="topic"
+                  placeholder="e.g. Addition, Photosynthesis, Persuasive Writing"
+                  required
+                />
+              </label>
+
+              <label class="field">
+                <span>Subtopic</span>
+                <input
+                  type="text"
+                  name="subtopic"
+                  id="subtopic"
+                  placeholder="Optional"
+                />
+              </label>
+
+              <label class="field">
+                <span>Number of Objectives</span>
+                <input
+                  type="number"
+                  name="objective_count"
+                  id="objective_count"
+                  min="1"
+                  max="6"
+                  value="3"
+                />
+              </label>
+
+              <label class="field">
+                <span>Duration (minutes)</span>
+                <input
+                  type="number"
+                  name="duration_minutes"
+                  id="duration_minutes"
+                  min="15"
+                  max="180"
+                  value="60"
+                />
+              </label>
+
+              <label class="field field-full">
+                <span>Description</span>
+                <textarea
+                  name="description"
+                  id="description"
+                  rows="4"
+                  placeholder="Describe the kind of lesson the teacher wants."
+                ></textarea>
+              </label>
+
+              <label class="field field-full">
+                <span>Resources</span>
+                <textarea
+                  name="resources"
+                  id="resources"
+                  rows="2"
+                  placeholder="Comma-separated optional resources"
+                ></textarea>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" id="matchBtn" class="secondary">Find Curriculum Match</button>
+              <button type="button" id="objectiveBtn" class="secondary">Suggest Objectives</button>
+              <button type="submit">Generate Lesson</button>
+            </div>
+
+            <div id="status" class="status"></div>
+          </form>
+
+          <div class="output-card">
+            <div class="output-header">
+              <div>
+                <div class="eyebrow">Lesson Output</div>
+                <h2>Editable lesson output</h2>
+                <p class="muted small-text">Edit, save, reload, and export your current lesson.</p>
+              </div>
+            </div>
+
+            <div class="output-actions">
+              <button type="button" id="saveLessonBtn">Save Lesson</button>
+              <button type="button" id="updateLessonBtn" class="secondary">Update Saved Lesson</button>
+              <button type="button" id="toggleEditBtn" class="secondary">Toggle Edit Mode</button>
+              <button type="button" id="exportDocxBtn" class="secondary">Export DOCX</button>
+              <button type="button" id="exportPdfBtn" class="secondary">Export PDF</button>
+            </div>
+
+            <textarea
+              id="output"
+              class="output-textarea"
+              rows="30"
+              readonly
+            >Your curriculum match, objectives and lesson plan will appear here.</textarea>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
