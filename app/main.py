@@ -7,6 +7,7 @@ from fastapi import Depends, FastAPI, Form, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import FileResponse
 
 from .auth_service import (
     can_export_docx,
@@ -678,3 +679,7 @@ def admin_update_user_billing(request: Request, user_id: int, payload: AdminBill
         raise HTTPException(status_code=404, detail="User not found")
 
     return {"message": "User billing updated.", "user": updated}
+
+@app.get("/ads.txt")
+def ads_txt():
+    return FileResponse("app/static/ads.txt", media_type="text/plain")
