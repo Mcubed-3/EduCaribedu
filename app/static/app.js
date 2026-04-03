@@ -1,8 +1,10 @@
 let currentLessonData = null;
+let currentUserContext = null;
 
 async function fetchJSON(url, options = {}) {
   const res = await fetch(url, {
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     ...options,
   });
 
@@ -68,7 +70,7 @@ function populateSelect(id, values, placeholder = "Select...") {
 
 function lessonToText(data) {
   const lesson = data.lesson;
-  let lines = [];
+  const lines = [];
 
   lines.push(`${data.title}`);
   lines.push("");
@@ -107,13 +109,17 @@ function lessonToText(data) {
 
 function renderLesson(data) {
   currentLessonData = data;
-  document.getElementById("output").value = lessonToText(data);
+  const output = document.getElementById("output");
+  if (output) output.value = lessonToText(data);
 }
 
 function renderMatch(data) {
+  const output = document.getElementById("output");
+  if (!output) return;
+
   const match = data.match;
   if (!match) {
-    document.getElementById("output").value = "No curriculum match found.";
+    output.value = "No curriculum match found.";
     return;
   }
 
@@ -129,14 +135,17 @@ function renderMatch(data) {
   ];
 
   match.objectives.forEach((obj, i) => lines.push(`${i + 1}. ${obj.text} [${obj.bloom}]`));
-  document.getElementById("output").value = lines.join("\n");
+  output.value = lines.join("\n");
 }
 
 function renderObjectives(data) {
+  const output = document.getElementById("output");
+  if (!output) return;
+
   const lines = ["Suggested Objectives:", ""];
   data.objectives.forEach((obj, i) => lines.push(`${i + 1}. ${obj.text} [${obj.bloom}]`));
   lines.push("", `Bloom verbs for selected difficulty: ${data.verbs.join(", ")}`);
-  document.getElementById("output").value = lines.join("\n");
+  output.value = lines.join("\n");
 }
 
 function updateDashboardStats(summary) {
@@ -168,13 +177,23 @@ function updateDashboardStats(summary) {
       recentLessonsList.appendChild(item);
     });
   } else {
-    recentLessonsList.innerHTML = `<p class='muted'>No recent lessons yet.</p>`;
+    recentLessonsList.innerHTML = `<p class="muted">No recent lessons yet.</p>`;
   }
 }
 
 async function loadDashboardSummary() {
   const summary = await fetchJSON("/api/dashboard");
   updateDashboardStats(summary);
+}
+
+async function loadCurrentUserContext() {
+  try {
+    const data = await fetchJSON("/api/me");
+    currentUserContext = data;
+  } catch (e) {
+    console.error("Failed to load current user context:", e);
+    currentUserContext = null;
+  }
 }
 
 async function loadSavedLessons() {
@@ -205,30 +224,52 @@ async function loadSavedLessons() {
 
   document.querySelectorAll(".load-lesson-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      const lessonId = btn.dataset.id;
-      const data = await fetchJSON(`/api/lessons/${lessonId}`);
-      currentLessonData = data.data;
-      document.getElementById("currentLessonId").value = data.id;
-      renderLesson(data.data);
-      scrollToBuilder();
-      setStatus("Saved lesson loaded.", "success");
+      try {
+        const lessonId = btn.dataset.id;
+        const data = await fetchJSON(`/api/lessons/${lessonId}`);
+        currentLessonData = data.data;
+        document.getElementById("currentLessonId").value = data.id;
+        renderLesson(data.data);
+        scrollToBuilder();
+        setStatus("Saved lesson loaded.", "success");
+      } catch (e) {
+        setStatus(e.message, "error");
+      }
     });
   });
 
   document.querySelectorAll(".delete-lesson-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      const lessonId = btn.dataset.id;
-      await fetchJSON(`/api/lessons/${lessonId}`, { method: "DELETE" });
-      if (document.getElementById("currentLessonId").value === lessonId) {
-        document.getElementById("currentLessonId").value = "";
+      try {
+        const lessonId = btn.dataset.id;
+        await fetchJSON(`/api/lessons/${lessonId}`, { method: "DELETE" });
+        if (document.getElementById("currentLessonId").value === lessonId) {
+          document.getElementById("currentLessonId").value = "";
+        }
+        await loadSavedLessons();
+        await loadDashboardSummary();
+        await loadCurrentUserContext();
+        setStatus("Lesson deleted.", "success");
+      } catch (e) {
+        setStatus(e.message, "error");
       }
-      await loadSavedLessons();
-      await loadDashboardSummary();
-      setStatus("Lesson deleted.", "success");
     });
   });
 
   await loadDashboardSummary();
+}
+
+function redirectToPricing(reason = "") {
+  const url = reason ? `/pricing?reason=${encodeURIComponent(reason)}` : "/pricing";
+  window.location.href = url;
+}
+
+function isDocxLocked() {
+  return !(currentUserContext?.plan_status?.docx_export);
+}
+
+function isFreePlan() {
+  return currentUserContext?.user?.plan === "free";
 }
 
 async function saveCurrentLesson() {
@@ -237,15 +278,25 @@ async function saveCurrentLesson() {
     return;
   }
 
-  const res = await fetchJSON("/api/lessons", {
-    method: "POST",
-    body: JSON.stringify({ lesson_payload: currentLessonData }),
-  });
+  try {
+    const res = await fetchJSON("/api/lessons", {
+      method: "POST",
+      body: JSON.stringify({ lesson_payload: currentLessonData }),
+    });
 
-  document.getElementById("currentLessonId").value = res.lesson.id;
-  await loadSavedLessons();
-  await loadDashboardSummary();
-  setStatus("Lesson saved.", "success");
+    document.getElementById("currentLessonId").value = res.lesson.id;
+    await loadSavedLessons();
+    await loadDashboardSummary();
+    await loadCurrentUserContext();
+    setStatus("Lesson saved.", "success");
+  } catch (e) {
+    if ((e.message || "").toLowerCase().includes("saved lesson limit")) {
+      setStatus("Free plan lesson storage limit reached. Redirecting to pricing...", "error");
+      setTimeout(() => redirectToPricing("save-limit"), 800);
+      return;
+    }
+    setStatus(e.message, "error");
+  }
 }
 
 async function updateCurrentLesson() {
@@ -259,18 +310,23 @@ async function updateCurrentLesson() {
     return;
   }
 
-  await fetchJSON(`/api/lessons/${lessonId}`, {
-    method: "PUT",
-    body: JSON.stringify({ lesson_payload: currentLessonData }),
-  });
+  try {
+    await fetchJSON(`/api/lessons/${lessonId}`, {
+      method: "PUT",
+      body: JSON.stringify({ lesson_payload: currentLessonData }),
+    });
 
-  await loadSavedLessons();
-  await loadDashboardSummary();
-  setStatus("Saved lesson updated.", "success");
+    await loadSavedLessons();
+    await loadDashboardSummary();
+    setStatus("Saved lesson updated.", "success");
+  } catch (e) {
+    setStatus(e.message, "error");
+  }
 }
 
 function toggleEditMode() {
   const output = document.getElementById("output");
+  if (!output) return;
   output.readOnly = !output.readOnly;
   setStatus(output.readOnly ? "Edit mode off." : "Edit mode on. You can edit the text area.", "success");
 }
@@ -279,6 +335,12 @@ async function downloadExport(format) {
   const output = document.getElementById("output");
   if (!output || !output.value.trim()) {
     setStatus("Nothing to export yet.", "error");
+    return;
+  }
+
+  if (format === "docx" && isDocxLocked()) {
+    setStatus("DOCX export is available on Pro. Redirecting to pricing...", "error");
+    setTimeout(() => redirectToPricing("docx-locked"), 700);
     return;
   }
 
@@ -296,6 +358,7 @@ async function downloadExport(format) {
   const res = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ title, content: output.value }),
   });
 
@@ -305,6 +368,13 @@ async function downloadExport(format) {
       const data = await res.json();
       if (data.detail) message = data.detail;
     } catch (_) {}
+
+    if ((message || "").toLowerCase().includes("pro plan only")) {
+      setStatus("DOCX export is locked on Free. Redirecting to pricing...", "error");
+      setTimeout(() => redirectToPricing("docx-locked"), 700);
+      return;
+    }
+
     throw new Error(message);
   }
 
@@ -352,9 +422,20 @@ function bindSubjectCards() {
   });
 }
 
+function bindPlanAwareActions() {
+  const exportDocxBtn = document.getElementById("exportDocxBtn");
+  if (exportDocxBtn && isDocxLocked()) {
+    exportDocxBtn.setAttribute("title", "Upgrade to Pro to unlock DOCX export");
+  }
+}
+
 async function init() {
   try {
-    const config = await fetchJSON("/api/config");
+    const [config] = await Promise.all([
+      fetchJSON("/api/config"),
+      loadCurrentUserContext(),
+    ]);
+
     populateSelect("curriculum", config.curricula, "Select curriculum...");
     populateSelect("subject", config.subjects, "Select subject...");
     populateSelect("grade_level", config.levels, "Select grade/level...");
@@ -363,6 +444,8 @@ async function init() {
     populateSelect("lesson_type", config.lesson_types, "Select lesson type...");
 
     bindSubjectCards();
+    bindPlanAwareActions();
+
     await loadSavedLessons();
     await loadDashboardSummary();
 
@@ -406,9 +489,16 @@ async function init() {
         });
         document.getElementById("currentLessonId").value = "";
         renderLesson(data);
+        await loadCurrentUserContext();
+        await loadDashboardSummary();
         scrollToBuilder();
         setStatus("Lesson plan generated.", "success");
       } catch (e) {
+        if ((e.message || "").toLowerCase().includes("monthly lesson generation limit")) {
+          setStatus("Free plan generation limit reached. Redirecting to pricing...", "error");
+          setTimeout(() => redirectToPricing("generation-limit"), 800);
+          return;
+        }
         setStatus(e.message, "error");
       }
     });
@@ -416,24 +506,55 @@ async function init() {
     document.getElementById("saveLessonBtn")?.addEventListener("click", saveCurrentLesson);
     document.getElementById("updateLessonBtn")?.addEventListener("click", updateCurrentLesson);
     document.getElementById("toggleEditBtn")?.addEventListener("click", toggleEditMode);
+
     document.getElementById("refreshLessonsBtn")?.addEventListener("click", async () => {
-      await loadSavedLessons();
-      await loadDashboardSummary();
-      setStatus("Workspace refreshed.", "success");
+      try {
+        await loadCurrentUserContext();
+        await loadSavedLessons();
+        await loadDashboardSummary();
+        bindPlanAwareActions();
+        setStatus("Workspace refreshed.", "success");
+      } catch (e) {
+        setStatus(e.message, "error");
+      }
     });
+
     document.getElementById("exportDocxBtn")?.addEventListener("click", async () => {
-      try { await downloadExport("docx"); } catch (e) { setStatus(e.message, "error"); }
+      try {
+        await downloadExport("docx");
+      } catch (e) {
+        setStatus(e.message, "error");
+      }
     });
+
     document.getElementById("exportPdfBtn")?.addEventListener("click", async () => {
-      try { await downloadExport("pdf"); } catch (e) { setStatus(e.message, "error"); }
+      try {
+        await downloadExport("pdf");
+      } catch (e) {
+        setStatus(e.message, "error");
+      }
     });
-    document.getElementById("newLessonBtn")?.addEventListener("click", () => { clearBuilderForm(); scrollToBuilder(); });
-    document.getElementById("heroNewLessonBtn")?.addEventListener("click", () => { clearBuilderForm(); scrollToBuilder(); });
+
+    document.getElementById("newLessonBtn")?.addEventListener("click", () => {
+      clearBuilderForm();
+      scrollToBuilder();
+    });
+
+    document.getElementById("heroNewLessonBtn")?.addEventListener("click", () => {
+      clearBuilderForm();
+      scrollToBuilder();
+    });
+
     document.getElementById("scrollToBuilderBtn")?.addEventListener("click", scrollToBuilder);
 
     const output = document.getElementById("output");
     if (output) output.readOnly = true;
-    setStatus("Ready.");
+
+    if (isFreePlan()) {
+      setStatus("Free plan active. Generate lessons, then upgrade for unlimited use and DOCX export.");
+    } else {
+      setStatus("Ready.");
+    }
   } catch (e) {
     console.error("Init failed:", e);
     setStatus(`Failed to load app config: ${e.message}`, "error");
