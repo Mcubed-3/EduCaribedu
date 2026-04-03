@@ -5,13 +5,26 @@ async function fetchJSON(url, options = {}) {
     headers: { "Content-Type": "application/json" },
     ...options,
   });
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+
+  if (!res.ok) {
+    let message = `Request failed: ${res.status}`;
+    try {
+      const data = await res.json();
+      if (data.detail) message = data.detail;
+    } catch (_) {}
+    throw new Error(message);
+  }
+
   return await res.json();
 }
 
-function setStatus(msg) {
+function setStatus(msg, kind = "neutral") {
   const statusEl = document.getElementById("status");
-  if (statusEl) statusEl.textContent = msg;
+  if (!statusEl) return;
+  statusEl.textContent = msg;
+  statusEl.classList.remove("is-error", "is-success");
+  if (kind === "error") statusEl.classList.add("is-error");
+  if (kind === "success") statusEl.classList.add("is-success");
 }
 
 function formPayload() {
@@ -35,6 +48,7 @@ function populateSelect(id, values, placeholder = "Select...") {
   const el = document.getElementById(id);
   if (!el) return;
 
+  const previousValue = el.value;
   el.innerHTML = "";
 
   const defaultOption = document.createElement("option");
@@ -47,6 +61,7 @@ function populateSelect(id, values, placeholder = "Select...") {
     const option = document.createElement("option");
     option.value = value;
     option.textContent = value;
+    if (value === previousValue) option.selected = true;
     el.appendChild(option);
   });
 }
@@ -113,55 +128,47 @@ function renderMatch(data) {
     "Objectives:",
   ];
 
-  match.objectives.forEach((obj, i) =>
-    lines.push(`${i + 1}. ${obj.text} [${obj.bloom}]`)
-  );
-
+  match.objectives.forEach((obj, i) => lines.push(`${i + 1}. ${obj.text} [${obj.bloom}]`));
   document.getElementById("output").value = lines.join("\n");
 }
 
 function renderObjectives(data) {
   const lines = ["Suggested Objectives:", ""];
-
-  data.objectives.forEach((obj, i) =>
-    lines.push(`${i + 1}. ${obj.text} [${obj.bloom}]`)
-  );
-
-  lines.push("");
-  lines.push(`Bloom verbs for selected difficulty: ${data.verbs.join(", ")}`);
-
+  data.objectives.forEach((obj, i) => lines.push(`${i + 1}. ${obj.text} [${obj.bloom}]`));
+  lines.push("", `Bloom verbs for selected difficulty: ${data.verbs.join(", ")}`);
   document.getElementById("output").value = lines.join("\n");
 }
 
 function updateDashboardStats(summary) {
-  const savedCount = document.getElementById("savedCount");
-  const frameworkCount = document.getElementById("frameworkCount");
-  const subjectCount = document.getElementById("subjectCount");
-  const levelCount = document.getElementById("levelCount");
-  const curriculumCount = document.getElementById("curriculumCount");
+  const ids = [
+    ["savedCount", summary.saved_count ?? 0],
+    ["frameworkCount", summary.framework_count ?? 0],
+    ["subjectCount", summary.subject_count ?? 0],
+    ["levelCount", summary.level_count ?? 0],
+    ["curriculumCount", summary.curriculum_count ?? 0],
+  ];
+
+  ids.forEach(([id, value]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  });
+
   const recentLessonsList = document.getElementById("recentLessonsList");
+  if (!recentLessonsList) return;
 
-  if (savedCount) savedCount.textContent = summary.saved_count ?? 0;
-  if (frameworkCount) frameworkCount.textContent = summary.framework_count ?? 0;
-  if (subjectCount) subjectCount.textContent = summary.subject_count ?? 0;
-  if (levelCount) levelCount.textContent = summary.level_count ?? 0;
-  if (curriculumCount) curriculumCount.textContent = summary.curriculum_count ?? 0;
-
-  if (recentLessonsList) {
-    recentLessonsList.innerHTML = "";
-    if (summary.recent_lessons && summary.recent_lessons.length) {
-      summary.recent_lessons.forEach((lesson) => {
-        const item = document.createElement("div");
-        item.className = "recent-lesson-item";
-        item.innerHTML = `
-          <strong>${lesson.title}</strong>
-          <small>${lesson.subject} • ${lesson.grade_level} • ${lesson.topic}</small>
-        `;
-        recentLessonsList.appendChild(item);
-      });
-    } else {
-      recentLessonsList.innerHTML = `<p class="muted">No recent lessons yet.</p>`;
-    }
+  recentLessonsList.innerHTML = "";
+  if (summary.recent_lessons && summary.recent_lessons.length) {
+    summary.recent_lessons.forEach((lesson) => {
+      const item = document.createElement("div");
+      item.className = "recent-lesson-item";
+      item.innerHTML = `
+        <strong>${lesson.title}</strong>
+        <small>${lesson.subject} • ${lesson.grade_level} • ${lesson.topic}</small>
+      `;
+      recentLessonsList.appendChild(item);
+    });
+  } else {
+    recentLessonsList.innerHTML = `<p class='muted'>No recent lessons yet.</p>`;
   }
 }
 
@@ -176,7 +183,6 @@ async function loadSavedLessons() {
   if (!container) return;
 
   container.innerHTML = "";
-
   if (!res.lessons.length) {
     container.innerHTML = "<p class='muted'>No saved lessons yet.</p>";
     await loadDashboardSummary();
@@ -193,7 +199,6 @@ async function loadSavedLessons() {
         <button type="button" data-id="${lesson.id}" class="load-lesson-btn secondary small-btn">Load</button>
         <button type="button" data-id="${lesson.id}" class="delete-lesson-btn secondary small-btn">Delete</button>
       </div>
-      <hr>
     `;
     container.appendChild(item);
   });
@@ -206,7 +211,7 @@ async function loadSavedLessons() {
       document.getElementById("currentLessonId").value = data.id;
       renderLesson(data.data);
       scrollToBuilder();
-      setStatus("Saved lesson loaded.");
+      setStatus("Saved lesson loaded.", "success");
     });
   });
 
@@ -219,7 +224,7 @@ async function loadSavedLessons() {
       }
       await loadSavedLessons();
       await loadDashboardSummary();
-      setStatus("Lesson deleted.");
+      setStatus("Lesson deleted.", "success");
     });
   });
 
@@ -228,7 +233,7 @@ async function loadSavedLessons() {
 
 async function saveCurrentLesson() {
   if (!currentLessonData) {
-    setStatus("Generate a lesson first before saving.");
+    setStatus("Generate a lesson first before saving.", "error");
     return;
   }
 
@@ -240,18 +245,17 @@ async function saveCurrentLesson() {
   document.getElementById("currentLessonId").value = res.lesson.id;
   await loadSavedLessons();
   await loadDashboardSummary();
-  setStatus("Lesson saved.");
+  setStatus("Lesson saved.", "success");
 }
 
 async function updateCurrentLesson() {
   const lessonId = document.getElementById("currentLessonId").value;
   if (!lessonId) {
-    setStatus("Load or save a lesson first before updating.");
+    setStatus("Load or save a lesson first before updating.", "error");
     return;
   }
-
   if (!currentLessonData) {
-    setStatus("No current lesson loaded.");
+    setStatus("No current lesson loaded.", "error");
     return;
   }
 
@@ -262,19 +266,19 @@ async function updateCurrentLesson() {
 
   await loadSavedLessons();
   await loadDashboardSummary();
-  setStatus("Saved lesson updated.");
+  setStatus("Saved lesson updated.", "success");
 }
 
 function toggleEditMode() {
   const output = document.getElementById("output");
   output.readOnly = !output.readOnly;
-  setStatus(output.readOnly ? "Edit mode off." : "Edit mode on. You can edit the text area.");
+  setStatus(output.readOnly ? "Edit mode off." : "Edit mode on. You can edit the text area.", "success");
 }
 
 async function downloadExport(format) {
   const output = document.getElementById("output");
   if (!output || !output.value.trim()) {
-    setStatus("Nothing to export yet.");
+    setStatus("Nothing to export yet.", "error");
     return;
   }
 
@@ -287,44 +291,41 @@ async function downloadExport(format) {
   }
 
   const endpoint = format === "pdf" ? "/api/export/pdf" : "/api/export/docx";
-
   setStatus(`Exporting ${format.toUpperCase()}...`);
 
   const res = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title,
-      content: output.value,
-    }),
+    body: JSON.stringify({ title, content: output.value }),
   });
 
   if (!res.ok) {
-    throw new Error(`Export failed: ${res.status}`);
+    let message = `Export failed: ${res.status}`;
+    try {
+      const data = await res.json();
+      if (data.detail) message = data.detail;
+    } catch (_) {}
+    throw new Error(message);
   }
 
   const blob = await res.blob();
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-
   const extension = format === "pdf" ? "pdf" : "docx";
   const safeTitle = title.replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
   a.download = `${safeTitle || "lesson_export"}.${extension}`;
-
   document.body.appendChild(a);
   a.click();
   a.remove();
   window.URL.revokeObjectURL(url);
 
-  setStatus(`${format.toUpperCase()} exported.`);
+  setStatus(`${format.toUpperCase()} exported.`, "success");
 }
 
 function scrollToBuilder() {
   const el = document.getElementById("builderSection");
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function clearBuilderForm() {
@@ -336,7 +337,7 @@ function clearBuilderForm() {
     output.value = "Your curriculum match, objectives and lesson plan will appear here.";
     output.readOnly = true;
   }
-  setStatus("Ready for a new lesson.");
+  setStatus("Ready for a new lesson.", "success");
 }
 
 function bindSubjectCards() {
@@ -344,11 +345,9 @@ function bindSubjectCards() {
     card.addEventListener("click", () => {
       const subject = card.dataset.subject;
       const subjectSelect = document.getElementById("subject");
-      if (subjectSelect) {
-        subjectSelect.value = subject;
-      }
+      if (subjectSelect) subjectSelect.value = subject;
       scrollToBuilder();
-      setStatus(`${subject} selected. Continue building your lesson.`);
+      setStatus(`${subject} selected. Continue building your lesson.`, "success");
     });
   });
 }
@@ -356,7 +355,6 @@ function bindSubjectCards() {
 async function init() {
   try {
     const config = await fetchJSON("/api/config");
-
     populateSelect("curriculum", config.curricula, "Select curriculum...");
     populateSelect("subject", config.subjects, "Select subject...");
     populateSelect("grade_level", config.levels, "Select grade/level...");
@@ -368,64 +366,52 @@ async function init() {
     await loadSavedLessons();
     await loadDashboardSummary();
 
-    const matchBtn = document.getElementById("matchBtn");
-    if (matchBtn) {
-      matchBtn.addEventListener("click", async () => {
-        setStatus("Finding curriculum match...");
-        try {
-          const payload = formPayload();
-          const data = await fetchJSON("/api/curriculum/search", {
-            method: "POST",
-            body: JSON.stringify(payload),
-          });
-          renderMatch(data);
-          scrollToBuilder();
-          setStatus("Curriculum match ready.");
-        } catch (e) {
-          setStatus(e.message);
-        }
-      });
-    }
+    document.getElementById("matchBtn")?.addEventListener("click", async () => {
+      setStatus("Finding curriculum match...");
+      try {
+        const data = await fetchJSON("/api/curriculum/search", {
+          method: "POST",
+          body: JSON.stringify(formPayload()),
+        });
+        renderMatch(data);
+        scrollToBuilder();
+        setStatus("Curriculum match ready.", "success");
+      } catch (e) {
+        setStatus(e.message, "error");
+      }
+    });
 
-    const objectiveBtn = document.getElementById("objectiveBtn");
-    if (objectiveBtn) {
-      objectiveBtn.addEventListener("click", async () => {
-        setStatus("Generating objectives...");
-        try {
-          const payload = formPayload();
-          const data = await fetchJSON("/api/objectives/generate", {
-            method: "POST",
-            body: JSON.stringify(payload),
-          });
-          renderObjectives(data);
-          scrollToBuilder();
-          setStatus("Objectives generated.");
-        } catch (e) {
-          setStatus(e.message);
-        }
-      });
-    }
+    document.getElementById("objectiveBtn")?.addEventListener("click", async () => {
+      setStatus("Generating objectives...");
+      try {
+        const data = await fetchJSON("/api/objectives/generate", {
+          method: "POST",
+          body: JSON.stringify(formPayload()),
+        });
+        renderObjectives(data);
+        scrollToBuilder();
+        setStatus("Objectives generated.", "success");
+      } catch (e) {
+        setStatus(e.message, "error");
+      }
+    });
 
-    const lessonForm = document.getElementById("lessonForm");
-    if (lessonForm) {
-      lessonForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        setStatus("Generating lesson plan...");
-        try {
-          const payload = formPayload();
-          const data = await fetchJSON("/api/lesson/generate", {
-            method: "POST",
-            body: JSON.stringify(payload),
-          });
-          document.getElementById("currentLessonId").value = "";
-          renderLesson(data);
-          scrollToBuilder();
-          setStatus("Lesson plan generated.");
-        } catch (e) {
-          setStatus(e.message);
-        }
-      });
-    }
+    document.getElementById("lessonForm")?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setStatus("Generating lesson plan...");
+      try {
+        const data = await fetchJSON("/api/lesson/generate", {
+          method: "POST",
+          body: JSON.stringify(formPayload()),
+        });
+        document.getElementById("currentLessonId").value = "";
+        renderLesson(data);
+        scrollToBuilder();
+        setStatus("Lesson plan generated.", "success");
+      } catch (e) {
+        setStatus(e.message, "error");
+      }
+    });
 
     document.getElementById("saveLessonBtn")?.addEventListener("click", saveCurrentLesson);
     document.getElementById("updateLessonBtn")?.addEventListener("click", updateCurrentLesson);
@@ -433,46 +419,24 @@ async function init() {
     document.getElementById("refreshLessonsBtn")?.addEventListener("click", async () => {
       await loadSavedLessons();
       await loadDashboardSummary();
-      setStatus("Dashboard refreshed.");
+      setStatus("Workspace refreshed.", "success");
     });
-
     document.getElementById("exportDocxBtn")?.addEventListener("click", async () => {
-      try {
-        await downloadExport("docx");
-      } catch (e) {
-        setStatus(e.message);
-      }
+      try { await downloadExport("docx"); } catch (e) { setStatus(e.message, "error"); }
     });
-
     document.getElementById("exportPdfBtn")?.addEventListener("click", async () => {
-      try {
-        await downloadExport("pdf");
-      } catch (e) {
-        setStatus(e.message);
-      }
+      try { await downloadExport("pdf"); } catch (e) { setStatus(e.message, "error"); }
     });
-
-    document.getElementById("newLessonBtn")?.addEventListener("click", () => {
-      clearBuilderForm();
-      scrollToBuilder();
-    });
-
-    document.getElementById("heroNewLessonBtn")?.addEventListener("click", () => {
-      clearBuilderForm();
-      scrollToBuilder();
-    });
-
-    document.getElementById("scrollToBuilderBtn")?.addEventListener("click", () => {
-      scrollToBuilder();
-    });
+    document.getElementById("newLessonBtn")?.addEventListener("click", () => { clearBuilderForm(); scrollToBuilder(); });
+    document.getElementById("heroNewLessonBtn")?.addEventListener("click", () => { clearBuilderForm(); scrollToBuilder(); });
+    document.getElementById("scrollToBuilderBtn")?.addEventListener("click", scrollToBuilder);
 
     const output = document.getElementById("output");
     if (output) output.readOnly = true;
-
     setStatus("Ready.");
   } catch (e) {
     console.error("Init failed:", e);
-    setStatus(`Failed to load app config: ${e.message}`);
+    setStatus(`Failed to load app config: ${e.message}`, "error");
   }
 }
 

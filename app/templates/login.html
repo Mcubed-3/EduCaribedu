@@ -4,51 +4,89 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EduCarib AI - Authentication</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
-<body>
-  <div class="auth-shell">
-    <div class="auth-card">
-      <div class="eyebrow">EduCarib AI</div>
-      <h1>{% if mode == "signup" %}Create your account{% else %}Welcome back{% endif %}</h1>
-      <p class="muted auth-subtext">
-        {% if mode == "signup" %}
-          Sign up to generate, save, edit, and export lesson plans.
-        {% else %}
-          Log in to access your lesson dashboard.
-        {% endif %}
-      </p>
-
-      {% if error %}
-        <div class="auth-error">{{ error }}</div>
-      {% endif %}
-
-      <form method="post" action="{% if mode == 'signup' %}/signup{% else %}/login{% endif %}" class="auth-form">
-        <label class="field">
-          <span>Email</span>
-          <input type="email" name="email" required />
-        </label>
-
-        <label class="field">
-          <span>Password</span>
-          <input type="password" name="password" required />
-        </label>
-
-        <button type="submit">
-          {% if mode == "signup" %}Sign Up{% else %}Log In{% endif %}
-        </button>
-      </form>
-
-      <div class="auth-switch">
-        {% if mode == "signup" %}
-          <span class="muted">Already have an account?</span>
-          <a href="/login">Log in</a>
-        {% else %}
-          <span class="muted">Need an account?</span>
-          <a href="/signup">Sign up</a>
-        {% endif %}
+<body class="auth-body">
+  <div class="auth-layout">
+    <section class="auth-showcase">
+      <div class="auth-showcase-inner glass-panel">
+        <div class="section-kicker">EduCarib AI</div>
+        <h1>Curriculum-aware lesson planning built for Caribbean classrooms.</h1>
+        <p class="muted auth-lead">
+          Generate aligned lesson plans, keep a reusable library, and create exports that feel ready for real teaching use.
+        </p>
+        <div class="auth-feature-grid">
+          <div class="auth-feature-card">
+            <strong>NSC + CSEC aligned</strong>
+            <span>Match topics to curriculum pathways faster.</span>
+          </div>
+          <div class="auth-feature-card">
+            <strong>Editable outputs</strong>
+            <span>Keep the AI speed, then refine like a teacher.</span>
+          </div>
+          <div class="auth-feature-card">
+            <strong>Ready for monetization</strong>
+            <span>Built to support free and pro experiences.</span>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <section class="auth-panel-wrap">
+      <div class="auth-card glass-panel">
+        <a href="/" class="brand-lockup no-underline auth-brand-inline">
+          <div class="brand-mark">EC</div>
+          <div>
+            <div class="brand-title">EduCarib AI</div>
+            <p class="muted brand-copy">{% if mode == "signup" %}Create your teaching workspace{% else %}Welcome back{% endif %}</p>
+          </div>
+        </a>
+
+        <div class="auth-copy-block">
+          <h2>{% if mode == "signup" %}Create your account{% else %}Log in to your dashboard{% endif %}</h2>
+          <p class="muted auth-subtext">
+            {% if mode == "signup" %}
+              Start generating, saving, editing, and exporting lesson plans in one place.
+            {% else %}
+              Access your saved lessons, premium tools, and curriculum-aligned builder.
+            {% endif %}
+          </p>
+        </div>
+
+        {% if error %}
+          <div class="auth-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="{% if mode == 'signup' %}/signup{% else %}/login{% endif %}" class="auth-form auth-form-modern">
+          <label class="field">
+            <span>Email</span>
+            <input type="email" name="email" required placeholder="you@example.com" />
+          </label>
+
+          <label class="field">
+            <span>Password</span>
+            <input type="password" name="password" required placeholder="Enter your password" />
+          </label>
+
+          <button type="submit" class="auth-submit-btn">
+            {% if mode == "signup" %}Create account{% else %}Log in{% endif %}
+          </button>
+        </form>
+
+        <div class="auth-switch auth-switch-modern">
+          {% if mode == "signup" %}
+            <span class="muted">Already have an account?</span>
+            <a href="/login">Log in</a>
+          {% else %}
+            <span class="muted">Need an account?</span>
+            <a href="/signup">Sign up</a>
+          {% endif %}
+        </div>
+      </div>
+    </section>
   </div>
 </body>
 </html>
