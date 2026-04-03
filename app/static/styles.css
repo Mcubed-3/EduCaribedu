@@ -784,3 +784,62 @@ button.primary-cta:hover {
     width: 100%;
   }
 }
+/* 🔥 Upgrade Modal */
+.upgrade-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 15, 35, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  backdrop-filter: blur(6px);
+}
+
+.upgrade-modal.hidden {
+  display: none;
+}
+
+.upgrade-modal-content {
+  width: min(520px, 92%);
+  padding: 26px;
+  border-radius: 24px;
+  animation: modalFade 0.25s ease;
+}
+
+@keyframes modalFade {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.upgrade-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.modal-close {
+  background: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.upgrade-benefits {
+  margin: 16px 0;
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.upgrade-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
