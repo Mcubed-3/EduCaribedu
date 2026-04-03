@@ -83,8 +83,8 @@
       <section class="sidebar-section">
         <div class="ad-shell">
           <div class="ad-label">Sponsored</div>
-          <div class="ad-title">Free plan partner slot</div>
-          <p class="muted small-text">Use this area later for educator tools, books, or learning service campaigns.</p>
+          <div class="ad-title">Teacher resource partner</div>
+          <p class="muted small-text">This space can later feature relevant classroom tools, educator services, or approved learning resources.</p>
         </div>
       </section>
       {% endif %}
@@ -115,6 +115,16 @@
         </div>
       </header>
 
+      {% if current_user.plan == "free" %}
+      <section class="promo-strip glass-panel">
+        <div>
+          <strong>You’re on Free: 10 lesson generations per month.</strong>
+          <p class="muted small-text">Upgrade to Pro for unlimited lesson generation, editable DOCX exports, and a cleaner ad-free workspace.</p>
+        </div>
+        <a href="/pricing" class="nav-link-btn">Unlock Pro</a>
+      </section>
+      {% endif %}
+
       <section class="hero-band">
         <div class="hero-panel glass-panel">
           <div class="hero-copy">
@@ -125,7 +135,7 @@
             </p>
             <div class="hero-actions">
               <button type="button" id="scrollToBuilderBtn">Open lesson builder</button>
-              <a href="/pricing" class="nav-link-btn">Upgrade for unlimited use</a>
+              <a href="/pricing" class="nav-link-btn">Unlock unlimited lessons</a>
             </div>
           </div>
           <div class="hero-aside">
@@ -134,13 +144,10 @@
               <strong id="frameworkCount">{{ dashboard.framework_count }}</strong>
               <small>curriculum entries loaded</small>
             </div>
-            <div class="hero-note-card">
-              <div class="note-title">Why this layout works</div>
-              <ul class="feature-bullets">
-                <li>Cleaner builder flow</li>
-                <li>Less visual clutter</li>
-                <li>Better conversion for paid plans</li>
-              </ul>
+            <div class="hero-stat-card">
+              <span class="hero-stat-label">Current plan</span>
+              <strong>{{ current_user.plan|upper }}</strong>
+              <small>{{ "Unlimited access" if current_user.plan in ["pro", "admin"] else "Free access limits apply" }}</small>
             </div>
           </div>
         </div>
@@ -169,16 +176,6 @@
         </div>
       </section>
 
-      {% if plan_status.ads_enabled %}
-      <section class="promo-strip glass-panel">
-        <div>
-          <div class="section-kicker">Free plan banner slot</div>
-          <strong>Show a sponsor, an upgrade nudge, or a featured teaching resource here.</strong>
-        </div>
-        <p class="muted small-text">This area can become your ad inventory later while pro users enjoy an ad-free dashboard.</p>
-      </section>
-      {% endif %}
-
       <section class="dashboard-grid two-col">
         <article class="content-card glass-panel">
           <div class="section-head">
@@ -204,12 +201,12 @@
         <article class="content-card glass-panel">
           <div class="section-head">
             <div>
-              <div class="section-kicker">Plan value</div>
-              <h2>What your account unlocks</h2>
+              <div class="section-kicker">Your plan</div>
+              <h2>Your current access</h2>
             </div>
           </div>
           <div class="summary-list modern-summary-list">
-            <div class="summary-row"><span>Monthly generation status</span><strong>{{ plan_status.subscription_status|capitalize }}</strong></div>
+            <div class="summary-row"><span>Subscription status</span><strong>{{ plan_status.subscription_status|capitalize }}</strong></div>
             <div class="summary-row"><span>PDF export</span><strong>{{ "Enabled" if plan_status.pdf_export else "Locked" }}</strong></div>
             <div class="summary-row"><span>DOCX export</span><strong>{{ "Enabled" if plan_status.docx_export else "Pro only" }}</strong></div>
             <div class="summary-row"><span>Ads experience</span><strong>{{ "Free plan" if plan_status.ads_enabled else "Ad-free" }}</strong></div>
@@ -326,14 +323,26 @@
                 <button type="button" id="saveLessonBtn">Save lesson</button>
                 <button type="button" id="updateLessonBtn" class="secondary">Update saved</button>
                 <button type="button" id="toggleEditBtn" class="secondary">Toggle edit</button>
-                <button type="button" id="exportDocxBtn" class="secondary">Export DOCX</button>
+                <button type="button" id="exportDocxBtn" class="secondary">
+                  {% if not plan_status.docx_export %}
+                    Export DOCX 🔒
+                  {% else %}
+                    Export DOCX
+                  {% endif %}
+                </button>
                 <button type="button" id="exportPdfBtn" class="secondary">Export PDF</button>
               </div>
             </div>
 
+            {% if current_user.plan == "free" %}
             <div class="output-callout">
-              <strong>Tip:</strong> Free users can still generate and test. Pro can scale usage and unlock a smoother export experience.
+              <strong>Free plan:</strong> Upgrade to Pro for unlimited lessons, editable DOCX export, and a cleaner ad-free workspace.
             </div>
+            {% else %}
+            <div class="output-callout">
+              <strong>Pro plan active:</strong> You have unlimited lesson generation, unlimited saved lessons, and full export access.
+            </div>
+            {% endif %}
 
             <textarea id="output" class="output-textarea output-textarea-modern" rows="30" readonly>Your curriculum match, objectives and lesson plan will appear here.</textarea>
           </div>

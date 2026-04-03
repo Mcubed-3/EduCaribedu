@@ -16,7 +16,7 @@
         <div class="brand-mark">EC</div>
         <div>
           <div class="brand-title">EduCarib AI</div>
-          <p class="muted brand-copy">Upgrade your lesson planning workflow.</p>
+          <p class="muted brand-copy">Curriculum-aware planning for Caribbean classrooms.</p>
         </div>
       </a>
       <div class="topbar-actions">
@@ -28,8 +28,10 @@
     <section class="pricing-hero glass-panel">
       <div>
         <div class="section-kicker">Pricing</div>
-        <h1 class="page-title">Simple plans for Caribbean teachers and schools</h1>
-        <p class="muted page-subtitle">Start free for testing and light use, then move to Pro when you want faster workflow, unlimited storage, cleaner exports, and an ad-free experience.</p>
+        <h1 class="page-title">Plan faster. Teach better. Save hours every week.</h1>
+        <p class="muted page-subtitle">
+          Start free for light use, then upgrade when you need unlimited lesson generation, editable DOCX exports, and a cleaner ad-free workflow.
+        </p>
       </div>
       <div class="account-summary-pill">
         <strong>{{ current_user.plan|upper }}</strong>
@@ -42,11 +44,13 @@
         <div class="pricing-tier-label">Free</div>
         <h2>Start free</h2>
         <div class="pricing-price">US$0 <span>/ month</span></div>
-        <p class="muted">A strong entry point for exploring the platform, testing lessons, and validating classroom fit.</p>
+        <p class="muted">Best for trying the platform and generating a limited number of lessons each month.</p>
         <ul class="pricing-features">
           <li>10 lesson generations each month</li>
           <li>5 saved lessons</li>
           <li>PDF export included</li>
+          <li>DOCX export 🔒</li>
+          <li>Unlimited saved lessons 🔒</li>
           <li>Ads shown on free</li>
         </ul>
         <button type="button" class="secondary pricing-btn" id="downgradeBtn" {% if current_user.plan == "free" %}disabled{% endif %}>
@@ -58,20 +62,20 @@
         <div class="pricing-tier-label pricing-tier-label-accent">Most popular</div>
         <h2>Pro Teacher</h2>
         <div class="pricing-price">US$9.99 <span>/ month</span></div>
-        <p class="muted">For regular classroom use, better workflow, clean exports, and a more polished daily planning experience.</p>
+        <p class="muted">Built for teachers who plan regularly and need unlimited lessons, editable exports, and a smoother workflow.</p>
         <ul class="pricing-features">
           <li>Unlimited lesson generations</li>
           <li>Unlimited saved lessons</li>
           <li>PDF and DOCX export</li>
           <li>No ads</li>
-          <li>Stripe-powered subscription checkout</li>
+          <li>Manage billing securely through Stripe</li>
         </ul>
 
         {% if current_user.plan == "pro" or current_user.plan == "admin" %}
           <button type="button" class="pricing-btn" disabled>Current plan</button>
           <button type="button" class="secondary pricing-btn" id="manageBillingBtn">Manage billing</button>
         {% else %}
-          <button type="button" class="pricing-btn" id="stripeUpgradeBtn">Upgrade with Stripe</button>
+          <button type="button" class="pricing-btn" id="stripeUpgradeBtn">Unlock Pro – US$9.99/month</button>
         {% endif %}
       </article>
     </section>
@@ -80,10 +84,11 @@
       <article class="content-card glass-panel">
         <div class="section-head">
           <div>
-            <div class="section-kicker">Usage snapshot</div>
-            <h2>Your current allowances</h2>
+            <div class="section-kicker">Plan comparison</div>
+            <h2>See the difference clearly</h2>
           </div>
         </div>
+
         <div class="summary-list modern-summary-list">
           <div class="summary-row">
             <span>Monthly lesson generations</span>
@@ -93,24 +98,24 @@
             <span>Saved lessons</span>
             <strong>{% if plan_status.saved_lessons.limit is none %}Unlimited{% else %}{{ plan_status.saved_lessons.used }} / {{ plan_status.saved_lessons.limit }}{% endif %}</strong>
           </div>
-          <div class="summary-row"><span>PDF export</span><strong>{{ "Enabled" if plan_status.pdf_export else "Locked" }}</strong></div>
-          <div class="summary-row"><span>DOCX export</span><strong>{{ "Enabled" if plan_status.docx_export else "Locked" }}</strong></div>
-          <div class="summary-row"><span>Ads</span><strong>{{ "Shown on free" if plan_status.ads_enabled else "Removed" }}</strong></div>
+          <div class="summary-row"><span>PDF export</span><strong>{{ "Included" if plan_status.pdf_export else "Locked" }}</strong></div>
+          <div class="summary-row"><span>DOCX export</span><strong>{{ "Included" if plan_status.docx_export else "Locked on Free" }}</strong></div>
+          <div class="summary-row"><span>Ads</span><strong>{{ "Shown on free" if plan_status.ads_enabled else "Removed on Pro" }}</strong></div>
         </div>
       </article>
 
       <article class="content-card glass-panel">
         <div class="section-head">
           <div>
-            <div class="section-kicker">Why upgrade</div>
+            <div class="section-kicker">Upgrade benefits</div>
             <h2>What Pro unlocks</h2>
           </div>
         </div>
         <ul class="feature-bullets feature-bullets-large">
-          <li>Daily-use workflow without monthly generation caps</li>
-          <li>Unlimited storage for saved lessons and refinements</li>
-          <li>DOCX export for schools that require editable documents</li>
-          <li>Cleaner ad-free interface for a more professional experience</li>
+          <li>Unlimited lesson generation for regular classroom use</li>
+          <li>Unlimited saved lessons and refinements</li>
+          <li>Editable DOCX export for school submission</li>
+          <li>Clean ad-free workspace</li>
         </ul>
         <div id="pricingStatus" class="status modern-status"></div>
       </article>
