@@ -119,9 +119,9 @@
       <section class="promo-strip glass-panel">
         <div>
           <strong>You’re on Free: 10 lesson generations per month.</strong>
-          <p class="muted small-text">Upgrade to Pro for unlimited lesson generation, editable DOCX exports, and a cleaner ad-free workspace.</p>
+          <p class="muted small-text">Upgrade to Pro for unlimited lesson generation, editable DOCX exports, and a cleaner ad-free workspace for just US$10/month.</p>
         </div>
-        <a href="/pricing" class="nav-link-btn">Unlock Pro</a>
+        <a href="/pricing" class="nav-link-btn">Unlock Pro – US$10/month</a>
       </section>
       {% endif %}
 
@@ -135,7 +135,7 @@
             </p>
             <div class="hero-actions">
               <button type="button" id="scrollToBuilderBtn">Open lesson builder</button>
-              <a href="/pricing" class="nav-link-btn">Unlock unlimited lessons</a>
+              <a href="/pricing" class="nav-link-btn">Unlock Pro – US$10/month</a>
             </div>
           </div>
           <div class="hero-aside">
@@ -336,7 +336,7 @@
 
             {% if current_user.plan == "free" %}
             <div class="output-callout">
-              <strong>Free plan:</strong> Upgrade to Pro for unlimited lessons, editable DOCX export, and a cleaner ad-free workspace.
+              <strong>Free plan:</strong> Upgrade to Pro for unlimited lessons, editable DOCX export, and a cleaner ad-free workspace for just US$10/month.
             </div>
             {% else %}
             <div class="output-callout">
@@ -352,5 +352,34 @@
   </div>
 
   <script src="/static/app.js"></script>
+
+  <div id="upgradeModal" class="upgrade-modal hidden">
+    <div class="upgrade-modal-content glass-panel">
+      <div class="upgrade-modal-header">
+        <h2>Free plan limit reached</h2>
+        <button id="closeUpgradeModal" class="modal-close">×</button>
+      </div>
+
+      <p class="muted">
+        You’ve reached your free usage limit. Upgrade to Pro for unlimited lesson generation, editable DOCX exports, and a cleaner ad-free experience for just US$10/month.
+      </p>
+
+      <div class="upgrade-benefits">
+        <div>✔ Unlimited lesson generation</div>
+        <div>✔ Unlimited saved lessons</div>
+        <div>✔ DOCX export</div>
+        <div>✔ No ads</div>
+      </div>
+
+      <div class="upgrade-actions">
+        <a href="/pricing" class="nav-link-btn primary-cta">
+          Unlock Pro – US$10/month
+        </a>
+        <button id="dismissUpgradeModal" class="secondary">
+          Maybe later
+        </button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
