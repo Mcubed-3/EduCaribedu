@@ -4,44 +4,84 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EduCarib AI - Dashboard</title>
-
-  <!-- Google Font -->
+  <meta name="google-adsense-account" content="ca-pub-6817907304188010">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6817907304188010"
      crossorigin="anonymous"></script>
-
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
-
 <body class="dashboard-body">
   <div class="dashboard-layout">
-
-    <!-- SIDEBAR -->
     <aside class="sidebar glass-panel">
-
       <div class="sidebar-top">
-        <div class="brand-title">EduCarib AI</div>
-        <p class="muted">Caribbean-aligned lesson planning</p>
+        <a href="/" class="brand-lockup no-underline">
+          <div class="brand-mark">EC</div>
+          <div>
+            <div class="brand-title">EduCarib AI</div>
+            <p class="muted brand-copy">Caribbean-aligned lesson planning for NSC and CSEC classrooms.</p>
+          </div>
+        </a>
       </div>
 
-      <!-- ACCOUNT -->
-      <section class="sidebar-section">
-        <strong>{{ current_user.email }}</strong>
-        <div class="soft-badge">{{ current_user.plan|upper }}</div>
+      <section class="sidebar-section account-panel">
+        <div class="section-kicker">Your Workspace</div>
+        <h3 class="sidebar-heading">Account overview</h3>
+        <div class="account-stack">
+          <div>
+            <strong class="account-email">{{ current_user.email }}</strong>
+            <div class="badge-row">
+              <span class="soft-badge">{{ current_user.role|upper }}</span>
+              <span class="soft-badge soft-badge-accent">{{ current_user.plan|upper }}</span>
+            </div>
+          </div>
+          <div class="mini-metrics">
+            <div class="mini-metric">
+              <span class="mini-label">Generations</span>
+              <strong>
+                {% if plan_status.monthly_generations.limit is none %}
+                  Unlimited
+                {% else %}
+                  {{ plan_status.monthly_generations.used }} / {{ plan_status.monthly_generations.limit }}
+                {% endif %}
+              </strong>
+            </div>
+            <div class="mini-metric">
+              <span class="mini-label">Saved</span>
+              <strong>
+                {% if plan_status.saved_lessons.limit is none %}
+                  Unlimited
+                {% else %}
+                  {{ plan_status.saved_lessons.used }} / {{ plan_status.saved_lessons.limit }}
+                {% endif %}
+              </strong>
+            </div>
+            <div class="mini-metric">
+              <span class="mini-label">DOCX</span>
+              <strong>{{ "Enabled" if plan_status.docx_export else "Pro only" }}</strong>
+            </div>
+            <div class="mini-metric">
+              <span class="mini-label">Ads</span>
+              <strong>{{ "Shown" if plan_status.ads_enabled else "Removed" }}</strong>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <!-- ACTIONS -->
       <section class="sidebar-section">
-        <button id="newLessonBtn">New lesson</button>
-        <a href="/pricing" class="nav-link-btn">Pricing</a>
-        <a href="/logout" class="nav-link-btn">Log out</a>
+        <div class="section-kicker">Quick Actions</div>
+        <div class="sidebar-actions sidebar-actions-column">
+          <button type="button" id="newLessonBtn">New lesson</button>
+          <button type="button" id="refreshLessonsBtn" class="secondary">Refresh workspace</button>
+          <a href="/pricing" class="nav-link-btn">Pricing</a>
+          {% if current_user.role == "admin" %}
+            <a href="/admin" class="nav-link-btn">Curriculum admin</a>
+          {% endif %}
+          <a href="/logout" class="nav-link-btn">Log out</a>
+        </div>
       </section>
 
-      <!-- 🔥 ADS (FREE USERS ONLY) -->
       {% if plan_status.ads_enabled %}
       <section class="sidebar-section">
         <div class="ad-shell">
@@ -55,41 +95,299 @@
                data-full-width-responsive="true"></ins>
 
           <script>
-               (adsbygoogle = window.adsbygoogle || []).push({});
+            (adsbygoogle = window.adsbygoogle || []).push({});
           </script>
-
         </div>
       </section>
       {% endif %}
 
+      <section class="sidebar-section sidebar-scroll-block">
+        <div class="section-head section-head-tight">
+          <div>
+            <div class="section-kicker">Library</div>
+            <h3 class="sidebar-heading">Saved lessons</h3>
+          </div>
+        </div>
+        <div id="savedLessonsList" class="saved-lessons-list compact-list">
+          <p class="muted">No saved lessons yet.</p>
+        </div>
+      </section>
     </aside>
 
-    <!-- MAIN -->
     <main class="main-content">
-
       <header class="topbar glass-panel">
-        <h1>Create lesson plans in seconds</h1>
-        <a href="/pricing" class="nav-link-btn">Upgrade – US$10/month</a>
+        <div>
+          <div class="section-kicker">Teacher dashboard</div>
+          <h1 class="page-title">Generate curriculum-aligned lesson plans in seconds</h1>
+          <p class="muted page-subtitle">Built for Caribbean teachers who need speed, alignment, and polished exports without the clutter.</p>
+        </div>
+        <div class="topbar-actions">
+          <a href="/pricing" class="nav-link-btn topbar-link">See plans</a>
+          <button type="button" id="heroNewLessonBtn">Create lesson</button>
+        </div>
       </header>
 
       {% if current_user.plan == "free" %}
-      <div class="promo-strip glass-panel">
-        Upgrade to Pro for unlimited lessons, DOCX export and no ads – US$10/month
-      </div>
+      <section class="promo-strip glass-panel">
+        <div>
+          <strong>You’re on Free: 10 lesson generations per month.</strong>
+          <p class="muted small-text">Upgrade to Pro for unlimited lesson generation, editable DOCX exports, and a cleaner ad-free workspace for just US$10/month.</p>
+        </div>
+        <a href="/pricing" class="nav-link-btn">Unlock Pro – US$10/month</a>
+      </section>
       {% endif %}
 
-      <section class="builder-shell">
-        <form id="lessonForm">
-          <input type="text" id="topic" placeholder="Lesson topic..." required />
-          <button type="submit">Generate lesson</button>
-        </form>
+      <section class="hero-band">
+        <div class="hero-panel glass-panel">
+          <div class="hero-copy">
+            <span class="hero-badge">NSC + CSEC Ready</span>
+            <h2>Move from idea to classroom-ready lesson faster.</h2>
+            <p class="muted">
+              Draft objectives, match curriculum strands, generate full lessons, and export polished files from one clean workspace.
+            </p>
+            <div class="hero-actions">
+              <button type="button" id="scrollToBuilderBtn">Open lesson builder</button>
+              <a href="/pricing" class="nav-link-btn">Unlock Pro – US$10/month</a>
+            </div>
+          </div>
+          <div class="hero-aside">
+            <div class="hero-stat-card">
+              <span class="hero-stat-label">Coverage</span>
+              <strong id="frameworkCount">{{ dashboard.framework_count }}</strong>
+              <small>curriculum entries loaded</small>
+            </div>
+            <div class="hero-stat-card">
+              <span class="hero-stat-label">Current plan</span>
+              <strong>{{ current_user.plan|upper }}</strong>
+              <small>{{ "Unlimited access" if current_user.plan in ["pro", "admin"] else "Free access limits apply" }}</small>
+            </div>
+          </div>
+        </div>
 
-        <textarea id="output" rows="20"></textarea>
+        <div class="stats-strip">
+          <article class="stat-card glass-panel">
+            <span class="stat-label">Saved Lessons</span>
+            <strong class="stat-value" id="savedCount">{{ dashboard.saved_count }}</strong>
+            <span class="stat-foot">Reusable teaching plans</span>
+          </article>
+          <article class="stat-card glass-panel">
+            <span class="stat-label">Subjects</span>
+            <strong class="stat-value" id="subjectCount">{{ dashboard.subject_count }}</strong>
+            <span class="stat-foot">Across your framework</span>
+          </article>
+          <article class="stat-card glass-panel">
+            <span class="stat-label">Levels</span>
+            <strong class="stat-value" id="levelCount">{{ dashboard.level_count }}</strong>
+            <span class="stat-foot">Primary to secondary coverage</span>
+          </article>
+          <article class="stat-card glass-panel">
+            <span class="stat-label">Curricula</span>
+            <strong class="stat-value" id="curriculumCount">{{ dashboard.curriculum_count }}</strong>
+            <span class="stat-foot">Aligned frameworks</span>
+          </article>
+        </div>
       </section>
 
+      <section class="dashboard-grid two-col">
+        <article class="content-card glass-panel">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Recent activity</div>
+              <h2>Recent lessons</h2>
+            </div>
+          </div>
+          <div id="recentLessonsList" class="recent-lessons-list">
+            {% if dashboard.recent_lessons %}
+              {% for lesson in dashboard.recent_lessons %}
+                <div class="recent-lesson-item">
+                  <strong>{{ lesson.title }}</strong>
+                  <small>{{ lesson.subject }} • {{ lesson.grade_level }} • {{ lesson.topic }}</small>
+                </div>
+              {% endfor %}
+            {% else %}
+              <p class="muted">No recent lessons yet.</p>
+            {% endif %}
+          </div>
+        </article>
+
+        <article class="content-card glass-panel">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Your plan</div>
+              <h2>Your current access</h2>
+            </div>
+          </div>
+          <div class="summary-list modern-summary-list">
+            <div class="summary-row"><span>Subscription status</span><strong>{{ plan_status.subscription_status|capitalize }}</strong></div>
+            <div class="summary-row"><span>PDF export</span><strong>{{ "Enabled" if plan_status.pdf_export else "Locked" }}</strong></div>
+            <div class="summary-row"><span>DOCX export</span><strong>{{ "Enabled" if plan_status.docx_export else "Pro only" }}</strong></div>
+            <div class="summary-row"><span>Ads experience</span><strong>{{ "Free plan" if plan_status.ads_enabled else "Ad-free" }}</strong></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="subjects-wrapper glass-panel">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Fast start</div>
+            <h2>Quick subject picks</h2>
+            <p class="muted small-text">Keep the homepage simple while still giving teachers one-click access to high-use subjects.</p>
+          </div>
+        </div>
+        <div id="subjectCards" class="subject-cards modern-subject-cards">
+          {% for subject in dashboard.subjects[:12] %}
+            <button type="button" class="subject-card" data-subject="{{ subject }}">{{ subject }}</button>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section id="builderSection" class="builder-shell">
+        <div class="builder-intro">
+          <div>
+            <div class="section-kicker">Lesson builder</div>
+            <h2>Create a lesson with less friction</h2>
+            <p class="muted">The builder keeps the workflow focused: select context, define the topic, then generate, save, and export.</p>
+          </div>
+          <input type="hidden" id="currentLessonId" value="" />
+        </div>
+
+        <div class="builder-grid redesign-builder-grid">
+          <form id="lessonForm" class="builder-card glass-panel">
+            <div class="form-grid form-grid-modern">
+              <label class="field">
+                <span>Curriculum</span>
+                <select name="curriculum" id="curriculum"></select>
+              </label>
+
+              <label class="field">
+                <span>Subject</span>
+                <select name="subject" id="subject"></select>
+              </label>
+
+              <label class="field">
+                <span>Grade / Level</span>
+                <select name="grade_level" id="grade_level"></select>
+              </label>
+
+              <label class="field">
+                <span>Structure</span>
+                <select name="structure" id="structure"></select>
+              </label>
+
+              <label class="field">
+                <span>Difficulty</span>
+                <select name="difficulty" id="difficulty"></select>
+              </label>
+
+              <label class="field">
+                <span>Lesson Type</span>
+                <select name="lesson_type" id="lesson_type"></select>
+              </label>
+
+              <label class="field field-wide">
+                <span>Topic</span>
+                <input type="text" name="topic" id="topic" placeholder="e.g. Photosynthesis, Fractions, Persuasive Writing" required />
+              </label>
+
+              <label class="field">
+                <span>Subtopic</span>
+                <input type="text" name="subtopic" id="subtopic" placeholder="Optional" />
+              </label>
+
+              <label class="field">
+                <span>Objectives</span>
+                <input type="number" name="objective_count" id="objective_count" min="1" max="6" value="3" />
+              </label>
+
+              <label class="field">
+                <span>Duration</span>
+                <input type="number" name="duration_minutes" id="duration_minutes" min="15" max="180" value="60" />
+              </label>
+
+              <label class="field field-full">
+                <span>Teacher brief</span>
+                <textarea name="description" id="description" rows="4" placeholder="Describe the kind of lesson, class needs, or outcome you want."></textarea>
+              </label>
+
+              <label class="field field-full">
+                <span>Resources</span>
+                <textarea name="resources" id="resources" rows="2" placeholder="Optional resources, separated by commas"></textarea>
+              </label>
+            </div>
+
+            <div class="form-actions sticky-actions">
+              <button type="button" id="matchBtn" class="secondary">Find curriculum match</button>
+              <button type="button" id="objectiveBtn" class="secondary">Suggest objectives</button>
+              <button type="submit">Generate lesson</button>
+            </div>
+
+            <div id="status" class="status modern-status">Ready.</div>
+          </form>
+
+          <div class="output-card glass-panel">
+            <div class="output-header output-header-modern">
+              <div>
+                <div class="section-kicker">Lesson output</div>
+                <h2>Editable working draft</h2>
+                <p class="muted small-text">This output stays editable so teachers can personalize it before export.</p>
+              </div>
+              <div class="output-actions">
+                <button type="button" id="saveLessonBtn">Save lesson</button>
+                <button type="button" id="updateLessonBtn" class="secondary">Update saved</button>
+                <button type="button" id="toggleEditBtn" class="secondary">Toggle edit</button>
+                <button type="button" id="exportDocxBtn" class="secondary">
+                  {% if not plan_status.docx_export %}
+                    Export DOCX 🔒
+                  {% else %}
+                    Export DOCX
+                  {% endif %}
+                </button>
+                <button type="button" id="exportPdfBtn" class="secondary">Export PDF</button>
+              </div>
+            </div>
+
+            {% if current_user.plan == "free" %}
+            <div class="output-callout">
+              <strong>Free plan:</strong> Upgrade to Pro for unlimited lessons, editable DOCX export, and a cleaner ad-free workspace for just US$10/month.
+            </div>
+            {% else %}
+            <div class="output-callout">
+              <strong>Pro plan active:</strong> You have unlimited lesson generation, unlimited saved lessons, and full export access.
+            </div>
+            {% endif %}
+
+            <textarea id="output" class="output-textarea output-textarea-modern" rows="30" readonly>Your curriculum match, objectives and lesson plan will appear here.</textarea>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
   <script src="/static/app.js"></script>
+
+  <div id="upgradeModal" class="upgrade-modal hidden">
+    <div class="upgrade-modal-content glass-panel">
+      <div class="upgrade-modal-header">
+        <h2>Free plan limit reached</h2>
+        <button id="closeUpgradeModal" class="modal-close">×</button>
+      </div>
+
+      <p class="muted">
+        You’ve reached your free usage limit. Upgrade to Pro for unlimited lesson generation, editable DOCX exports, and a cleaner ad-free experience for just US$10/month.
+      </p>
+
+      <div class="upgrade-benefits">
+        <div>✔ Unlimited lesson generation</div>
+        <div>✔ Unlimited saved lessons</div>
+        <div>✔ DOCX export</div>
+        <div>✔ No ads</div>
+      </div>
+
+      <div class="upgrade-actions">
+        <a href="/pricing" class="nav-link-btn primary-cta">Unlock Pro – US$10/month</a>
+        <button id="dismissUpgradeModal" class="secondary">Maybe later</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
