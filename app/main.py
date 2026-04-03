@@ -7,7 +7,6 @@ from fastapi import Depends, FastAPI, Form, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import FileResponse
 
 from .auth_service import (
     can_export_docx,
@@ -117,6 +116,11 @@ def _dashboard_summary(user_email: str):
         "subjects": subjects,
         "recent_lessons": recent_lessons,
     }
+
+
+@app.get("/ads.txt")
+def ads_txt():
+    return FileResponse(BASE_DIR / "static" / "ads.txt", media_type="text/plain")
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -284,31 +288,29 @@ def dashboard_data(request: Request):
 @app.get("/api/config")
 def config(request: Request):
     require_user(request)
+
+    subjects = sorted({
+        item.get("subject", "").strip()
+        for item in engine.frameworks
+        if item.get("subject", "").strip()
+    })
+
+    curricula = sorted({
+        item.get("curriculum", "").strip()
+        for item in engine.frameworks
+        if item.get("curriculum", "").strip()
+    })
+
+    levels = sorted({
+        item.get("level", "").strip()
+        for item in engine.frameworks
+        if item.get("level", "").strip()
+    })
+
     return {
-        "subjects": [
-            "Biology",
-            "Chemistry",
-            "English",
-            "Information Technology",
-            "Integrated Science",
-            "Language Arts",
-            "Mathematics",
-            "Physics",
-            "Social Studies",
-        ],
-        "curricula": ["CSEC", "NSC"],
-        "levels": [
-            "Grade 1",
-            "Grade 2",
-            "Grade 3",
-            "Grade 4",
-            "Grade 5",
-            "Grade 6",
-            "Grade 7",
-            "Grade 8",
-            "Grade 9",
-            "Grades 10-11",
-        ],
+        "subjects": subjects,
+        "curricula": curricula,
+        "levels": levels,
         "structures": ["5Es", "4Cs"],
         "difficulties": ["Beginner", "Intermediate", "Advanced"],
         "lesson_types": ["Theory", "Practical", "Discussion", "Mixed"],
@@ -461,10 +463,6 @@ def update_plan(request: Request, payload: PlanUpdateRequest):
         "plan_status": get_plan_status(updated, saved_count),
     }
 
-
-# ---------------------------
-# Stripe routes
-# ---------------------------
 
 @app.get("/api/stripe/config")
 def stripe_config(request: Request):
@@ -679,7 +677,3 @@ def admin_update_user_billing(request: Request, user_id: int, payload: AdminBill
         raise HTTPException(status_code=404, detail="User not found")
 
     return {"message": "User billing updated.", "user": updated}
-
-@app.get("/ads.txt")
-def ads_txt():
-    return FileResponse("app/static/ads.txt", media_type="text/plain")
