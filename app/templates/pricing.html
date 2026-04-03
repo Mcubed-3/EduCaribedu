@@ -29,7 +29,7 @@
       <div>
         <div class="section-kicker">Pricing</div>
         <h1 class="page-title">Simple plans for Caribbean teachers and schools</h1>
-        <p class="muted page-subtitle">Keep the free plan for testing and light use, or move to Pro when you want faster workflow, more storage, and a cleaner experience.</p>
+        <p class="muted page-subtitle">Start free for testing and light use, then move to Pro when you want faster workflow, unlimited storage, cleaner exports, and an ad-free experience.</p>
       </div>
       <div class="account-summary-pill">
         <strong>{{ current_user.plan|upper }}</strong>
@@ -42,12 +42,12 @@
         <div class="pricing-tier-label">Free</div>
         <h2>Start free</h2>
         <div class="pricing-price">US$0 <span>/ month</span></div>
-        <p class="muted">A good entry point for testing the platform and generating occasional lessons.</p>
+        <p class="muted">A strong entry point for exploring the platform, testing lessons, and validating classroom fit.</p>
         <ul class="pricing-features">
           <li>10 lesson generations each month</li>
           <li>5 saved lessons</li>
           <li>PDF export included</li>
-          <li>Ad-supported experience</li>
+          <li>Ads shown on free</li>
         </ul>
         <button type="button" class="secondary pricing-btn" id="downgradeBtn" {% if current_user.plan == "free" %}disabled{% endif %}>
           {% if current_user.plan == "free" %}Current plan{% else %}Switch to Free{% endif %}
@@ -58,20 +58,21 @@
         <div class="pricing-tier-label pricing-tier-label-accent">Most popular</div>
         <h2>Pro Teacher</h2>
         <div class="pricing-price">US$9.99 <span>/ month</span></div>
-        <p class="muted">For regular classroom use, cleaner exports, and a more premium planning flow.</p>
+        <p class="muted">For regular classroom use, better workflow, clean exports, and a more polished daily planning experience.</p>
         <ul class="pricing-features">
           <li>Unlimited lesson generations</li>
           <li>Unlimited saved lessons</li>
           <li>PDF and DOCX export</li>
           <li>No ads</li>
-          <li>Best fit for daily teacher workflow</li>
+          <li>Stripe-powered subscription checkout</li>
         </ul>
-        <button type="button" class="pricing-btn" id="upgradeBtn" {% if current_user.plan == "pro" or current_user.plan == "admin" %}disabled{% endif %}>
-          {% if current_user.plan == "pro" or current_user.plan == "admin" %}Current plan{% else %}Upgrade to Pro{% endif %}
-        </button>
-        <button type="button" class="secondary pricing-btn" id="paypalUpgradeBtn" {% if current_user.plan == "pro" or current_user.plan == "admin" %}disabled{% endif %}>
-          {% if current_user.plan == "pro" or current_user.plan == "admin" %}PayPal already not needed{% else %}Upgrade with PayPal{% endif %}
-        </button>
+
+        {% if current_user.plan == "pro" or current_user.plan == "admin" %}
+          <button type="button" class="pricing-btn" disabled>Current plan</button>
+          <button type="button" class="secondary pricing-btn" id="manageBillingBtn">Manage billing</button>
+        {% else %}
+          <button type="button" class="pricing-btn" id="stripeUpgradeBtn">Upgrade with Stripe</button>
+        {% endif %}
       </article>
     </section>
 
@@ -102,14 +103,14 @@
         <div class="section-head">
           <div>
             <div class="section-kicker">Why upgrade</div>
-            <h2>What Pro is really buying you</h2>
+            <h2>What Pro unlocks</h2>
           </div>
         </div>
         <ul class="feature-bullets feature-bullets-large">
-          <li>More confidence using the tool as part of a daily teaching routine</li>
-          <li>Unlimited storage for lesson drafts and refinements</li>
-          <li>Cleaner export flow for sharing and printing</li>
-          <li>Stronger premium feel when you later add advanced templates and integrations</li>
+          <li>Daily-use workflow without monthly generation caps</li>
+          <li>Unlimited storage for saved lessons and refinements</li>
+          <li>DOCX export for schools that require editable documents</li>
+          <li>Cleaner ad-free interface for a more professional experience</li>
         </ul>
         <div id="pricingStatus" class="status modern-status"></div>
       </article>

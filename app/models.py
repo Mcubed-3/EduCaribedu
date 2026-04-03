@@ -60,8 +60,10 @@ class AdminBillingUpdateRequest(BaseModel):
     plan: str
     subscription_status: str
     payment_provider: str
-    paypal_customer_id: str
-    paypal_subscription_id: str
-    subscription_started_at: str
-    subscription_renews_at: str
-    billing_notes: str
+    paypal_customer_id: str = ""
+    paypal_subscription_id: str = ""
+    stripe_customer_id: str = ""
+    stripe_subscription_id: str = ""
+    subscription_started_at: str = ""
+    subscription_renews_at: str = ""
+    billing_notes: str = ""

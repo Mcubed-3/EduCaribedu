@@ -53,7 +53,7 @@ def init_auth_db() -> None:
     cur = conn.cursor()
 
     cur.execute(
-        """
+        '''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT UNIQUE NOT NULL,
@@ -65,16 +65,18 @@ def init_auth_db() -> None:
             payment_provider TEXT NOT NULL DEFAULT '',
             paypal_customer_id TEXT NOT NULL DEFAULT '',
             paypal_subscription_id TEXT NOT NULL DEFAULT '',
+            stripe_customer_id TEXT NOT NULL DEFAULT '',
+            stripe_subscription_id TEXT NOT NULL DEFAULT '',
             subscription_started_at TEXT NOT NULL DEFAULT '',
             subscription_renews_at TEXT NOT NULL DEFAULT '',
             billing_notes TEXT NOT NULL DEFAULT '',
             created_at TEXT NOT NULL
         )
-        """
+        '''
     )
 
     cur.execute(
-        """
+        '''
         CREATE TABLE IF NOT EXISTS sessions (
             token TEXT PRIMARY KEY,
             user_id INTEGER NOT NULL,
@@ -82,11 +84,11 @@ def init_auth_db() -> None:
             expires_at TEXT NOT NULL,
             FOREIGN KEY(user_id) REFERENCES users(id)
         )
-        """
+        '''
     )
 
     cur.execute(
-        """
+        '''
         CREATE TABLE IF NOT EXISTS monthly_usage (
             user_id INTEGER NOT NULL,
             month_key TEXT NOT NULL,
@@ -94,20 +96,18 @@ def init_auth_db() -> None:
             PRIMARY KEY(user_id, month_key),
             FOREIGN KEY(user_id) REFERENCES users(id)
         )
-        """
+        '''
     )
 
-    # lightweight migration support
-    existing_cols = {
-        row["name"]
-        for row in cur.execute("PRAGMA table_info(users)").fetchall()
-    }
+    existing_cols = {row["name"] for row in cur.execute("PRAGMA table_info(users)").fetchall()}
 
     extra_columns = {
         "subscription_status": "TEXT NOT NULL DEFAULT 'inactive'",
         "payment_provider": "TEXT NOT NULL DEFAULT ''",
         "paypal_customer_id": "TEXT NOT NULL DEFAULT ''",
         "paypal_subscription_id": "TEXT NOT NULL DEFAULT ''",
+        "stripe_customer_id": "TEXT NOT NULL DEFAULT ''",
+        "stripe_subscription_id": "TEXT NOT NULL DEFAULT ''",
         "subscription_started_at": "TEXT NOT NULL DEFAULT ''",
         "subscription_renews_at": "TEXT NOT NULL DEFAULT ''",
         "billing_notes": "TEXT NOT NULL DEFAULT ''",
@@ -176,6 +176,8 @@ def create_user(
     payment_provider: str = "",
     paypal_customer_id: str = "",
     paypal_subscription_id: str = "",
+    stripe_customer_id: str = "",
+    stripe_subscription_id: str = "",
     subscription_started_at: str = "",
     subscription_renews_at: str = "",
     billing_notes: str = "",
@@ -190,14 +192,15 @@ def create_user(
     conn = _get_conn()
     cur = conn.cursor()
     cur.execute(
-        """
+        '''
         INSERT INTO users (
             email, password_hash, salt, role, plan,
             subscription_status, payment_provider, paypal_customer_id, paypal_subscription_id,
+            stripe_customer_id, stripe_subscription_id,
             subscription_started_at, subscription_renews_at, billing_notes, created_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''',
         (
             email,
             password_hash,
@@ -208,6 +211,8 @@ def create_user(
             payment_provider,
             paypal_customer_id,
             paypal_subscription_id,
+            stripe_customer_id,
+            stripe_subscription_id,
             subscription_started_at,
             subscription_renews_at,
             billing_notes,
@@ -239,19 +244,42 @@ def get_user_by_id(user_id: int) -> Optional[Dict[str, Any]]:
     return dict(row) if row else None
 
 
+def find_user_by_stripe_customer_id(customer_id: str) -> Optional[Dict[str, Any]]:
+    if not customer_id:
+        return None
+    conn = _get_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE stripe_customer_id = ?", (customer_id.strip(),))
+    row = cur.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def find_user_by_stripe_subscription_id(subscription_id: str) -> Optional[Dict[str, Any]]:
+    if not subscription_id:
+        return None
+    conn = _get_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE stripe_subscription_id = ?", (subscription_id.strip(),))
+    row = cur.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 def list_users() -> List[Dict[str, Any]]:
     conn = _get_conn()
     cur = conn.cursor()
     cur.execute(
-        """
+        '''
         SELECT
             id, email, role, plan, subscription_status, payment_provider,
             paypal_customer_id, paypal_subscription_id,
+            stripe_customer_id, stripe_subscription_id,
             subscription_started_at, subscription_renews_at,
             billing_notes, created_at
         FROM users
         ORDER BY created_at DESC
-        """
+        '''
     )
     rows = cur.fetchall()
     conn.close()
@@ -279,11 +307,11 @@ def update_user_role_plan(user_id: int, role: str, plan: str) -> Optional[Dict[s
     conn = _get_conn()
     cur = conn.cursor()
     cur.execute(
-        """
+        '''
         UPDATE users
         SET role = ?, plan = ?, subscription_status = ?
         WHERE id = ?
-        """,
+        ''',
         (role, plan, subscription_status, user_id),
     )
     conn.commit()
@@ -317,11 +345,11 @@ def update_user_plan(user_id: int, plan: str) -> Optional[Dict[str, Any]]:
     conn = _get_conn()
     cur = conn.cursor()
     cur.execute(
-        """
+        '''
         UPDATE users
         SET plan = ?, subscription_status = ?
         WHERE id = ?
-        """,
+        ''',
         (plan, subscription_status, user_id),
     )
     conn.commit()
@@ -340,11 +368,13 @@ def update_user_billing(
     plan: str,
     subscription_status: str,
     payment_provider: str,
-    paypal_customer_id: str,
-    paypal_subscription_id: str,
-    subscription_started_at: str,
-    subscription_renews_at: str,
-    billing_notes: str,
+    paypal_customer_id: str = "",
+    paypal_subscription_id: str = "",
+    stripe_customer_id: str = "",
+    stripe_subscription_id: str = "",
+    subscription_started_at: str = "",
+    subscription_renews_at: str = "",
+    billing_notes: str = "",
 ) -> Optional[Dict[str, Any]]:
     role = role.strip().lower()
     plan = plan.strip().lower()
@@ -368,7 +398,7 @@ def update_user_billing(
     conn = _get_conn()
     cur = conn.cursor()
     cur.execute(
-        """
+        '''
         UPDATE users
         SET
             role = ?,
@@ -377,11 +407,13 @@ def update_user_billing(
             payment_provider = ?,
             paypal_customer_id = ?,
             paypal_subscription_id = ?,
+            stripe_customer_id = ?,
+            stripe_subscription_id = ?,
             subscription_started_at = ?,
             subscription_renews_at = ?,
             billing_notes = ?
         WHERE id = ?
-        """,
+        ''',
         (
             role,
             plan,
@@ -389,6 +421,8 @@ def update_user_billing(
             payment_provider.strip(),
             paypal_customer_id.strip(),
             paypal_subscription_id.strip(),
+            stripe_customer_id.strip(),
+            stripe_subscription_id.strip(),
             subscription_started_at.strip(),
             subscription_renews_at.strip(),
             billing_notes.strip(),
@@ -403,6 +437,58 @@ def update_user_billing(
         return None
 
     return get_user_by_id(user_id)
+
+
+def update_user_stripe_subscription(
+    user_id: int,
+    *,
+    stripe_customer_id: str,
+    stripe_subscription_id: str,
+    subscription_status: str,
+    subscription_started_at: str = "",
+    subscription_renews_at: str = "",
+    billing_notes: str = "",
+) -> Optional[Dict[str, Any]]:
+    user = get_user_by_id(user_id)
+    if not user:
+        return None
+
+    plan = "pro" if subscription_status in {"trialing", "active", "past_due"} else "free"
+    return update_user_billing(
+        user_id=user_id,
+        role=user["role"],
+        plan=plan,
+        subscription_status=subscription_status,
+        payment_provider="stripe",
+        paypal_customer_id=user.get("paypal_customer_id", ""),
+        paypal_subscription_id=user.get("paypal_subscription_id", ""),
+        stripe_customer_id=stripe_customer_id,
+        stripe_subscription_id=stripe_subscription_id,
+        subscription_started_at=subscription_started_at or user.get("subscription_started_at", ""),
+        subscription_renews_at=subscription_renews_at or user.get("subscription_renews_at", ""),
+        billing_notes=billing_notes or user.get("billing_notes", ""),
+    )
+
+
+def cancel_user_paid_plan(user_id: int, note: str = "") -> Optional[Dict[str, Any]]:
+    user = get_user_by_id(user_id)
+    if not user:
+        return None
+
+    return update_user_billing(
+        user_id=user_id,
+        role=user["role"],
+        plan="free" if user["role"] != "admin" else "admin",
+        subscription_status="inactive" if user["role"] != "admin" else "active",
+        payment_provider="" if user["role"] != "admin" else "manual",
+        paypal_customer_id=user.get("paypal_customer_id", ""),
+        paypal_subscription_id=user.get("paypal_subscription_id", ""),
+        stripe_customer_id=user.get("stripe_customer_id", ""),
+        stripe_subscription_id="",
+        subscription_started_at=user.get("subscription_started_at", ""),
+        subscription_renews_at="",
+        billing_notes=note,
+    )
 
 
 def verify_user(email: str, password: str) -> Optional[Dict[str, Any]]:
@@ -423,6 +509,8 @@ def verify_user(email: str, password: str) -> Optional[Dict[str, Any]]:
             "payment_provider": user.get("payment_provider", ""),
             "paypal_customer_id": user.get("paypal_customer_id", ""),
             "paypal_subscription_id": user.get("paypal_subscription_id", ""),
+            "stripe_customer_id": user.get("stripe_customer_id", ""),
+            "stripe_subscription_id": user.get("stripe_subscription_id", ""),
             "subscription_started_at": user.get("subscription_started_at", ""),
             "subscription_renews_at": user.get("subscription_renews_at", ""),
             "billing_notes": user.get("billing_notes", ""),
@@ -440,10 +528,10 @@ def create_session(user_id: int) -> str:
     conn = _get_conn()
     cur = conn.cursor()
     cur.execute(
-        """
+        '''
         INSERT INTO sessions (token, user_id, created_at, expires_at)
         VALUES (?, ?, ?, ?)
-        """,
+        ''',
         (
             token,
             user_id,
@@ -463,18 +551,19 @@ def get_user_by_session(token: str) -> Optional[Dict[str, Any]]:
     conn = _get_conn()
     cur = conn.cursor()
     cur.execute(
-        """
+        '''
         SELECT
             s.token, s.expires_at,
             u.id, u.email, u.role, u.plan,
             u.subscription_status, u.payment_provider,
             u.paypal_customer_id, u.paypal_subscription_id,
+            u.stripe_customer_id, u.stripe_subscription_id,
             u.subscription_started_at, u.subscription_renews_at,
             u.billing_notes, u.created_at
         FROM sessions s
         JOIN users u ON u.id = s.user_id
         WHERE s.token = ?
-        """,
+        ''',
         (token,),
     )
     row = cur.fetchone()
@@ -497,6 +586,8 @@ def get_user_by_session(token: str) -> Optional[Dict[str, Any]]:
         "payment_provider": row["payment_provider"],
         "paypal_customer_id": row["paypal_customer_id"],
         "paypal_subscription_id": row["paypal_subscription_id"],
+        "stripe_customer_id": row["stripe_customer_id"],
+        "stripe_subscription_id": row["stripe_subscription_id"],
         "subscription_started_at": row["subscription_started_at"],
         "subscription_renews_at": row["subscription_renews_at"],
         "billing_notes": row["billing_notes"],
@@ -526,11 +617,11 @@ def get_generation_count(user_id: int, month_key: Optional[str] = None) -> int:
     conn = _get_conn()
     cur = conn.cursor()
     cur.execute(
-        """
+        '''
         SELECT generation_count
         FROM monthly_usage
         WHERE user_id = ? AND month_key = ?
-        """,
+        ''',
         (user_id, month_key),
     )
     row = cur.fetchone()
@@ -544,23 +635,23 @@ def increment_generation_count(user_id: int, month_key: Optional[str] = None) ->
     cur = conn.cursor()
 
     cur.execute(
-        """
+        '''
         INSERT INTO monthly_usage (user_id, month_key, generation_count)
         VALUES (?, ?, 1)
         ON CONFLICT(user_id, month_key)
         DO UPDATE SET generation_count = generation_count + 1
-        """,
+        ''',
         (user_id, month_key),
     )
 
     conn.commit()
 
     cur.execute(
-        """
+        '''
         SELECT generation_count
         FROM monthly_usage
         WHERE user_id = ? AND month_key = ?
-        """,
+        ''',
         (user_id, month_key),
     )
     row = cur.fetchone()
