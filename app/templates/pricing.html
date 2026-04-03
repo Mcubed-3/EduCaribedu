@@ -1,109 +1,76 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EduCarib AI - Pricing</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Pricing - EduCarib AI</title>
+
+  <!-- AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6817907304188010"
+     crossorigin="anonymous"></script>
+
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
+
 <body class="pricing-body">
-  <div class="marketing-shell">
-    <header class="marketing-topbar glass-panel">
-      <a href="/" class="brand-lockup no-underline">
-        <div class="brand-mark">EC</div>
-        <div>
-          <div class="brand-title">EduCarib AI</div>
-          <p class="muted brand-copy">Curriculum-aware planning for Caribbean classrooms.</p>
-        </div>
-      </a>
-      <div class="topbar-actions">
-        <a href="/" class="nav-link-btn topbar-link">Dashboard</a>
-        <a href="/logout" class="nav-link-btn topbar-link">Log out</a>
-      </div>
-    </header>
 
-    <section class="pricing-hero glass-panel">
-      <div>
-        <div class="section-kicker">Pricing</div>
-        <h1 class="page-title">Plan faster. Teach better. Save hours every week.</h1>
-        <p class="muted page-subtitle">
-          Start free for light use, then upgrade for unlimited lesson generation and professional exports.
-        </p>
-      </div>
-      <div class="account-summary-pill">
-        <strong>{{ current_user.plan|upper }}</strong>
-        <span>{{ plan_status.subscription_status|capitalize }}</span>
-      </div>
-    </section>
+  <div class="pricing-container">
 
-    <section class="pricing-grid pricing-grid-redesign">
+    <h1>Simple pricing</h1>
+
+    <div class="pricing-grid">
 
       <!-- FREE -->
-      <article class="pricing-card glass-panel {% if current_user.plan == 'free' %}pricing-card-active{% endif %}">
-        <div class="pricing-tier-label">Free</div>
-        <h2>Start free</h2>
-        <div class="pricing-price">US$0 <span>/ month</span></div>
-        <p class="muted">Perfect for trying the platform.</p>
+      <div class="pricing-card">
+        <h2>Free</h2>
+        <h3>US$0 / month</h3>
 
-        <ul class="pricing-features">
-          <li>10 lesson generations each month</li>
+        <ul>
+          <li>10 lessons/month</li>
           <li>5 saved lessons</li>
-          <li>PDF export included</li>
-          <li>DOCX export 🔒</li>
-          <li>Unlimited saved lessons 🔒</li>
-          <li>Ads shown on free</li>
+          <li>PDF export</li>
+          <li>Ads included</li>
         </ul>
 
-        <button type="button" class="secondary pricing-btn" disabled>
-          Current plan
-        </button>
-      </article>
+        <button disabled>Current plan</button>
+      </div>
 
       <!-- PRO -->
-      <article class="pricing-card pricing-card-featured glass-panel">
-        <div class="pricing-tier-label pricing-tier-label-accent">Most popular</div>
+      <div class="pricing-card featured">
         <h2>Pro Teacher</h2>
+        <h3>US$10 / month</h3>
 
-        <!-- ✅ FIXED PRICE -->
-        <div class="pricing-price">US$10 <span>/ month</span></div>
-
-        <p class="muted">
-          Built for teachers who plan regularly and need unlimited lessons and clean exports.
-        </p>
-
-        <ul class="pricing-features">
-          <li>Unlimited lesson generations</li>
+        <ul>
+          <li>Unlimited lessons</li>
           <li>Unlimited saved lessons</li>
-          <li>PDF and DOCX export</li>
+          <li>DOCX export</li>
           <li>No ads</li>
-          <li>Secure billing with Stripe</li>
         </ul>
 
-        <!-- ✅ FIXED BUTTON -->
-        <button type="button" class="pricing-btn" id="stripeUpgradeBtn">
+        <button id="stripeUpgradeBtn">
           Unlock Pro – US$10/month
         </button>
-      </article>
+      </div>
 
-    </section>
+    </div>
 
-    <section class="dashboard-grid two-col">
-      <article class="content-card glass-panel">
-        <h2>Why upgrade?</h2>
-        <ul class="feature-bullets feature-bullets-large">
-          <li>Unlimited lesson generation</li>
-          <li>Unlimited saved lessons</li>
-          <li>DOCX export for school use</li>
-          <li>Cleaner ad-free workspace</li>
-        </ul>
-        <div id="pricingStatus" class="status modern-status"></div>
-      </article>
-    </section>
+    <!-- Optional ad at bottom -->
+    <div style="margin-top:30px;">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-6817907304188010"
+           data-ad-slot="3289424229"
+           data-ad-format="auto"></ins>
+
+      <script>
+           (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </div>
+
   </div>
 
   <script src="/static/pricing.js"></script>
+
 </body>
 </html>
