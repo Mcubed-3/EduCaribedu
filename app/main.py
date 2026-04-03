@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import os
+from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import FastAPI, Form, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, Form, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -13,9 +13,12 @@ from .auth_service import (
     can_export_pdf,
     can_generate_lessons,
     can_save_more_lessons,
+    cancel_user_paid_plan,
     create_session,
     create_user,
     delete_session,
+    find_user_by_stripe_customer_id,
+    find_user_by_stripe_subscription_id,
     get_plan_status,
     get_user_by_email,
     get_user_by_session,
@@ -25,6 +28,7 @@ from .auth_service import (
     update_user_billing,
     update_user_plan,
     update_user_role_plan,
+    update_user_stripe_subscription,
     verify_user,
 )
 from .curriculum_admin_service import (
@@ -55,6 +59,13 @@ from .storage_service import (
     save_new_lesson,
     update_existing_lesson,
 )
+from .stripe_service import (
+    create_checkout_session,
+    create_portal_session,
+    get_stripe_public_config,
+    to_iso_from_unix,
+    verify_webhook,
+)
 
 app = FastAPI(title="EduCarib AI Local Python")
 BASE_DIR = Path(__file__).parent
@@ -63,10 +74,6 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 SESSION_COOKIE = "educarib_session"
-
-PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID", "").strip()
-PAYPAL_PLAN_ID_PRO = os.getenv("PAYPAL_PLAN_ID_PRO", "").strip()
-PAYPAL_WEBHOOK_ID = os.getenv("PAYPAL_WEBHOOK_ID", "").strip()
 
 init_auth_db()
 
@@ -454,44 +461,126 @@ def update_plan(request: Request, payload: PlanUpdateRequest):
     }
 
 
-@app.get("/api/paypal/config")
-def paypal_config(request: Request):
+# ---------------------------
+# Stripe routes
+# ---------------------------
+
+@app.get("/api/stripe/config")
+def stripe_config(request: Request):
     require_user(request)
-    return {
-        "client_id_present": bool(PAYPAL_CLIENT_ID),
-        "plan_id_pro_present": bool(PAYPAL_PLAN_ID_PRO),
-        "webhook_id_present": bool(PAYPAL_WEBHOOK_ID),
-        "provider": "paypal",
-        "status": "placeholder",
-    }
+    return get_stripe_public_config()
 
 
-@app.post("/api/paypal/create-subscription")
-def paypal_create_subscription_placeholder(request: Request):
-    user = require_user(request)
-    if user["role"] == "admin":
-        raise HTTPException(status_code=400, detail="Admin account does not need a paid subscription.")
+@app.post("/api/stripe/create-checkout-session")
+def stripe_create_checkout_session(current_user=Depends(require_user)):
+    if current_user["plan"] in {"pro", "admin"}:
+        raise HTTPException(status_code=400, detail="You already have access to Pro.")
 
-    return JSONResponse(
-        {
-            "message": "PayPal subscription placeholder only. Connect real PayPal API later.",
-            "provider": "paypal",
-            "plan": "pro",
-            "paypal_plan_id_configured": bool(PAYPAL_PLAN_ID_PRO),
-            "client_id_configured": bool(PAYPAL_CLIENT_ID),
-        }
-    )
+    try:
+        session = create_checkout_session(user=current_user)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Stripe checkout setup failed: {exc}")
+
+    return {"url": session.url, "id": session.id}
 
 
-@app.post("/api/paypal/webhook")
-async def paypal_webhook_placeholder(request: Request):
-    payload = await request.json()
-    return {
-        "message": "PayPal webhook placeholder received.",
-        "configured_webhook_id": bool(PAYPAL_WEBHOOK_ID),
-        "event_type": payload.get("event_type", ""),
-        "status": "placeholder",
-    }
+@app.post("/api/stripe/create-portal-session")
+def stripe_create_portal_session(current_user=Depends(require_user)):
+    if current_user["plan"] not in {"pro", "admin"}:
+        raise HTTPException(status_code=400, detail="Billing portal is only available for paid plans.")
+
+    customer_id = (current_user.get("stripe_customer_id") or "").strip()
+    if not customer_id:
+        raise HTTPException(status_code=400, detail="No Stripe customer is stored for this account yet.")
+
+    try:
+        session = create_portal_session(customer_id=customer_id)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Stripe billing portal failed: {exc}")
+
+    return {"url": session.url}
+
+
+@app.post("/api/stripe/webhook")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig = request.headers.get("stripe-signature")
+
+    try:
+        event = verify_webhook(payload=payload, signature=sig)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid Stripe webhook: {exc}")
+
+    event_type = event["type"]
+    obj = event["data"]["object"]
+
+    if event_type == "checkout.session.completed":
+        user_id_raw = (obj.get("metadata") or {}).get("user_id") or obj.get("client_reference_id")
+        if user_id_raw:
+            user_id = int(user_id_raw)
+            subscription_id = obj.get("subscription", "") or ""
+            customer_id = obj.get("customer", "") or ""
+
+            update_user_stripe_subscription(
+                user_id,
+                stripe_customer_id=customer_id,
+                stripe_subscription_id=subscription_id,
+                subscription_status="active",
+                subscription_started_at=datetime.now(timezone.utc).isoformat(),
+                billing_notes="Stripe Checkout completed",
+            )
+
+    elif event_type in {"customer.subscription.created", "customer.subscription.updated"}:
+        customer_id = obj.get("customer", "") or ""
+        subscription_id = obj.get("id", "") or ""
+        status = obj.get("status", "inactive")
+        current_period_end = obj.get("current_period_end")
+        metadata = obj.get("metadata") or {}
+        user_id_raw = metadata.get("user_id")
+
+        user_id = None
+        if user_id_raw:
+            user_id = int(user_id_raw)
+        else:
+            matched = find_user_by_stripe_customer_id(customer_id) or find_user_by_stripe_subscription_id(subscription_id)
+            if matched:
+                user_id = int(matched["id"])
+
+        if user_id:
+            update_user_stripe_subscription(
+                user_id,
+                stripe_customer_id=customer_id,
+                stripe_subscription_id=subscription_id,
+                subscription_status=status,
+                subscription_started_at=datetime.now(timezone.utc).isoformat(),
+                subscription_renews_at=to_iso_from_unix(current_period_end),
+                billing_notes=f"Stripe subscription {status}",
+            )
+
+    elif event_type in {"customer.subscription.deleted", "invoice.payment_failed"}:
+        customer_id = obj.get("customer", "") or ""
+        subscription_id = (
+            obj.get("id", "") if event_type == "customer.subscription.deleted"
+            else obj.get("subscription", "") or ""
+        )
+
+        matched = find_user_by_stripe_subscription_id(subscription_id) or find_user_by_stripe_customer_id(customer_id)
+
+        if matched:
+            if event_type == "invoice.payment_failed":
+                update_user_stripe_subscription(
+                    int(matched["id"]),
+                    stripe_customer_id=matched.get("stripe_customer_id", customer_id),
+                    stripe_subscription_id=matched.get("stripe_subscription_id", subscription_id),
+                    subscription_status="past_due",
+                    subscription_started_at=matched.get("subscription_started_at", ""),
+                    subscription_renews_at=matched.get("subscription_renews_at", ""),
+                    billing_notes="Stripe invoice payment failed",
+                )
+            else:
+                cancel_user_paid_plan(int(matched["id"]), note="Stripe subscription cancelled")
+
+    return JSONResponse({"received": True})
 
 
 @app.get("/api/admin/frameworks")
