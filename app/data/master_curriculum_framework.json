@@ -2800,6 +2800,1842 @@
           "resources": []
         }
       ]
+    },
+    {
+      "id": "csec_agricultural_science_core",
+      "curriculum": "CSEC",
+      "subject": "Agricultural Science",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Core Areas",
+      "topic_group": "Agriculture Fundamentals",
+      "topics": [
+        {
+          "name": "Introduction to Agriculture",
+          "aliases": [],
+          "keywords": [
+            "agriculture",
+            "farming",
+            "agricultural sector",
+            "crop production",
+            "animal production"
+          ],
+          "objectives": [
+            {
+              "text": "Explain the scope, value, and career pathways within agriculture in the Caribbean context.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Differentiate major areas of crop production, animal production, and agricultural enterprise.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Apply safe and sustainable practices to introductory agricultural activities.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Crop and Animal Production",
+          "aliases": [],
+          "keywords": [
+            "crop production",
+            "animal production",
+            "soil",
+            "livestock",
+            "plant nutrition",
+            "husbandry"
+          ],
+          "objectives": [
+            {
+              "text": "Describe factors affecting crop growth and animal productivity.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Compare systems used in crop and animal production.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Plan basic management activities for crops or livestock using appropriate techniques.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Agribusiness and Entrepreneurship",
+          "aliases": [],
+          "keywords": [
+            "agribusiness",
+            "business of farming",
+            "entrepreneurship",
+            "communication",
+            "marketing"
+          ],
+          "objectives": [
+            {
+              "text": "Explain how agricultural enterprises are managed for productivity and profit.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze simple farm records and production decisions.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Design a basic agricultural enterprise idea for a local market.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_caribbean_history_core",
+      "curriculum": "CSEC",
+      "subject": "Caribbean History",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Themes",
+      "topic_group": "Caribbean Historical Development",
+      "topics": [
+        {
+          "name": "Indigenous Peoples and European Contact",
+          "aliases": [],
+          "keywords": [
+            "indigenous peoples",
+            "first inhabitants",
+            "european contact",
+            "amerindians"
+          ],
+          "objectives": [
+            {
+              "text": "Summarize the contribution and experience of indigenous peoples in Caribbean history.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Explain the effects of European contact on Caribbean societies.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Use evidence from sources to discuss change and continuity in the early Caribbean.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Slavery, Emancipation, and Resistance",
+          "aliases": [],
+          "keywords": [
+            "slavery",
+            "emancipation",
+            "resistance",
+            "plantation society",
+            "freedom"
+          ],
+          "objectives": [
+            {
+              "text": "Explain how plantation society developed in the Caribbean.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze forms of resistance used by enslaved people.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Assess the social and economic impact of emancipation on Caribbean life.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Nationhood and Regional Development",
+          "aliases": [],
+          "keywords": [
+            "independence",
+            "nationhood",
+            "regionalism",
+            "caribbean development",
+            "government"
+          ],
+          "objectives": [
+            {
+              "text": "Describe major steps toward Caribbean self-government and independence.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Compare the development experiences of different Caribbean territories.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate the role of regional integration in Caribbean development.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_edpm_core",
+      "curriculum": "CSEC",
+      "subject": "EDPM",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Core Areas",
+      "topic_group": "Digital Office Productivity",
+      "topics": [
+        {
+          "name": "Fundamentals of Computing and Keyboarding",
+          "aliases": [
+            "Electronic Document Preparation and Management"
+          ],
+          "keywords": [
+            "edpm",
+            "keyboard mastery",
+            "computing",
+            "application software",
+            "document management"
+          ],
+          "objectives": [
+            {
+              "text": "Explain core concepts in digital productivity and office computing.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Demonstrate efficient keyboarding and document input skills.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use appropriate digital tools to prepare professional business documents.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Business Document Preparation",
+          "aliases": [],
+          "keywords": [
+            "business documents",
+            "letters",
+            "memos",
+            "reports",
+            "specialised documents"
+          ],
+          "objectives": [
+            {
+              "text": "Prepare business documents using accepted formatting conventions.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Select suitable software features for specialised document preparation.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Edit and improve documents for accuracy, layout, and audience.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Electronic Communication and Ethics",
+          "aliases": [],
+          "keywords": [
+            "electronic communication",
+            "email",
+            "ethics",
+            "digital citizenship",
+            "records"
+          ],
+          "objectives": [
+            {
+              "text": "Explain ethical and professional standards in digital communication.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Manage electronic communication and document storage responsibly.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Assess digital workflow choices for security, efficiency, and professionalism.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_english_b_core",
+      "curriculum": "CSEC",
+      "subject": "English B",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Modules",
+      "topic_group": "Literary Discourse",
+      "topics": [
+        {
+          "name": "Poetry Analysis",
+          "aliases": [],
+          "keywords": [
+            "poetry",
+            "literary discourse",
+            "theme",
+            "imagery",
+            "figurative language"
+          ],
+          "objectives": [
+            {
+              "text": "Interpret theme, mood, and literary devices in poetry.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Support responses to poetry with relevant textual evidence.",
+              "bloom": "Evaluate"
+            },
+            {
+              "text": "Create organised literary responses using appropriate critical language.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Prose and Drama",
+          "aliases": [],
+          "keywords": [
+            "prose",
+            "drama",
+            "character",
+            "plot",
+            "setting",
+            "conflict"
+          ],
+          "objectives": [
+            {
+              "text": "Analyze character, setting, plot, and conflict in prose and drama.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Compare how writers shape meaning through structure and language.",
+              "bloom": "Evaluate"
+            },
+            {
+              "text": "Develop coherent written responses to literary texts.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Critical Response and Essay Writing",
+          "aliases": [],
+          "keywords": [
+            "essay",
+            "critical response",
+            "literature essay",
+            "textual evidence"
+          ],
+          "objectives": [
+            {
+              "text": "Organize literary essays around clear arguments and supporting evidence.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Evaluate multiple interpretations of a literary text.",
+              "bloom": "Evaluate"
+            },
+            {
+              "text": "Refine language and structure for effective literary discussion.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_geography_core",
+      "curriculum": "CSEC",
+      "subject": "Geography",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Study Areas",
+      "topic_group": "Natural and Human Systems",
+      "topics": [
+        {
+          "name": "Map Skills and Field Study",
+          "aliases": [],
+          "keywords": [
+            "map skills",
+            "field study",
+            "data collection",
+            "graphs",
+            "survey"
+          ],
+          "objectives": [
+            {
+              "text": "Use maps, graphs, and fieldwork techniques to gather and present geographic information.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Interpret spatial patterns from geographic data.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate field study findings and geographic evidence.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Natural Systems",
+          "aliases": [],
+          "keywords": [
+            "natural systems",
+            "weather",
+            "climate",
+            "rivers",
+            "coasts",
+            "ecosystems"
+          ],
+          "objectives": [
+            {
+              "text": "Explain how natural systems shape environments and human activity.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze interactions among climate, landforms, and ecosystems.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Assess environmental issues and sustainable responses in the Caribbean.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Human Systems",
+          "aliases": [],
+          "keywords": [
+            "population",
+            "settlement",
+            "economic activity",
+            "urbanisation",
+            "migration"
+          ],
+          "objectives": [
+            {
+              "text": "Describe major human systems studied in geography.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze patterns of settlement, population, and economic activity.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Propose solutions to selected geographic and development challenges.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_home_economics_core",
+      "curriculum": "CSEC",
+      "subject": "Home Economics",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Options",
+      "topic_group": "Family, Textiles, and Food Management",
+      "topics": [
+        {
+          "name": "Family and Resource Management",
+          "aliases": [],
+          "keywords": [
+            "family",
+            "resource management",
+            "consumerism",
+            "housing",
+            "special events"
+          ],
+          "objectives": [
+            {
+              "text": "Explain principles of family and resource management in everyday life.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze consumer choices and family resource decisions.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Plan a simple event or household task using management principles.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Textiles, Clothing, and Fashion",
+          "aliases": [],
+          "keywords": [
+            "textiles",
+            "clothing",
+            "fashion",
+            "fibres",
+            "construction processes"
+          ],
+          "objectives": [
+            {
+              "text": "Identify properties and uses of common fibres, yarns, and fabrics.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Compare clothing construction and care practices for different purposes.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Design or plan a basic fashion or textile product for a stated need.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Food, Nutrition, and Health",
+          "aliases": [],
+          "keywords": [
+            "food and nutrition",
+            "meal planning",
+            "diet and health",
+            "food science",
+            "kitchen"
+          ],
+          "objectives": [
+            {
+              "text": "Explain relationships among diet, nutrition, and health.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze meal plans using nutritional needs and resource limits.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Plan safe food preparation and service activities for different contexts.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_human_social_biology_core",
+      "curriculum": "CSEC",
+      "subject": "Human and Social Biology",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Sections",
+      "topic_group": "Human Life Processes and Society",
+      "topics": [
+        {
+          "name": "Living Organisms and Life Processes",
+          "aliases": [],
+          "keywords": [
+            "living organisms",
+            "life processes",
+            "cells",
+            "nutrition",
+            "respiration"
+          ],
+          "objectives": [
+            {
+              "text": "Explain key life processes in humans and other living organisms.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Relate body systems to health and daily life.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Apply scientific ideas to personal and community health situations.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Reproduction, Heredity, and Development",
+          "aliases": [],
+          "keywords": [
+            "reproduction",
+            "heredity",
+            "variation",
+            "growth",
+            "development"
+          ],
+          "objectives": [
+            {
+              "text": "Describe human reproduction, growth, and development.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Explain basic principles of heredity and variation.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate health information related to reproduction and development.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Disease and Public Health",
+          "aliases": [],
+          "keywords": [
+            "disease",
+            "public health",
+            "environment",
+            "community health",
+            "wellness"
+          ],
+          "objectives": [
+            {
+              "text": "Explain causes, prevention, and control of selected diseases.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze links between lifestyle, environment, and health outcomes.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Recommend strategies for healthier individuals and communities.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_industrial_technology_core",
+      "curriculum": "CSEC",
+      "subject": "Industrial Technology",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Core and Options",
+      "topic_group": "Design, Production, and Technology",
+      "topics": [
+        {
+          "name": "Fundamentals of Industry and Design",
+          "aliases": [],
+          "keywords": [
+            "industry",
+            "design principles",
+            "design process",
+            "ict",
+            "portfolio"
+          ],
+          "objectives": [
+            {
+              "text": "Explain core concepts in industrial design and production.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Apply stages of the design process to a practical problem.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Develop a simple solution brief or design proposal.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Electrical, Mechanical, or Building Systems",
+          "aliases": [],
+          "keywords": [
+            "electrical",
+            "mechanical",
+            "building",
+            "furniture",
+            "materials",
+            "tools"
+          ],
+          "objectives": [
+            {
+              "text": "Describe major option areas within industrial technology.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Compare tools, materials, and processes used in different specialisations.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Select suitable methods or materials for a stated practical task.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Drafting, Production, and Safety",
+          "aliases": [],
+          "keywords": [
+            "drafting",
+            "production engineering",
+            "safety",
+            "workshop",
+            "measurements"
+          ],
+          "objectives": [
+            {
+              "text": "Use technical language and diagrams to communicate design ideas.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Explain the importance of safety and quality control in workshop practice.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Evaluate finished products against function, accuracy, and presentation.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_music_core",
+      "curriculum": "CSEC",
+      "subject": "Music",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Sections",
+      "topic_group": "Music History, Literacy, and Practice",
+      "topics": [
+        {
+          "name": "Listening and Appraising",
+          "aliases": [],
+          "keywords": [
+            "listening",
+            "appraising",
+            "music history",
+            "theory",
+            "genres",
+            "styles"
+          ],
+          "objectives": [
+            {
+              "text": "Describe major features of selected musical styles, periods, and genres.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze musical elements heard in recorded or live examples.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate performances using appropriate music vocabulary.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Performing",
+          "aliases": [],
+          "keywords": [
+            "performing",
+            "ensemble",
+            "voice",
+            "instrumental",
+            "rehearsal"
+          ],
+          "objectives": [
+            {
+              "text": "Demonstrate performance skills individually or in groups.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Interpret music with attention to technique and expression.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Reflect on strengths and areas for improvement in performance.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Composing and Music Literacy",
+          "aliases": [],
+          "keywords": [
+            "composing",
+            "notation",
+            "rhythm",
+            "melody",
+            "harmony"
+          ],
+          "objectives": [
+            {
+              "text": "Read and write basic musical notation accurately.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Use musical ideas to create short compositions or arrangements.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Explain how rhythm, melody, and harmony shape musical meaning.",
+              "bloom": "Understand"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_office_administration_core",
+      "curriculum": "CSEC",
+      "subject": "Office Administration",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Sections",
+      "topic_group": "Office Operations and Services",
+      "topics": [
+        {
+          "name": "Office Orientation and Communication",
+          "aliases": [],
+          "keywords": [
+            "office orientation",
+            "communication",
+            "reception",
+            "hospitality",
+            "meetings"
+          ],
+          "objectives": [
+            {
+              "text": "Explain the functions and responsibilities found in office environments.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Apply professional communication practices in office scenarios.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Organize meeting or reception tasks using appropriate procedures.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Records, Human Resources, and Accounts",
+          "aliases": [],
+          "keywords": [
+            "records",
+            "human resources",
+            "accounts",
+            "financial services",
+            "inventory"
+          ],
+          "objectives": [
+            {
+              "text": "Describe systems used to manage records, staff, and routine office accounts.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze office documents and workflows for accuracy and efficiency.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Recommend improvements to an office process or service.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Customer Service and Operations",
+          "aliases": [],
+          "keywords": [
+            "customer service",
+            "sales",
+            "marketing",
+            "dispatch",
+            "transport"
+          ],
+          "objectives": [
+            {
+              "text": "Explain the importance of customer service in office administration.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Apply suitable procedures for sales support and operational coordination.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Evaluate service quality in a workplace case study.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_physical_education_sport_core",
+      "curriculum": "CSEC",
+      "subject": "Physical Education and Sport",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Core and Options",
+      "topic_group": "Movement, Fitness, and Sport",
+      "topics": [
+        {
+          "name": "Fitness and Human Performance",
+          "aliases": [],
+          "keywords": [
+            "fitness",
+            "training",
+            "human performance",
+            "exercise",
+            "wellness"
+          ],
+          "objectives": [
+            {
+              "text": "Explain components of fitness and their role in health and sport.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze how training affects performance and well-being.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Plan a simple fitness activity or improvement routine.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Skills, Rules, and Tactics",
+          "aliases": [],
+          "keywords": [
+            "skills",
+            "rules",
+            "tactics",
+            "sport",
+            "games"
+          ],
+          "objectives": [
+            {
+              "text": "Demonstrate understanding of rules and skills in selected sports or activities.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Analyze tactics and decision-making in game situations.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate performance using criteria related to movement and teamwork.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Sports Issues and Officiating",
+          "aliases": [],
+          "keywords": [
+            "officiating",
+            "ethics",
+            "sportsmanship",
+            "safety",
+            "leadership"
+          ],
+          "objectives": [
+            {
+              "text": "Explain the role of ethics, leadership, and safety in sport.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Apply officiating knowledge in structured physical activity settings.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Evaluate sporting situations using fair play and performance criteria.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_principles_accounts_core",
+      "curriculum": "CSEC",
+      "subject": "Principles of Accounts",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Sections",
+      "topic_group": "Accounting Foundations",
+      "topics": [
+        {
+          "name": "Accounting as a System",
+          "aliases": [
+            "POA"
+          ],
+          "keywords": [
+            "accounting",
+            "ledgers",
+            "books of original entry",
+            "trial balance",
+            "accounting system"
+          ],
+          "objectives": [
+            {
+              "text": "Explain the purpose and structure of accounting as a system.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Record transactions using appropriate books of original entry and ledgers.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Analyze trial balance and financial information for accuracy.",
+              "bloom": "Analyze"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Financial Statements and Adjustments",
+          "aliases": [],
+          "keywords": [
+            "financial statements",
+            "adjustments",
+            "sole trader",
+            "income statement",
+            "balance sheet"
+          ],
+          "objectives": [
+            {
+              "text": "Prepare simple financial statements using accounting principles.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Explain the purpose of common accounting adjustments.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Evaluate the effect of adjustments on financial results.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Partnerships, Companies, and Controls",
+          "aliases": [],
+          "keywords": [
+            "partnerships",
+            "limited companies",
+            "control systems",
+            "co-operatives"
+          ],
+          "objectives": [
+            {
+              "text": "Describe accounting treatments for partnerships and companies.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze internal control measures used in accounting systems.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Interpret accounting information for decision-making.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_principles_business_core",
+      "curriculum": "CSEC",
+      "subject": "Principles of Business",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Sections",
+      "topic_group": "Business Operations and Environment",
+      "topics": [
+        {
+          "name": "Nature and Organization of Business",
+          "aliases": [
+            "POB"
+          ],
+          "keywords": [
+            "business",
+            "organisation",
+            "establishing a business",
+            "legal aspects"
+          ],
+          "objectives": [
+            {
+              "text": "Explain the nature and purpose of business activity.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Compare forms of business organisation and start-up considerations.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate legal and ethical issues affecting business decisions.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Production, Marketing, and Finance",
+          "aliases": [],
+          "keywords": [
+            "production",
+            "marketing",
+            "finance",
+            "logistics",
+            "supply chain"
+          ],
+          "objectives": [
+            {
+              "text": "Describe key business functions in production, marketing, and finance.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze how businesses manage supply, demand, and financial decisions.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Propose strategies for improving business operations in a case study.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Government, Technology, and Global Business",
+          "aliases": [],
+          "keywords": [
+            "government",
+            "technology",
+            "global business",
+            "economy"
+          ],
+          "objectives": [
+            {
+              "text": "Explain the role of government and technology in business activity.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Assess how global trends affect Caribbean businesses.",
+              "bloom": "Evaluate"
+            },
+            {
+              "text": "Recommend responses to selected business environment challenges.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_religious_education_core",
+      "curriculum": "CSEC",
+      "subject": "Religious Education",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Core and Options",
+      "topic_group": "Belief Systems and Life Issues",
+      "topics": [
+        {
+          "name": "Essentials of Religion",
+          "aliases": [],
+          "keywords": [
+            "religion",
+            "belief systems",
+            "christianity",
+            "hinduism",
+            "islam",
+            "judaism"
+          ],
+          "objectives": [
+            {
+              "text": "Describe key features of major belief systems studied in religious education.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Compare teachings, practices, and values across religious traditions.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate the role of religion in shaping identity and community life.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Sacred Texts and Teachings",
+          "aliases": [],
+          "keywords": [
+            "bible",
+            "quran",
+            "tenakh",
+            "ramayan",
+            "bhagvad geeta",
+            "sacred texts"
+          ],
+          "objectives": [
+            {
+              "text": "Explain the significance of selected sacred texts and teachings.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Interpret passages or ideas in relation to life issues.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Use religious teachings to discuss moral decision-making.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Human Life Issues",
+          "aliases": [],
+          "keywords": [
+            "human life issues",
+            "sin",
+            "salvation",
+            "liberation",
+            "festivals",
+            "observances"
+          ],
+          "objectives": [
+            {
+              "text": "Discuss religious responses to selected human life issues.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze how beliefs influence personal and social choices.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate different perspectives on ethical or moral problems.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_technical_drawing_core",
+      "curriculum": "CSEC",
+      "subject": "Technical Drawing",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Sections",
+      "topic_group": "Graphic Communication and Drafting",
+      "topics": [
+        {
+          "name": "Drawing Fundamentals",
+          "aliases": [],
+          "keywords": [
+            "technical drawing",
+            "drafting",
+            "instruments",
+            "linework",
+            "dimensioning"
+          ],
+          "objectives": [
+            {
+              "text": "Explain conventions and tools used in technical drawing.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Produce basic technical drawings using accepted standards.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Check drawings for accuracy, neatness, and clarity.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Geometric Construction and Projection",
+          "aliases": [],
+          "keywords": [
+            "geometric construction",
+            "projection",
+            "orthographic",
+            "isometric",
+            "scale"
+          ],
+          "objectives": [
+            {
+              "text": "Construct geometric shapes and projections accurately.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Analyze relationships among views in technical drawings.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Select appropriate projection methods for practical problems.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Design Communication",
+          "aliases": [],
+          "keywords": [
+            "design communication",
+            "working drawings",
+            "visualisation",
+            "problem solving"
+          ],
+          "objectives": [
+            {
+              "text": "Use technical drawings to communicate design ideas clearly.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Interpret working drawings and layout information.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Create a simple drawing solution to meet stated requirements.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_theatre_arts_core",
+      "curriculum": "CSEC",
+      "subject": "Theatre Arts",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Core and Options",
+      "topic_group": "Performance and Production",
+      "topics": [
+        {
+          "name": "Elements of Theatre and Cultural Forms",
+          "aliases": [
+            "Drama"
+          ],
+          "keywords": [
+            "theatre",
+            "elements of theatre",
+            "caribbean cultural forms",
+            "text analysis"
+          ],
+          "objectives": [
+            {
+              "text": "Explain core elements of theatre and selected Caribbean cultural forms.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Analyze scripts or performance texts for meaning and effect.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Evaluate how performance choices communicate ideas to audiences.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Improvisation and Playmaking",
+          "aliases": [],
+          "keywords": [
+            "improvisation",
+            "playmaking",
+            "devising",
+            "drama techniques"
+          ],
+          "objectives": [
+            {
+              "text": "Use improvisation techniques to develop dramatic ideas.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Collaborate to shape scenes or short performances.",
+              "bloom": "Create"
+            },
+            {
+              "text": "Reflect on performance decisions and audience impact.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Stagecraft and Production",
+          "aliases": [],
+          "keywords": [
+            "stagecraft",
+            "costume",
+            "lighting",
+            "sound",
+            "stage management",
+            "production"
+          ],
+          "objectives": [
+            {
+              "text": "Describe roles and processes involved in theatre production.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Apply stagecraft concepts to costume, set, lighting, or sound tasks.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Assess how technical choices support a production concept.",
+              "bloom": "Evaluate"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_visual_arts_core",
+      "curriculum": "CSEC",
+      "subject": "Visual Arts",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Expressive Forms",
+      "topic_group": "Two- and Three-Dimensional Art",
+      "topics": [
+        {
+          "name": "Drawing, Painting, and Mixed Media",
+          "aliases": [],
+          "keywords": [
+            "drawing",
+            "painting",
+            "mixed media",
+            "graphics",
+            "printmaking"
+          ],
+          "objectives": [
+            {
+              "text": "Explore drawing and painting techniques for visual expression.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Analyze how artists use elements and principles of design.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Create original work using appropriate media and processes.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Three-Dimensional Forms",
+          "aliases": [],
+          "keywords": [
+            "sculpture",
+            "ceramics",
+            "leathercraft",
+            "fibre design",
+            "3d forms"
+          ],
+          "objectives": [
+            {
+              "text": "Describe processes used in selected three-dimensional art forms.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Compare materials and techniques used across visual art forms.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Plan or create a simple three-dimensional visual solution.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Reflective Journal and Critique",
+          "aliases": [],
+          "keywords": [
+            "reflective journal",
+            "art critique",
+            "process",
+            "practice"
+          ],
+          "objectives": [
+            {
+              "text": "Document artistic process using reflective writing and visual evidence.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Evaluate personal artwork and the work of others using art vocabulary.",
+              "bloom": "Evaluate"
+            },
+            {
+              "text": "Refine ideas and presentation based on reflection and feedback.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_french_core",
+      "curriculum": "CSEC",
+      "subject": "French",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Communication Skills",
+      "topic_group": "Listening, Speaking, Reading, Writing",
+      "topics": [
+        {
+          "name": "Everyday Communication in French",
+          "aliases": [],
+          "keywords": [
+            "french",
+            "listening",
+            "speaking",
+            "reading",
+            "writing",
+            "communication"
+          ],
+          "objectives": [
+            {
+              "text": "Understand and respond to everyday spoken and written French.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Use French to communicate simple personal and social information.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Create short messages, dialogues, or responses in French.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Culture and Context",
+          "aliases": [],
+          "keywords": [
+            "culture",
+            "french-speaking communities",
+            "traditions",
+            "caribbean"
+          ],
+          "objectives": [
+            {
+              "text": "Describe cultural practices in French-speaking communities.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Compare cultural perspectives using familiar topics.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Use language appropriately in context-sensitive situations.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Grammar and Written Expression",
+          "aliases": [],
+          "keywords": [
+            "grammar",
+            "vocabulary",
+            "sentence structure",
+            "written expression"
+          ],
+          "objectives": [
+            {
+              "text": "Apply key grammar patterns in guided French writing.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Analyze language choices for accuracy and meaning.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Write organised responses using suitable vocabulary and structure.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "csec_spanish_core",
+      "curriculum": "CSEC",
+      "subject": "Spanish",
+      "level": "Grades 10-11",
+      "bands": [
+        "Grade 10",
+        "Grade 11"
+      ],
+      "strand": "Communication Skills",
+      "topic_group": "Listening, Speaking, Reading, Writing",
+      "topics": [
+        {
+          "name": "Everyday Communication in Spanish",
+          "aliases": [],
+          "keywords": [
+            "spanish",
+            "listening",
+            "speaking",
+            "reading",
+            "writing",
+            "communication"
+          ],
+          "objectives": [
+            {
+              "text": "Understand and respond to everyday spoken and written Spanish.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Use Spanish to communicate simple personal and social information.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Create short messages, dialogues, or responses in Spanish.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Culture and Context",
+          "aliases": [],
+          "keywords": [
+            "culture",
+            "spanish-speaking communities",
+            "traditions",
+            "caribbean"
+          ],
+          "objectives": [
+            {
+              "text": "Describe cultural practices in Spanish-speaking communities.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Compare cultural perspectives using familiar topics.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Use language appropriately in context-sensitive situations.",
+              "bloom": "Apply"
+            }
+          ],
+          "resources": []
+        },
+        {
+          "name": "Grammar and Written Expression",
+          "aliases": [],
+          "keywords": [
+            "grammar",
+            "vocabulary",
+            "sentence structure",
+            "written expression"
+          ],
+          "objectives": [
+            {
+              "text": "Apply key grammar patterns in guided Spanish writing.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Analyze language choices for accuracy and meaning.",
+              "bloom": "Analyze"
+            },
+            {
+              "text": "Write organised responses using suitable vocabulary and structure.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_7_9_french_language_skills",
+      "curriculum": "NSC",
+      "subject": "French",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Communication",
+      "topic_group": "Language Skills",
+      "topics": [
+        {
+          "name": "Basic French Communication",
+          "aliases": [],
+          "keywords": [
+            "french",
+            "greetings",
+            "self introduction",
+            "questions",
+            "responses"
+          ],
+          "objectives": [
+            {
+              "text": "Use simple French greetings, introductions, and classroom expressions appropriately.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Understand familiar words and phrases in short spoken or written texts.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Create simple spoken or written responses about everyday topics.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
+    },
+    {
+      "id": "nsc_7_9_spanish_language_skills",
+      "curriculum": "NSC",
+      "subject": "Spanish",
+      "level": "Grades 7-9",
+      "bands": [
+        "Grade 7",
+        "Grade 8",
+        "Grade 9"
+      ],
+      "strand": "Communication",
+      "topic_group": "Language Skills",
+      "topics": [
+        {
+          "name": "Basic Spanish Communication",
+          "aliases": [],
+          "keywords": [
+            "spanish",
+            "greetings",
+            "self introduction",
+            "questions",
+            "responses"
+          ],
+          "objectives": [
+            {
+              "text": "Use simple Spanish greetings, introductions, and classroom expressions appropriately.",
+              "bloom": "Apply"
+            },
+            {
+              "text": "Understand familiar words and phrases in short spoken or written texts.",
+              "bloom": "Understand"
+            },
+            {
+              "text": "Create simple spoken or written responses about everyday topics.",
+              "bloom": "Create"
+            }
+          ],
+          "resources": []
+        }
+      ]
     }
   ]
 }
