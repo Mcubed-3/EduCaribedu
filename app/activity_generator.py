@@ -53,6 +53,7 @@ def _extract_lesson_context(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 PROMPT_TEMPLATE = r"""
+PROMPT_TEMPLATE = r"""
 You are generating a classroom activity STRICTLY aligned to the teaching context provided.
 
 CRITICAL RULES:
@@ -66,9 +67,9 @@ CRITICAL RULES:
 - For ALL mathematics, use LaTeX delimiters
 - Inline maths must use \( ... \)
 - Display maths must use \[ ... \]
-- Fractions must use \frac{a}{b}
-- Powers must use x^2 or x^{10}
-- Square roots must use \sqrt{x}
+- Fractions must use \frac{{a}}{{b}}
+- Powers must use x^2 or x^{{10}}
+- Square roots must use \sqrt{{x}}
 
 Return ONLY valid JSON:
 
