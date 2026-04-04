@@ -81,6 +81,7 @@
           <button type="button" id="newLessonBtn" class="btn btn-primary">New lesson</button>
           <button type="button" id="refreshLessonsBtn" class="btn btn-secondary">Refresh workspace</button>
           <a href="/pricing" class="btn btn-secondary btn-link">Pricing</a>
+          <a href="/feedback" class="btn btn-secondary btn-link">Feedback</a>
           {% if current_user.role == "admin" %}
             <a href="/admin" class="btn btn-secondary btn-link">Curriculum admin</a>
           {% endif %}
@@ -142,7 +143,7 @@
       <section class="upgrade-banner">
         <div>
           <strong>Pro Teacher:</strong>
-          <span>Need quizzes, word searches, maths problem-solving tasks, and classroom worksheets? Upgrade to Pro Teacher Plus.</span>
+          <span>Need quizzes, case studies, exit tickets, or homework sheets? Upgrade to Pro Teacher Plus.</span>
         </div>
         <a href="/pricing" class="btn btn-primary btn-link">See Plus</a>
       </section>
@@ -336,7 +337,7 @@
             </div>
             {% elif current_user.plan == "pro" %}
             <div class="callout">
-              <strong>Pro Teacher:</strong> You have premium lesson planning and exports. Upgrade to Plus for quizzes, worksheets, and classroom activities.
+              <strong>Pro Teacher:</strong> You have premium lesson planning and exports. Upgrade to Plus for quizzes, case studies, exit tickets, and homework sheets.
             </div>
             {% else %}
             <div class="callout">
@@ -349,7 +350,7 @@
             <div class="activity-panel">
               <div class="panel-kicker">Optional extension</div>
               <h3>Generate a classroom activity from this lesson</h3>
-              <p class="muted">Create quizzes, maths problem-solving questions, crosswords, word searches, case studies, and worksheet-style activities after generating a lesson.</p>
+              <p class="muted">Create quizzes, short responses, essays, case studies, exit tickets, homework sheets, and maths problem-solving tasks after generating a lesson.</p>
 
               {% if current_user.plan == "plus" or current_user.role == "admin" %}
               <div class="activity-grid">
@@ -362,8 +363,6 @@
                     <option value="short_answer">Short answer</option>
                     <option value="essay">Essay questions</option>
                     <option value="math_problem_solving">Math problem-solving</option>
-                    <option value="crossword">Crossword puzzle</option>
-                    <option value="word_search">Word search</option>
                     <option value="case_study">Case study</option>
                     <option value="exit_ticket">Exit ticket</option>
                     <option value="homework_sheet">Homework sheet</option>
@@ -403,7 +402,7 @@
               {% else %}
               <div class="locked-card">
                 <strong>Activity generation is available on Pro Teacher Plus.</strong>
-                <p>Generate quizzes, crossword puzzles, word searches, case studies, maths problem-solving tasks, and worksheet-style activities from the lesson you already created.</p>
+                <p>Generate quizzes, case studies, exit tickets, homework sheets, and worksheet-style activities from the lesson you already created.</p>
                 <a href="/pricing" class="btn btn-primary btn-link">See Plus plan</a>
               </div>
               {% endif %}

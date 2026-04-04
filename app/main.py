@@ -43,6 +43,12 @@ from .curriculum_admin_service import (
 )
 from .engine_state import engine
 from .export_service import export_to_docx, export_to_pdf
+from .feedback_service import (
+    create_feedback,
+    init_feedback_db,
+    list_all_feedback,
+    list_feedback_for_user,
+)
 from .lesson_generator import generate_lesson
 from .models import (
     ActivityRequest,
@@ -80,6 +86,7 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 SESSION_COOKIE = "educarib_session"
 
 init_auth_db()
+init_feedback_db()
 
 
 def get_current_user(request: Request):
@@ -166,11 +173,26 @@ def pricing_page(request: Request):
     )
 
 
+@app.get("/feedback", response_class=HTMLResponse)
+def feedback_page(request: Request):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/login", status_code=302)
+
+    return templates.TemplateResponse(
+        "feedback.html",
+        {
+            "request": request,
+            "current_user": user,
+        },
+    )
+
+
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
     user = get_current_user(request)
     if user:
-      return RedirectResponse(url="/", status_code=302)
+        return RedirectResponse(url="/", status_code=302)
     return templates.TemplateResponse("login.html", {"request": request, "mode": "login", "error": ""})
 
 
@@ -327,6 +349,47 @@ def config(request: Request):
         "difficulties": ["Beginner", "Intermediate", "Advanced"],
         "lesson_types": ["Theory", "Practical", "Discussion", "Mixed"],
     }
+
+
+@app.get("/api/feedback")
+def feedback_list(request: Request):
+    user = require_user(request)
+
+    if user.get("role") == "admin":
+        return {
+            "admin_view": True,
+            "items": list_all_feedback(),
+        }
+
+    return {
+        "admin_view": False,
+        "items": list_feedback_for_user(user["email"]),
+    }
+
+
+@app.post("/api/feedback")
+async def feedback_create(request: Request):
+    user = require_user(request)
+    payload = await request.json()
+
+    category = (payload.get("category") or "").strip()
+    subject = (payload.get("subject") or "").strip()
+    page = (payload.get("page") or "").strip()
+    message = (payload.get("message") or "").strip()
+
+    if not category or not subject or not message:
+        raise HTTPException(status_code=400, detail="Category, subject, and message are required.")
+
+    item = create_feedback(
+        email=user["email"],
+        role=user.get("role", "user"),
+        category=category,
+        subject=subject,
+        page=page,
+        message=message,
+    )
+
+    return {"message": "Feedback submitted.", "item": item}
 
 
 @app.post("/api/curriculum/search")
@@ -695,11 +758,13 @@ def admin_update_user_billing(request: Request, user_id: int, payload: AdminBill
             plan=payload.plan,
             subscription_status=payload.subscription_status,
             payment_provider=payload.payment_provider,
-            paypal_customer_id=payload.paypal_customer_id,
-            paypal_subscription_id=payload.paypal_subscription_id,
+            paypal_customer_id="",
+            paypal_subscription_id="",
             subscription_started_at=payload.subscription_started_at,
             subscription_renews_at=payload.subscription_renews_at,
             billing_notes=payload.billing_notes,
+            stripe_customer_id=payload.stripe_customer_id,
+            stripe_subscription_id=payload.stripe_subscription_id,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
