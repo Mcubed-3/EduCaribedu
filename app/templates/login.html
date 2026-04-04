@@ -3,87 +3,105 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EduCarib AI - Authentication</title>
+  <title>EduCarib AI - {{ "Log in" if mode == "login" else "Sign up" }}</title>
+  <meta name="google-adsense-account" content="ca-pub-6817907304188010">
+  <link rel="icon" href="/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6817907304188010"
+     crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body class="auth-body">
-  <div class="auth-layout">
-    <section class="auth-showcase">
-      <div class="auth-showcase-inner glass-panel">
-        <div class="section-kicker">EduCarib AI</div>
-        <h1>Curriculum-aware lesson planning built for Caribbean classrooms.</h1>
-        <p class="muted auth-lead">
-          Generate aligned lesson plans, keep a reusable library, and create exports that feel ready for real teaching use.
-        </p>
+  <div class="auth-shell">
+    <section class="auth-hero">
+      <div class="auth-brand-card">
+        <div class="auth-brand-top">
+          <div class="auth-brand-mark">
+            <img src="/favicon.png" alt="EduCarib AI logo" class="auth-brand-img" />
+          </div>
+          <div>
+            <div class="auth-brand-title">EduCarib AI</div>
+            <div class="auth-brand-subtitle">Curriculum-aware lesson planning for Caribbean classrooms.</div>
+          </div>
+        </div>
+
+        <div class="auth-hero-copy">
+          <div class="hero-kicker">Built for teachers</div>
+          <h1>Curriculum-aware lesson planning built for Caribbean classrooms.</h1>
+          <p>
+            Generate aligned lesson plans, keep a reusable library, create exports ready for teaching use,
+            and unlock classroom activities when you need more than just planning.
+          </p>
+        </div>
+
         <div class="auth-feature-grid">
           <div class="auth-feature-card">
             <strong>NSC + CSEC aligned</strong>
-            <span>Match topics to curriculum pathways faster.</span>
+            <span>Match lesson content to curriculum pathways faster.</span>
           </div>
           <div class="auth-feature-card">
             <strong>Editable outputs</strong>
             <span>Keep the AI speed, then refine like a teacher.</span>
           </div>
           <div class="auth-feature-card">
-            <strong>Ready for monetization</strong>
-            <span>Built to support free and pro experiences.</span>
+            <strong>Built to grow</strong>
+            <span>From planning only to full classroom activity generation.</span>
           </div>
         </div>
       </div>
     </section>
 
     <section class="auth-panel-wrap">
-      <div class="auth-card glass-panel">
-        <a href="/" class="brand-lockup no-underline auth-brand-inline">
-          <div class="brand-mark">EC</div>
-          <div>
-            <div class="brand-title">EduCarib AI</div>
-            <p class="muted brand-copy">{% if mode == "signup" %}Create your teaching workspace{% else %}Welcome back{% endif %}</p>
+      <div class="auth-panel">
+        <div class="auth-card">
+          <div class="auth-card-top">
+            <div class="auth-card-mark">
+              <img src="/favicon.png" alt="EduCarib AI icon" class="auth-card-mark-img" />
+            </div>
+            <div>
+              <div class="auth-card-brand">EduCarib AI</div>
+              <div class="auth-card-meta">{{ "Welcome back" if mode == "login" else "Create your account" }}</div>
+            </div>
           </div>
-        </a>
 
-        <div class="auth-copy-block">
-          <h2>{% if mode == "signup" %}Create your account{% else %}Log in to your dashboard{% endif %}</h2>
-          <p class="muted auth-subtext">
-            {% if mode == "signup" %}
-              Start generating, saving, editing, and exporting lesson plans in one place.
-            {% else %}
+          <h2>{{ "Log in to your dashboard" if mode == "login" else "Create your teacher account" }}</h2>
+          <p class="auth-muted">
+            {% if mode == "login" %}
               Access your saved lessons, premium tools, and curriculum-aligned builder.
+            {% else %}
+              Start free, generate lesson plans, and upgrade only when you need more.
             {% endif %}
           </p>
-        </div>
 
-        {% if error %}
+          {% if error %}
           <div class="auth-error">{{ error }}</div>
-        {% endif %}
-
-        <form method="post" action="{% if mode == 'signup' %}/signup{% else %}/login{% endif %}" class="auth-form auth-form-modern">
-          <label class="field">
-            <span>Email</span>
-            <input type="email" name="email" required placeholder="you@example.com" />
-          </label>
-
-          <label class="field">
-            <span>Password</span>
-            <input type="password" name="password" required placeholder="Enter your password" />
-          </label>
-
-          <button type="submit" class="auth-submit-btn">
-            {% if mode == "signup" %}Create account{% else %}Log in{% endif %}
-          </button>
-        </form>
-
-        <div class="auth-switch auth-switch-modern">
-          {% if mode == "signup" %}
-            <span class="muted">Already have an account?</span>
-            <a href="/login">Log in</a>
-          {% else %}
-            <span class="muted">Need an account?</span>
-            <a href="/signup">Sign up</a>
           {% endif %}
+
+          <form method="post" action="{{ '/login' if mode == 'login' else '/signup' }}" class="auth-form">
+            <label class="field auth-field">
+              <span>Email</span>
+              <input type="email" name="email" placeholder="you@example.com" required />
+            </label>
+
+            <label class="field auth-field">
+              <span>Password</span>
+              <input type="password" name="password" placeholder="Enter your password" required />
+            </label>
+
+            <button type="submit" class="btn btn-primary auth-submit">
+              {{ "Log in" if mode == "login" else "Create account" }}
+            </button>
+          </form>
+
+          <div class="auth-switch">
+            {% if mode == "login" %}
+              Need an account? <a href="/signup">Sign up</a>
+            {% else %}
+              Already have an account? <a href="/login">Log in</a>
+            {% endif %}
+          </div>
         </div>
       </div>
     </section>
