@@ -3,9 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EduCarib AI - {{ "Log in" if mode == "login" else "Sign up" }}</title>
+  <title>{% if mode == "login" %}Log in | EduCarib AI{% else %}Sign up | EduCarib AI{% endif %}</title>
+  <meta name="description" content="Log in or create an EduCarib AI account to generate Caribbean curriculum-aligned lesson plans and classroom activities." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="{{ site_url }}/login" />
+  <meta property="og:title" content="EduCarib AI" />
+  <meta property="og:description" content="AI-powered lesson planning for Caribbean teachers." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="{{ site_url }}/login" />
+  <meta property="og:image" content="{{ site_url }}/static/logo.png" />
   <meta name="google-adsense-account" content="ca-pub-6817907304188010">
-  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <link rel="icon" type="image/png" href="/static/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -101,6 +109,10 @@
           {% else %}
             Already have an account? <a href="/login">Log in</a>
           {% endif %}
+        </div>
+
+        <div class="auth-switch-row">
+          <a href="/privacy">Privacy Policy</a> • <a href="/terms">Terms of Service</a>
         </div>
       </div>
     </section>

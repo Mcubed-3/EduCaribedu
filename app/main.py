@@ -150,6 +150,7 @@ def home(request: Request):
             "dashboard": dashboard,
             "current_user": user,
             "plan_status": plan_status,
+            "site_url": "https://educaribedu.org",
         },
     )
 
@@ -169,6 +170,7 @@ def pricing_page(request: Request):
             "request": request,
             "current_user": user,
             "plan_status": plan_status,
+            "site_url": "https://educaribedu.org",
         },
     )
 
@@ -184,6 +186,29 @@ def feedback_page(request: Request):
         {
             "request": request,
             "current_user": user,
+            "site_url": "https://educaribedu.org",
+        },
+    )
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+def privacy_page(request: Request):
+    return templates.TemplateResponse(
+        "privacy.html",
+        {
+            "request": request,
+            "site_url": "https://educaribedu.org",
+        },
+    )
+
+
+@app.get("/terms", response_class=HTMLResponse)
+def terms_page(request: Request):
+    return templates.TemplateResponse(
+        "terms.html",
+        {
+            "request": request,
+            "site_url": "https://educaribedu.org",
         },
     )
 
@@ -193,7 +218,15 @@ def login_page(request: Request):
     user = get_current_user(request)
     if user:
         return RedirectResponse(url="/", status_code=302)
-    return templates.TemplateResponse("login.html", {"request": request, "mode": "login", "error": ""})
+    return templates.TemplateResponse(
+        "login.html",
+        {
+            "request": request,
+            "mode": "login",
+            "error": "",
+            "site_url": "https://educaribedu.org",
+        },
+    )
 
 
 @app.post("/login", response_class=HTMLResponse)
@@ -206,7 +239,12 @@ def login_submit(
     if not user:
         return templates.TemplateResponse(
             "login.html",
-            {"request": request, "mode": "login", "error": "Invalid email or password."},
+            {
+                "request": request,
+                "mode": "login",
+                "error": "Invalid email or password.",
+                "site_url": "https://educaribedu.org",
+            },
             status_code=400,
         )
 
@@ -228,7 +266,15 @@ def signup_page(request: Request):
     user = get_current_user(request)
     if user:
         return RedirectResponse(url="/", status_code=302)
-    return templates.TemplateResponse("login.html", {"request": request, "mode": "signup", "error": ""})
+    return templates.TemplateResponse(
+        "login.html",
+        {
+            "request": request,
+            "mode": "signup",
+            "error": "",
+            "site_url": "https://educaribedu.org",
+        },
+    )
 
 
 @app.post("/signup", response_class=HTMLResponse)
@@ -242,14 +288,24 @@ def signup_submit(
     if get_user_by_email(email):
         return templates.TemplateResponse(
             "login.html",
-            {"request": request, "mode": "signup", "error": "An account with that email already exists."},
+            {
+                "request": request,
+                "mode": "signup",
+                "error": "An account with that email already exists.",
+                "site_url": "https://educaribedu.org",
+            },
             status_code=400,
         )
 
     if len(password) < 6:
         return templates.TemplateResponse(
             "login.html",
-            {"request": request, "mode": "signup", "error": "Password must be at least 6 characters."},
+            {
+                "request": request,
+                "mode": "signup",
+                "error": "Password must be at least 6 characters.",
+                "site_url": "https://educaribedu.org",
+            },
             status_code=400,
         )
 
@@ -285,7 +341,14 @@ def admin_page(request: Request):
         return RedirectResponse(url="/login", status_code=302)
     if user.get("role") != "admin":
         return RedirectResponse(url="/", status_code=302)
-    return templates.TemplateResponse("admin.html", {"request": request, "current_user": user})
+    return templates.TemplateResponse(
+        "admin.html",
+        {
+            "request": request,
+            "current_user": user,
+            "site_url": "https://educaribedu.org",
+        },
+    )
 
 
 @app.get("/admin/users", response_class=HTMLResponse)
@@ -295,7 +358,14 @@ def admin_users_page(request: Request):
         return RedirectResponse(url="/login", status_code=302)
     if user.get("role") != "admin":
         return RedirectResponse(url="/", status_code=302)
-    return templates.TemplateResponse("admin_users.html", {"request": request, "current_user": user})
+    return templates.TemplateResponse(
+        "admin_users.html",
+        {
+            "request": request,
+            "current_user": user,
+            "site_url": "https://educaribedu.org",
+        },
+    )
 
 
 @app.get("/api/me")
