@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EduCarib AI</title>
   <meta name="google-adsense-account" content="ca-pub-6817907304188010">
-  <link rel="icon" href="/favicon.png" />
+  <link rel="icon" type="image/png" href="/static/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
       <div class="brand-card">
         <a href="/" class="brand-lockup">
           <div class="brand-mark-wrap">
-            <img src="/favicon.png" alt="EduCarib AI logo" class="brand-mark-img" />
+            <img src="/static/logo.png" alt="EduCarib AI logo" class="brand-mark-img" />
           </div>
           <div class="brand-copy-wrap">
             <div class="brand-title">EduCarib AI</div>
@@ -234,6 +234,8 @@
 
         <div class="builder-grid">
           <form id="lessonForm" class="panel">
+            <input type="hidden" id="currentLessonId" value="" />
+
             <div class="form-grid">
               <label class="field">
                 <span>Curriculum</span>
