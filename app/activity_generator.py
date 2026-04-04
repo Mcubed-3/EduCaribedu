@@ -12,6 +12,7 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5-mini").strip()
 
+
 ACTIVITY_LABELS = {
     "mixed_quiz": "Mixed Quiz",
     "mcq": "Multiple Choice Quiz",
@@ -26,215 +27,177 @@ ACTIVITY_LABELS = {
 }
 
 
-def _fallback_items(activity_type: str, topic: str, subject: str, count: int) -> List[str]:
-    if activity_type == "mcq":
-        return [
-            f"{i}. Write a multiple-choice question about {topic} in {subject} with four options."
-            for i in range(1, count + 1)
-        ]
-    if activity_type == "word_search":
-        return [
-            f"Target vocabulary for {topic}: key term {i}" for i in range(1, min(count, 10) + 1)
-        ]
-    if activity_type == "crossword":
-        return [
-            f"Clue {i}: vocabulary clue for {topic} in {subject}" for i in range(1, count + 1)
-        ]
-    return [f"{i}. Create a classroom-ready prompt about {topic} for {subject}." for i in range(1, count + 1)]
+# ----------------------------
+# 🔥 NEW: EXTRACT LESSON DATA
+# ----------------------------
+def _extract_lesson_context(payload: Dict[str, Any]) -> Dict[str, Any]:
+    lesson_payload = payload.get("lesson_payload")
+
+    if lesson_payload and isinstance(lesson_payload, dict):
+        lesson = lesson_payload.get("lesson", {})
+
+        return {
+            "curriculum": lesson.get("curriculum", ""),
+            "subject": lesson.get("subject", ""),
+            "grade_level": lesson.get("grade_level", ""),
+            "topic": lesson.get("topic", ""),
+            "objectives": lesson.get("objectives", []),
+            "sections": lesson.get("sections", {}),
+        }
+
+    # fallback (old system)
+    return {
+        "curriculum": payload.get("curriculum", ""),
+        "subject": payload.get("subject", ""),
+        "grade_level": payload.get("grade_level", ""),
+        "topic": payload.get("topic", ""),
+        "objectives": [],
+        "sections": {},
+    }
 
 
-def _fallback_grid(words: List[str], width: int = 10) -> List[str]:
-    rows = []
-    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    for i in range(max(8, min(12, len(words) + 2))):
-        row = "".join(alphabet[(i * 3 + j) % len(alphabet)] for j in range(width))
-        rows.append(row)
-    return rows
-
-
+# ----------------------------
+# 🔥 STRICT PROMPT (FIXED)
+# ----------------------------
 PROMPT_TEMPLATE = """
-Create a classroom-ready activity sheet as JSON.
+You are generating a classroom activity STRICTLY aligned to the lesson provided.
 
-Return ONLY valid JSON with this exact shape:
+⚠️ CRITICAL RULES:
+- ONLY generate content related to the lesson topic
+- DO NOT include unrelated subjects (NO maths, NO grammar, NO random science)
+- ALL questions must directly match the lesson content
+- Use the objectives and lesson sections to guide the activity
+
+Return ONLY valid JSON:
+
 {{
   "title": "string",
-  "student_instructions": ["string", "string"],
-  "worksheet_items": ["string", "string"],
+  "student_instructions": ["string"],
+  "worksheet_items": ["string"],
   "answer_key": ["string"],
   "mark_scheme": ["string"],
-  "teacher_notes": ["string"],
-  "table_headers": ["string"],
-  "table_rows": [["string", "string"]],
-  "puzzle_grid": ["ABCDEFGHIJ"],
-  "word_bank": ["string"],
-  "lesson_snippet": ["string", "string"]
+  "teacher_notes": ["string"]
 }}
 
-Rules:
-- Activity type: {activity_type_label}
-- Curriculum: {curriculum}
-- Subject: {subject}
-- Grade/Level: {grade_level}
-- Topic: {topic}
-- Difficulty: {difficulty}
-- Number of items: {question_count}
-- Duration: {duration_minutes} minutes
-- Include answer key: {include_answer_key}
-- Include mark scheme: {include_mark_scheme}
-- Additional notes: {additional_notes}
-- Use the lesson text for alignment when provided.
-- If the activity is math_problem_solving, include meaningful table headers and rows when useful.
-- If the activity is case_study, include a short scenario followed by questions.
-- If the activity is crossword or word_search, include a word_bank and puzzle_grid.
-- lesson_snippet should be a short embedded task that can be inserted into a lesson plan.
-- Keep worksheet_items concise and printable.
-- If a field is not needed, return an empty list.
+Lesson Details:
+Subject: {subject}
+Topic: {topic}
+Grade: {grade_level}
+Curriculum: {curriculum}
 
-Lesson text:
-{lesson_text}
+Objectives:
+{objectives}
+
+Lesson Sections:
+{sections}
+
+Activity Type: {activity_type}
+Number of items: {count}
+
+Make it:
+- Relevant to Caribbean context where possible
+- Appropriate for the grade level
+- Practical and classroom-ready
 """.strip()
 
 
-def _to_text(data: Dict[str, Any], activity_type: str) -> str:
+# ----------------------------
+# FORMAT OUTPUT
+# ----------------------------
+def _to_text(data: Dict[str, Any]) -> str:
     lines: List[str] = []
-    lines.append(data.get("title") or ACTIVITY_LABELS.get(activity_type, "Activity Sheet"))
+
+    lines.append(data.get("title", "Activity"))
     lines.append("")
 
-    instructions = data.get("student_instructions") or []
-    if instructions:
+    if data.get("student_instructions"):
         lines.append("Student Instructions:")
-        for item in instructions:
-            lines.append(f"- {item}")
+        for i in data["student_instructions"]:
+            lines.append(f"- {i}")
         lines.append("")
 
-    items = data.get("worksheet_items") or []
-    if items:
-        lines.append("Activity Items:")
-        for item in items:
+    if data.get("worksheet_items"):
+        lines.append("Activity:")
+        for item in data["worksheet_items"]:
             lines.append(str(item))
         lines.append("")
 
-    headers = data.get("table_headers") or []
-    rows = data.get("table_rows") or []
-    if headers and rows:
-        lines.append("Table Activity:")
-        lines.append(" | ".join(headers))
-        lines.append(" | ".join(["---"] * len(headers)))
-        for row in rows:
-            lines.append(" | ".join(str(cell) for cell in row))
-        lines.append("")
-
-    word_bank = data.get("word_bank") or []
-    if word_bank:
-        lines.append("Word Bank:")
-        lines.append(", ".join(word_bank))
-        lines.append("")
-
-    grid = data.get("puzzle_grid") or []
-    if grid:
-        lines.append("Puzzle Grid:")
-        for row in grid:
-            lines.append(str(row))
-        lines.append("")
-
-    answer_key = data.get("answer_key") or []
-    if answer_key:
+    if data.get("answer_key"):
         lines.append("Answer Key:")
-        for item in answer_key:
-            lines.append(f"- {item}")
+        for i in data["answer_key"]:
+            lines.append(f"- {i}")
         lines.append("")
 
-    mark_scheme = data.get("mark_scheme") or []
-    if mark_scheme:
+    if data.get("mark_scheme"):
         lines.append("Mark Scheme:")
-        for item in mark_scheme:
-            lines.append(f"- {item}")
+        for i in data["mark_scheme"]:
+            lines.append(f"- {i}")
         lines.append("")
 
-    teacher_notes = data.get("teacher_notes") or []
-    if teacher_notes:
+    if data.get("teacher_notes"):
         lines.append("Teacher Notes:")
-        for item in teacher_notes:
-            lines.append(f"- {item}")
+        for i in data["teacher_notes"]:
+            lines.append(f"- {i}")
 
     return "\n".join(lines).strip()
 
 
+# ----------------------------
+# MAIN GENERATOR
+# ----------------------------
 def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
+    ctx = _extract_lesson_context(payload)
+
     activity_type = payload["activity_type"]
-    title = f"{ACTIVITY_LABELS.get(activity_type, 'Activity Sheet')} - {payload['topic']}"
+    count = payload.get("item_count", 8)
+
+    title = f"{ACTIVITY_LABELS.get(activity_type, 'Activity')} - {ctx['topic']}"
 
     if not OPENAI_API_KEY:
-        words = [payload["topic"].upper(), payload["subject"].upper(), payload["curriculum"].upper()]
-        data = {
-            "title": title,
-            "student_instructions": [
-                f"Complete this {ACTIVITY_LABELS.get(activity_type, 'activity').lower()} based on {payload['topic']}.",
-                "Use your lesson notes and class discussion to help you.",
-            ],
-            "worksheet_items": _fallback_items(activity_type, payload["topic"], payload["subject"], payload["question_count"]),
-            "answer_key": ["Teacher-generated answer key unavailable in fallback mode."],
-            "mark_scheme": ["Award marks for accuracy, relevance, and clear working where appropriate."] if payload.get("include_mark_scheme") else [],
-            "teacher_notes": ["Fallback mode was used because OPENAI_API_KEY is not configured."],
-            "table_headers": ["Question", "Student Response"] if activity_type in {"math_problem_solving", "case_study"} else [],
-            "table_rows": [[f"Task {i}", ""] for i in range(1, min(payload["question_count"], 6) + 1)] if activity_type in {"math_problem_solving", "case_study"} else [],
-            "puzzle_grid": _fallback_grid(words) if activity_type in {"word_search", "crossword"} else [],
-            "word_bank": words if activity_type in {"word_search", "crossword"} else [],
-            "lesson_snippet": [
-                f"Embedded activity: use a short {ACTIVITY_LABELS.get(activity_type, 'activity').lower()} on {payload['topic']}.",
-                "Review answers as a class during plenary or independent practice.",
-            ],
-        }
         return {
-            "title": data["title"],
+            "title": title,
             "activity_type": activity_type,
-            "content": _to_text(data, activity_type),
-            "lesson_snippet": "\n".join(f"- {item}" for item in data.get("lesson_snippet", [])),
-            "raw": data,
+            "content": f"Fallback activity for {ctx['topic']}",
+            "lesson_snippet": "",
+            "raw": {},
         }
 
     client = OpenAI(api_key=OPENAI_API_KEY)
+
     prompt = PROMPT_TEMPLATE.format(
-        activity_type_label=ACTIVITY_LABELS.get(activity_type, activity_type),
-        curriculum=payload["curriculum"],
-        subject=payload["subject"],
-        grade_level=payload["grade_level"],
-        topic=payload["topic"],
-        difficulty=payload.get("difficulty", "Intermediate"),
-        question_count=payload.get("question_count", 6),
-        duration_minutes=payload.get("duration_minutes", 20),
-        include_answer_key=str(payload.get("include_answer_key", True)),
-        include_mark_scheme=str(payload.get("include_mark_scheme", False)),
-        additional_notes=payload.get("additional_notes", ""),
-        lesson_text=payload.get("lesson_text", "")[:6000],
+        subject=ctx["subject"],
+        topic=ctx["topic"],
+        grade_level=ctx["grade_level"],
+        curriculum=ctx["curriculum"],
+        objectives="\n".join(f"- {o}" for o in ctx["objectives"]),
+        sections=json.dumps(ctx["sections"], indent=2),
+        activity_type=ACTIVITY_LABELS.get(activity_type, activity_type),
+        count=count,
     )
 
-    response = client.responses.create(model=OPENAI_MODEL, input=prompt)
+    response = client.responses.create(
+        model=OPENAI_MODEL,
+        input=prompt,
+    )
+
     raw_text = getattr(response, "output_text", "").strip()
-    if not raw_text:
-        raise RuntimeError("No activity content was returned by the AI service.")
 
     try:
         data = json.loads(raw_text)
-    except json.JSONDecodeError:
+    except:
         data = {
             "title": title,
-            "student_instructions": ["Use the generated activity below."],
+            "student_instructions": ["Complete the activity below."],
             "worksheet_items": [raw_text],
             "answer_key": [],
             "mark_scheme": [],
             "teacher_notes": [],
-            "table_headers": [],
-            "table_rows": [],
-            "puzzle_grid": [],
-            "word_bank": [],
-            "lesson_snippet": ["Use the full generated activity as an extension or homework task."],
         }
 
     return {
-        "title": data.get("title") or title,
+        "title": data.get("title", title),
         "activity_type": activity_type,
-        "content": _to_text(data, activity_type),
-        "lesson_snippet": "\n".join(f"- {item}" for item in (data.get("lesson_snippet") or [])),
+        "content": _to_text(data),
+        "lesson_snippet": "",
         "raw": data,
     }
