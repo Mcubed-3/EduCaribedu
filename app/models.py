@@ -4,6 +4,10 @@ from typing import Any, Dict, Literal, Optional
 from pydantic import BaseModel, Field
 
 
+# ----------------------------
+# LESSON + OBJECTIVES
+# ----------------------------
+
 class ObjectiveRequest(BaseModel):
     curriculum: str
     subject: str
@@ -29,11 +33,21 @@ class LessonRequest(BaseModel):
     resources: str = ""
 
 
+# ----------------------------
+# ✅ FIXED ACTIVITY MODEL
+# ----------------------------
+
 class ActivityRequest(BaseModel):
-    curriculum: str
-    subject: str
-    grade_level: str
-    topic: str
+    # ✅ NEW (frontend uses this)
+    lesson_payload: Optional[Dict[str, Any]] = None
+
+    # fallback support (old system)
+    curriculum: Optional[str] = None
+    subject: Optional[str] = None
+    grade_level: Optional[str] = None
+    topic: Optional[str] = None
+
+    # activity config
     activity_type: Literal[
         "mixed_quiz",
         "mcq",
@@ -46,19 +60,43 @@ class ActivityRequest(BaseModel):
         "exit_ticket",
         "homework_sheet",
     ]
+
     difficulty: str = "Intermediate"
-    question_count: int = Field(default=6, ge=3, le=20)
+
+    # ✅ MATCH FRONTEND
+    item_count: int = Field(default=8, ge=3, le=20)
+
     include_answer_key: bool = True
     include_mark_scheme: bool = False
+
+    # optional extras
     integrate_into_lesson: bool = False
     duration_minutes: int = Field(default=20, ge=5, le=120)
     lesson_text: str = ""
     additional_notes: str = ""
 
+    # 🔥 BACKWARD COMPATIBILITY
+    question_count: Optional[int] = None
+
+    def get_count(self) -> int:
+        """
+        Ensures compatibility between old (question_count)
+        and new (item_count) frontend.
+        """
+        return self.item_count or self.question_count or 8
+
+
+# ----------------------------
+# PAYMENTS
+# ----------------------------
 
 class CheckoutSessionRequest(BaseModel):
     target_plan: Literal["pro", "plus"] = "pro"
 
+
+# ----------------------------
+# LESSON STORAGE
+# ----------------------------
 
 class SaveLessonRequest(BaseModel):
     lesson_payload: Dict[str, Any]
@@ -68,10 +106,18 @@ class UpdateLessonRequest(BaseModel):
     lesson_payload: Dict[str, Any]
 
 
+# ----------------------------
+# EXPORT
+# ----------------------------
+
 class ExportRequest(BaseModel):
     title: str
     content: str
 
+
+# ----------------------------
+# ADMIN
+# ----------------------------
 
 class AdminFrameworkRequest(BaseModel):
     framework: Dict[str, Any]
