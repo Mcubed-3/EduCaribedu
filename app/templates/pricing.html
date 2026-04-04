@@ -16,44 +16,44 @@
 <body class="pricing-body">
   <div class="pricing-shell">
     <header class="pricing-topbar">
-      <a href="/" class="brand-lockup">
-        <div class="brand-mark-wrap">
-          <img src="/favicon.png" alt="EduCarib AI logo" class="brand-mark-img" />
+      <a href="/" class="pricing-brand-lockup">
+        <div class="pricing-brand-icon-wrap">
+          <img src="/favicon.png" alt="EduCarib AI logo" class="pricing-brand-icon" />
         </div>
-        <div class="brand-copy-wrap">
-          <div class="brand-title">EduCarib AI</div>
-          <div class="brand-subtitle">Curriculum-aware planning for Caribbean classrooms.</div>
+        <div>
+          <div class="pricing-brand-name">EduCarib AI</div>
+          <div class="pricing-brand-subtitle">Curriculum-aware planning for Caribbean classrooms.</div>
         </div>
       </a>
 
-      <div class="pricing-top-actions">
+      <div class="pricing-topbar-actions">
         <a href="/" class="btn btn-secondary btn-link">Dashboard</a>
         <a href="/logout" class="btn btn-secondary btn-link">Log out</a>
       </div>
     </header>
 
-    <section class="pricing-hero-card">
-      <div class="hero-kicker">Pricing</div>
+    <section class="pricing-hero">
+      <div class="section-kicker">Pricing</div>
       <h1>Choose the workflow that fits your teaching</h1>
       <p>
         Start free for light use, move to Pro Teacher for unlimited lesson planning,
         or choose Pro Teacher Plus for lesson-linked classroom activities and downloadable worksheets.
       </p>
 
-      <div class="pricing-account-pill">
+      <div class="pricing-current-pill">
         <strong>{{ current_user.plan|upper }}</strong>
         <span>{{ plan_status.subscription_status|capitalize }}</span>
       </div>
     </section>
 
-    <section class="pricing-card-grid">
-      <article class="pricing-plan-card {% if current_user.plan == 'free' %}pricing-plan-active{% endif %}">
-        <div class="pricing-plan-badge">Free</div>
+    <section class="pricing-grid">
+      <article class="plan-card {% if current_user.plan == 'free' %}plan-card-active{% endif %}">
+        <div class="plan-badge">Free</div>
         <h2>Start free</h2>
-        <div class="pricing-amount">US$0 <span>/ month</span></div>
-        <p class="pricing-copy">Best for testing the platform and generating a limited number of lessons each month.</p>
+        <div class="plan-price">US$0 <span>/ month</span></div>
+        <p class="plan-copy">Best for trying the platform and generating a limited number of lessons each month.</p>
 
-        <ul class="pricing-feature-list">
+        <ul class="plan-features">
           <li>10 lesson generations each month</li>
           <li>5 saved lessons</li>
           <li>PDF export included</li>
@@ -62,18 +62,18 @@
           <li>Ads shown on free</li>
         </ul>
 
-        <button type="button" class="btn btn-secondary pricing-btn" id="downgradeBtn" {% if current_user.plan == "free" %}disabled{% endif %}>
+        <button type="button" class="btn btn-secondary pricing-action-btn" id="downgradeBtn" {% if current_user.plan == "free" %}disabled{% endif %}>
           {% if current_user.plan == "free" %}Current plan{% else %}Switch to Free{% endif %}
         </button>
       </article>
 
-      <article class="pricing-plan-card pricing-plan-featured {% if current_user.plan == 'pro' %}pricing-plan-active{% endif %}">
-        <div class="pricing-plan-badge pricing-badge-popular">Most popular</div>
+      <article class="plan-card plan-card-featured {% if current_user.plan == 'pro' %}plan-card-active{% endif %}">
+        <div class="plan-badge plan-badge-popular">Most popular</div>
         <h2>Pro Teacher</h2>
-        <div class="pricing-amount">US$10 <span>/ month</span></div>
-        <p class="pricing-copy">Built for teachers who plan regularly and need unlimited lessons, premium exports, and a smoother workflow.</p>
+        <div class="plan-price">US$10 <span>/ month</span></div>
+        <p class="plan-copy">Built for teachers who plan regularly and need unlimited lessons, premium exports, and a smoother workflow.</p>
 
-        <ul class="pricing-feature-list">
+        <ul class="plan-features">
           <li>Unlimited lesson generations</li>
           <li>Unlimited saved lessons</li>
           <li>PDF and DOCX export</li>
@@ -82,23 +82,23 @@
         </ul>
 
         {% if current_user.plan == "pro" %}
-          <button type="button" class="btn btn-primary pricing-btn" disabled>Current plan</button>
-          <button type="button" class="btn btn-secondary pricing-btn" id="manageBillingBtn">Manage billing</button>
+          <button type="button" class="btn btn-primary pricing-action-btn" disabled>Current plan</button>
+          <button type="button" class="btn btn-secondary pricing-action-btn" id="manageBillingBtn">Manage billing</button>
         {% elif current_user.plan == "plus" or current_user.plan == "admin" %}
-          <button type="button" class="btn btn-secondary pricing-btn" id="downgradeToProBtn">Switch to Pro Teacher</button>
-          <button type="button" class="btn btn-secondary pricing-btn" id="manageBillingBtn">Manage billing</button>
+          <button type="button" class="btn btn-secondary pricing-action-btn" id="downgradeToProBtn">Switch to Pro Teacher</button>
+          <button type="button" class="btn btn-secondary pricing-action-btn" id="manageBillingBtn">Manage billing</button>
         {% else %}
-          <button type="button" class="btn btn-primary pricing-btn" id="stripeUpgradeBtn" data-plan="pro">Choose Pro Teacher</button>
+          <button type="button" class="btn btn-primary pricing-action-btn" id="stripeUpgradeBtn" data-plan="pro">Choose Pro Teacher</button>
         {% endif %}
       </article>
 
-      <article class="pricing-plan-card {% if current_user.plan == 'plus' or current_user.plan == 'admin' %}pricing-plan-active{% endif %}">
-        <div class="pricing-plan-badge pricing-badge-advanced">Advanced</div>
+      <article class="plan-card {% if current_user.plan == 'plus' or current_user.plan == 'admin' %}plan-card-active{% endif %}">
+        <div class="plan-badge plan-badge-advanced">Advanced</div>
         <h2>Pro Teacher Plus</h2>
-        <div class="pricing-amount">US$15 <span>/ month</span></div>
-        <p class="pricing-copy">For teachers who want lesson planning plus classroom-ready quizzes, puzzles, worksheets, and case-study style activities.</p>
+        <div class="plan-price">US$15 <span>/ month</span></div>
+        <p class="plan-copy">For teachers who want lesson planning plus classroom-ready quizzes, puzzles, worksheets, and case-study style activities.</p>
 
-        <ul class="pricing-feature-list">
+        <ul class="plan-features">
           <li>Everything in Pro Teacher</li>
           <li>Mixed quizzes, MCQ, short answer, essay</li>
           <li>Math problem-solving activities</li>
@@ -108,17 +108,17 @@
         </ul>
 
         {% if current_user.plan == "plus" or current_user.plan == "admin" %}
-          <button type="button" class="btn btn-primary pricing-btn" disabled>Current plan</button>
-          <button type="button" class="btn btn-secondary pricing-btn" id="manageBillingBtn">Manage billing</button>
+          <button type="button" class="btn btn-primary pricing-action-btn" disabled>Current plan</button>
+          <button type="button" class="btn btn-secondary pricing-action-btn" id="manageBillingBtn">Manage billing</button>
         {% else %}
-          <button type="button" class="btn btn-primary pricing-btn" id="stripePlusUpgradeBtn" data-plan="plus">Choose Pro Teacher Plus</button>
+          <button type="button" class="btn btn-primary pricing-action-btn" id="stripePlusUpgradeBtn" data-plan="plus">Choose Pro Teacher Plus</button>
         {% endif %}
       </article>
     </section>
 
-    <section class="pricing-bottom-grid">
+    <section class="pricing-lower-grid">
       <article class="pricing-info-card">
-        <div class="panel-kicker">Plan comparison</div>
+        <div class="section-kicker">Plan comparison</div>
         <h2>See the difference clearly</h2>
 
         <div class="summary-list">
@@ -146,10 +146,10 @@
       </article>
 
       <article class="pricing-info-card">
-        <div class="panel-kicker">Why upgrade</div>
+        <div class="section-kicker">Why upgrade</div>
         <h2>What Pro Teacher Plus adds</h2>
 
-        <ul class="pricing-feature-list pricing-feature-list-spaced">
+        <ul class="plan-features plan-features-spaced">
           <li>Generate activities directly from the lesson you already created</li>
           <li>Offer mixed quizzes, MCQ-only, short-answer, essay, and maths problem-solving tasks</li>
           <li>Create crosswords, word searches, case studies, homework sheets, and exit tickets</li>
