@@ -1,14 +1,33 @@
-function setAdminStatus(msg) {
+function setAdminStatus(msg, kind = "neutral") {
   const el = document.getElementById("adminStatus");
-  if (el) el.textContent = msg;
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.remove("is-error", "is-success");
+  if (kind === "error") el.classList.add("is-error");
+  if (kind === "success") el.classList.add("is-success");
 }
 
 async function fetchJSON(url, options = {}) {
+  const headers = { ...(options.headers || {}) };
+  if (!headers["Content-Type"] && options.body) {
+    headers["Content-Type"] = "application/json";
+  }
+
   const res = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    headers,
+    credentials: "include",
   });
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+
+  if (!res.ok) {
+    let message = `Request failed: ${res.status}`;
+    try {
+      const data = await res.json();
+      if (data.detail) message = data.detail;
+    } catch (_) {}
+    throw new Error(message);
+  }
+
   return await res.json();
 }
 
@@ -57,12 +76,14 @@ function formToFramework() {
   const level = document.getElementById("framework_level").value.trim();
   const strand = document.getElementById("framework_strand").value.trim();
   const topic_group = document.getElementById("framework_topic_group").value.trim();
+
   const bands = document.getElementById("framework_bands").value
     .split(",")
     .map((x) => x.trim())
     .filter(Boolean);
 
   const topic_name = document.getElementById("topic_name").value.trim();
+
   const aliases = document.getElementById("topic_aliases").value
     .split(",")
     .map((x) => x.trim())
@@ -110,6 +131,41 @@ function formToFramework() {
   };
 }
 
+function clearAdminForm() {
+  document.getElementById("adminFrameworkId").value = "";
+  document.getElementById("framework_id").value = "";
+  document.getElementById("framework_curriculum").value = "";
+  document.getElementById("framework_subject").value = "";
+  document.getElementById("framework_level").value = "";
+  document.getElementById("framework_strand").value = "";
+  document.getElementById("framework_topic_group").value = "";
+  document.getElementById("framework_bands").value = "";
+  document.getElementById("topic_name").value = "";
+  document.getElementById("topic_aliases").value = "";
+  document.getElementById("topic_keywords").value = "";
+  document.getElementById("topic_objectives").value = "";
+  document.getElementById("topic_resources").value = "";
+}
+
+function frameworkCardHTML(framework) {
+  const topic = (framework.topics && framework.topics[0]) || {};
+  return `
+    <div class="admin-entry-card">
+      <div class="admin-entry-card-head">
+        <div>
+          <strong>${topic.name || framework.id}</strong>
+          <small>${framework.curriculum} • ${framework.subject} • ${framework.level}</small>
+        </div>
+        <button type="button" class="btn btn-secondary small-btn load-framework-btn" data-id="${framework.id}">Edit</button>
+      </div>
+      <div class="admin-entry-meta">
+        <span>Strand: ${framework.strand || "—"}</span>
+        <span>Topic group: ${framework.topic_group || "—"}</span>
+      </div>
+    </div>
+  `;
+}
+
 async function loadAdminConfig() {
   const config = await fetchJSON("/api/config");
   populateSelect("adminCurriculumFilter", config.curricula, "All curricula");
@@ -131,6 +187,8 @@ async function loadFrameworkList() {
 
   const res = await fetchJSON(`/api/admin/frameworks?${params.toString()}`);
   const container = document.getElementById("adminFrameworkList");
+  if (!container) return;
+
   container.innerHTML = "";
 
   if (!res.frameworks.length) {
@@ -139,92 +197,84 @@ async function loadFrameworkList() {
   }
 
   res.frameworks.forEach((framework) => {
-    const topic = (framework.topics && framework.topics[0]) || {};
-    const card = document.createElement("div");
-    card.className = "saved-lesson-card";
-    card.innerHTML = `
-      <strong>${topic.name || framework.id}</strong>
-      <small>${framework.curriculum} • ${framework.subject} • ${framework.level}</small>
-      <div class="lesson-buttons">
-        <button type="button" class="load-framework-btn secondary small-btn" data-id="${framework.id}">Edit</button>
-      </div>
-      <hr>
-    `;
-    container.appendChild(card);
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = frameworkCardHTML(framework);
+    container.appendChild(wrapper.firstElementChild);
   });
 
   document.querySelectorAll(".load-framework-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      const frameworkId = btn.dataset.id;
-      const res = await fetchJSON(`/api/admin/frameworks/${frameworkId}`);
-      frameworkToForm(res.framework);
-      setAdminStatus("Framework loaded.");
+      try {
+        const frameworkId = btn.dataset.id;
+        const res = await fetchJSON(`/api/admin/frameworks/${frameworkId}`);
+        frameworkToForm(res.framework);
+        setAdminStatus("Framework loaded.", "success");
+      } catch (e) {
+        setAdminStatus(e.message, "error");
+      }
     });
   });
-}
-
-function clearAdminForm() {
-  document.getElementById("adminFrameworkId").value = "";
-  document.getElementById("framework_id").value = "";
-  document.getElementById("framework_curriculum").value = "";
-  document.getElementById("framework_subject").value = "";
-  document.getElementById("framework_level").value = "";
-  document.getElementById("framework_strand").value = "";
-  document.getElementById("framework_topic_group").value = "";
-  document.getElementById("framework_bands").value = "";
-  document.getElementById("topic_name").value = "";
-  document.getElementById("topic_aliases").value = "";
-  document.getElementById("topic_keywords").value = "";
-  document.getElementById("topic_objectives").value = "";
-  document.getElementById("topic_resources").value = "";
 }
 
 async function saveFrameworkChanges() {
   const frameworkId = document.getElementById("adminFrameworkId").value.trim();
   if (!frameworkId) {
-    setAdminStatus("Load an entry first or use Create New Entry.");
+    setAdminStatus("Load an entry first or create a new one.", "error");
     return;
   }
 
-  const framework = formToFramework();
+  try {
+    const framework = formToFramework();
 
-  await fetchJSON(`/api/admin/frameworks/${frameworkId}`, {
-    method: "PUT",
-    body: JSON.stringify({ framework }),
-  });
+    await fetchJSON(`/api/admin/frameworks/${frameworkId}`, {
+      method: "PUT",
+      body: JSON.stringify({ framework }),
+    });
 
-  await loadFrameworkList();
-  setAdminStatus("Framework updated. Engine reloaded automatically.");
+    await loadFrameworkList();
+    setAdminStatus("Framework updated. Engine reloaded automatically.", "success");
+  } catch (e) {
+    setAdminStatus(e.message, "error");
+  }
 }
 
 async function createNewFramework() {
-  const framework = formToFramework();
+  try {
+    const framework = formToFramework();
 
-  const res = await fetchJSON("/api/admin/frameworks", {
-    method: "POST",
-    body: JSON.stringify({ framework }),
-  });
+    const res = await fetchJSON("/api/admin/frameworks", {
+      method: "POST",
+      body: JSON.stringify({ framework }),
+    });
 
-  document.getElementById("adminFrameworkId").value = res.framework.id;
-  document.getElementById("framework_id").value = res.framework.id;
-  await loadFrameworkList();
-  setAdminStatus("New framework created. Engine reloaded automatically.");
+    document.getElementById("adminFrameworkId").value = res.framework.id;
+    document.getElementById("framework_id").value = res.framework.id;
+
+    await loadFrameworkList();
+    setAdminStatus("New framework created. Engine reloaded automatically.", "success");
+  } catch (e) {
+    setAdminStatus(e.message, "error");
+  }
 }
 
 async function deleteCurrentFramework() {
   const frameworkId = document.getElementById("adminFrameworkId").value.trim();
   if (!frameworkId) {
-    setAdminStatus("No framework loaded.");
+    setAdminStatus("No framework loaded.", "error");
     return;
   }
 
-  await fetchJSON(`/api/admin/frameworks/${frameworkId}`, {
-    method: "DELETE",
-  });
+  try {
+    await fetchJSON(`/api/admin/frameworks/${frameworkId}`, {
+      method: "DELETE",
+    });
 
-  clearAdminForm();
-  await loadFrameworkList();
-  setAdminStatus("Framework deleted. Engine reloaded automatically.");
+    clearAdminForm();
+    await loadFrameworkList();
+    setAdminStatus("Framework deleted. Engine reloaded automatically.", "success");
+  } catch (e) {
+    setAdminStatus(e.message, "error");
+  }
 }
 
 async function initAdmin() {
@@ -238,13 +288,13 @@ async function initAdmin() {
     document.getElementById("deleteFrameworkBtn")?.addEventListener("click", deleteCurrentFramework);
     document.getElementById("newFrameworkBtn")?.addEventListener("click", () => {
       clearAdminForm();
-      setAdminStatus("Ready to create a new framework entry.");
+      setAdminStatus("Ready to create a new framework entry.", "success");
     });
 
-    setAdminStatus("Admin ready.");
+    setAdminStatus("Curriculum admin ready.", "success");
   } catch (e) {
     console.error(e);
-    setAdminStatus(`Admin failed to load: ${e.message}`);
+    setAdminStatus(`Admin failed to load: ${e.message}`, "error");
   }
 }
 

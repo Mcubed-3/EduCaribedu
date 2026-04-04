@@ -4,48 +4,67 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EduCarib AI - User Management</title>
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
-<body>
-  <div class="page-shell">
+<body class="dashboard-body">
+  <div class="dashboard-shell">
     <aside class="sidebar">
-      <div class="brand-wrap">
-        <div class="brand">EduCarib AI</div>
-        <p class="muted">Admin user management.</p>
+      <div class="brand-card">
+        <a href="/" class="brand-lockup">
+          <div class="brand-mark-wrap">
+            <img src="/static/logo.png" alt="EduCarib AI logo" class="brand-mark-img" />
+          </div>
+          <div class="brand-copy-wrap">
+            <div class="brand-title">EduCarib AI</div>
+            <div class="brand-subtitle">User management workspace</div>
+          </div>
+        </a>
       </div>
 
-      <div class="sidebar-card">
-        <h3>Navigation</h3>
+      <section class="sidebar-card">
+        <div class="sidebar-kicker">Navigation</div>
+        <h3 class="sidebar-title">Admin tools</h3>
         <div class="sidebar-actions">
-          <a href="/" class="nav-link-btn">Back to Dashboard</a>
-          <a href="/admin" class="nav-link-btn">Curriculum Admin</a>
-          <a href="/logout" class="nav-link-btn">Log Out</a>
-        </div>
-      </div>
-    </aside>
-
-    <main class="main">
-      <section class="builder-header">
-        <div>
-          <div class="eyebrow">Admin</div>
-          <h2>User Management</h2>
-          <p class="muted small-text">Manage roles, plans, and billing placeholders.</p>
+          <a href="/" class="btn btn-secondary btn-link">Back to dashboard</a>
+          <a href="/admin" class="btn btn-secondary btn-link">Curriculum admin</a>
+          <a href="/logout" class="btn btn-secondary btn-link">Log out</a>
         </div>
       </section>
+    </aside>
 
-      <section class="builder-grid">
-        <div class="builder-card">
-          <div class="section-head">
-            <h2>Users</h2>
-            <p class="muted small-text">Select a user to update role, plan, and billing data.</p>
-          </div>
-          <div id="adminUserList" class="admin-framework-list"></div>
+    <main class="main-content">
+      <header class="hero-card">
+        <div class="hero-text">
+          <div class="hero-kicker">Admin</div>
+          <h1>User Management</h1>
+          <p>Manage roles, plan access, Stripe billing metadata, and manual billing notes.</p>
         </div>
+      </header>
 
-        <div class="output-card">
-          <div class="section-head">
-            <h2>User Billing Editor</h2>
-            <p class="muted small-text">Manual billing controls before live PayPal integration.</p>
+      <section class="builder-grid admin-builder-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Users</div>
+              <h2>Account list</h2>
+              <p class="muted">Select a user to edit access and billing details.</p>
+            </div>
+          </div>
+
+          <div id="adminUserList" class="admin-list-grid"></div>
+        </article>
+
+        <article class="panel output-panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Billing editor</div>
+              <h2>User access and billing</h2>
+              <p class="muted">Use Stripe-based or manual billing notes. No PayPal wording remains here.</p>
+            </div>
           </div>
 
           <input type="hidden" id="adminUserId" value="" />
@@ -69,12 +88,13 @@
               <select id="user_plan">
                 <option value="free">free</option>
                 <option value="pro">pro</option>
+                <option value="plus">plus</option>
                 <option value="admin">admin</option>
               </select>
             </label>
 
             <label class="field">
-              <span>Subscription Status</span>
+              <span>Subscription status</span>
               <select id="user_subscription_status">
                 <option value="inactive">inactive</option>
                 <option value="trialing">trialing</option>
@@ -85,47 +105,47 @@
             </label>
 
             <label class="field">
-              <span>Payment Provider</span>
-              <input type="text" id="user_payment_provider" placeholder="manual or paypal" />
+              <span>Payment provider</span>
+              <input type="text" id="user_payment_provider" placeholder="manual or stripe" />
             </label>
 
             <label class="field">
-              <span>PayPal Customer ID</span>
-              <input type="text" id="user_paypal_customer_id" placeholder="Optional" />
+              <span>Stripe customer ID</span>
+              <input type="text" id="user_stripe_customer_id" placeholder="Optional" />
             </label>
 
             <label class="field">
-              <span>PayPal Subscription ID</span>
-              <input type="text" id="user_paypal_subscription_id" placeholder="Optional" />
+              <span>Stripe subscription ID</span>
+              <input type="text" id="user_stripe_subscription_id" placeholder="Optional" />
             </label>
 
             <label class="field">
-              <span>Subscription Started At</span>
+              <span>Subscription started at</span>
               <input type="text" id="user_subscription_started_at" placeholder="YYYY-MM-DD or ISO datetime" />
             </label>
 
             <label class="field">
-              <span>Subscription Renews At</span>
+              <span>Subscription renews at</span>
               <input type="text" id="user_subscription_renews_at" placeholder="YYYY-MM-DD or ISO datetime" />
             </label>
 
             <label class="field field-full">
-              <span>Billing Notes</span>
-              <textarea id="user_billing_notes" rows="5" placeholder="Manual billing notes..."></textarea>
+              <span>Billing notes</span>
+              <textarea id="user_billing_notes" rows="5" placeholder="Manual billing notes, access notes, testing notes..."></textarea>
             </label>
 
             <label class="field field-full">
-              <span>Created At</span>
+              <span>Created at</span>
               <input type="text" id="user_created_at" readonly />
             </label>
           </div>
 
           <div class="output-actions">
-            <button type="button" id="saveUserBtn">Save Billing Changes</button>
+            <button type="button" id="saveUserBtn" class="btn btn-primary">Save billing changes</button>
           </div>
 
-          <div id="adminUserStatus" class="status"></div>
-        </div>
+          <div id="adminUserStatus" class="status-box">Ready.</div>
+        </article>
       </section>
     </main>
   </div>

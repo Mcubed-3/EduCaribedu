@@ -4,72 +4,96 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EduCarib AI - Curriculum Admin</title>
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
-<body>
-  <div class="page-shell">
+<body class="dashboard-body">
+  <div class="dashboard-shell">
     <aside class="sidebar">
-      <div class="brand-wrap">
-        <div class="brand">EduCarib AI</div>
-        <p class="muted">Curriculum admin management.</p>
+      <div class="brand-card">
+        <a href="/" class="brand-lockup">
+          <div class="brand-mark-wrap">
+            <img src="/static/logo.png" alt="EduCarib AI logo" class="brand-mark-img" />
+          </div>
+          <div class="brand-copy-wrap">
+            <div class="brand-title">EduCarib AI</div>
+            <div class="brand-subtitle">Curriculum admin workspace</div>
+          </div>
+        </a>
       </div>
 
-      <div class="sidebar-card">
-        <h3>Navigation</h3>
+      <section class="sidebar-card">
+        <div class="sidebar-kicker">Navigation</div>
+        <h3 class="sidebar-title">Admin tools</h3>
         <div class="sidebar-actions">
-          <a href="/" class="nav-link-btn">Back to Dashboard</a>
-          <a href="/admin/users" class="nav-link-btn">User Management</a>
-          <a href="/logout" class="nav-link-btn">Log Out</a>
-          <button type="button" id="newFrameworkBtn">Add New Topic</button>
+          <a href="/" class="btn btn-secondary btn-link">Back to dashboard</a>
+          <a href="/admin/users" class="btn btn-secondary btn-link">User management</a>
+          <a href="/logout" class="btn btn-secondary btn-link">Log out</a>
+          <button type="button" id="newFrameworkBtn" class="btn btn-primary">Add new topic</button>
         </div>
-      </div>
+      </section>
 
-      <div class="sidebar-card">
-        <h3>Filters</h3>
+      <section class="sidebar-card">
+        <div class="sidebar-kicker">Filters</div>
+        <h3 class="sidebar-title">Find curriculum entries</h3>
+
         <div class="admin-filter-grid">
           <label class="field">
             <span>Curriculum</span>
             <select id="adminCurriculumFilter"></select>
           </label>
+
           <label class="field">
             <span>Subject</span>
             <select id="adminSubjectFilter"></select>
           </label>
+
           <label class="field">
             <span>Level</span>
             <select id="adminLevelFilter"></select>
           </label>
+
           <label class="field">
             <span>Search</span>
             <input type="text" id="adminQueryFilter" placeholder="Search topic, strand..." />
           </label>
-          <button type="button" id="applyAdminFiltersBtn" class="secondary">Apply Filters</button>
-        </div>
-      </div>
-    </aside>
 
-    <main class="main">
-      <section class="builder-header">
-        <div>
-          <div class="eyebrow">Admin</div>
-          <h2>Curriculum Management</h2>
-          <p class="muted small-text">Add, edit, and manage curriculum topics without editing JSON manually.</p>
+          <button type="button" id="applyAdminFiltersBtn" class="btn btn-secondary admin-filter-btn">Apply filters</button>
         </div>
       </section>
+    </aside>
 
-      <section class="builder-grid">
-        <div class="builder-card">
-          <div class="section-head">
-            <h2>Curriculum Entries</h2>
-            <p class="muted small-text">Select an entry to edit.</p>
-          </div>
-          <div id="adminFrameworkList" class="admin-framework-list"></div>
+    <main class="main-content">
+      <header class="hero-card">
+        <div class="hero-text">
+          <div class="hero-kicker">Admin</div>
+          <h1>Curriculum Management</h1>
+          <p>Add, edit, and manage curriculum topics without touching raw JSON manually.</p>
         </div>
+      </header>
 
-        <div class="output-card">
-          <div class="section-head">
-            <h2>Framework Editor</h2>
-            <p class="muted small-text">Edit topic name, aliases, keywords, objectives, and resources.</p>
+      <section class="builder-grid admin-builder-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Curriculum entries</div>
+              <h2>Entry list</h2>
+            </div>
+          </div>
+
+          <div id="adminFrameworkList" class="admin-list-grid"></div>
+        </article>
+
+        <article class="panel output-panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Framework editor</div>
+              <h2>Edit curriculum entry</h2>
+              <p class="muted">Update identifiers, topic aliases, objectives, and learning resources.</p>
+            </div>
           </div>
 
           <input type="hidden" id="adminFrameworkId" value="" />
@@ -87,63 +111,63 @@
 
             <label class="field">
               <span>Subject</span>
-              <input type="text" id="framework_subject" placeholder="e.g. Mathematics" />
+              <input type="text" id="framework_subject" placeholder="e.g. Agricultural Science" />
             </label>
 
             <label class="field">
               <span>Level</span>
-              <input type="text" id="framework_level" placeholder="e.g. Grade 3" />
+              <input type="text" id="framework_level" placeholder="e.g. Grade 10" />
             </label>
 
             <label class="field">
               <span>Strand</span>
-              <input type="text" id="framework_strand" placeholder="e.g. Number" />
+              <input type="text" id="framework_strand" placeholder="e.g. Animal Production" />
             </label>
 
             <label class="field">
-              <span>Topic Group</span>
-              <input type="text" id="framework_topic_group" placeholder="e.g. Operations" />
+              <span>Topic group</span>
+              <input type="text" id="framework_topic_group" placeholder="e.g. Livestock" />
             </label>
 
             <label class="field field-full">
               <span>Bands (comma-separated)</span>
-              <input type="text" id="framework_bands" placeholder="e.g. Grade 3, Grade 4" />
+              <input type="text" id="framework_bands" placeholder="e.g. Grade 10, Grade 11" />
             </label>
 
             <label class="field field-full">
-              <span>Topic Name</span>
-              <input type="text" id="topic_name" placeholder="e.g. Addition" />
+              <span>Topic name</span>
+              <input type="text" id="topic_name" placeholder="e.g. Breeds of Cattle in the Caribbean" />
             </label>
 
             <label class="field field-full">
               <span>Aliases (comma-separated)</span>
-              <textarea id="topic_aliases" rows="2" placeholder="e.g. adding, sum, plus"></textarea>
+              <textarea id="topic_aliases" rows="2" placeholder="e.g. cattle breeds, dairy breeds, beef breeds"></textarea>
             </label>
 
             <label class="field field-full">
               <span>Keywords (comma-separated)</span>
-              <textarea id="topic_keywords" rows="3" placeholder="e.g. addition, sum, plus sign, total"></textarea>
+              <textarea id="topic_keywords" rows="3" placeholder="e.g. cattle, breed, dairy, beef, brahman, jersey"></textarea>
             </label>
 
             <label class="field field-full">
               <span>Objectives (one per line, format: text | bloom)</span>
-              <textarea id="topic_objectives" rows="8" placeholder="Add whole numbers accurately using mental and written methods. | Apply"></textarea>
+              <textarea id="topic_objectives" rows="8" placeholder="Explain the characteristics of major Caribbean cattle breeds. | Understand"></textarea>
             </label>
 
             <label class="field field-full">
               <span>Resources (one per line)</span>
-              <textarea id="topic_resources" rows="5" placeholder="Mathematics textbook section on addition"></textarea>
+              <textarea id="topic_resources" rows="5" placeholder="Agricultural Science textbook section on cattle breeds"></textarea>
             </label>
           </div>
 
           <div class="output-actions">
-            <button type="button" id="saveFrameworkBtn">Save Changes</button>
-            <button type="button" id="createFrameworkBtn" class="secondary">Create New Entry</button>
-            <button type="button" id="deleteFrameworkBtn" class="secondary">Delete Entry</button>
+            <button type="button" id="saveFrameworkBtn" class="btn btn-primary">Save changes</button>
+            <button type="button" id="createFrameworkBtn" class="btn btn-secondary">Create new entry</button>
+            <button type="button" id="deleteFrameworkBtn" class="btn btn-secondary">Delete entry</button>
           </div>
 
-          <div id="adminStatus" class="status"></div>
-        </div>
+          <div id="adminStatus" class="status-box">Ready.</div>
+        </article>
       </section>
     </main>
   </div>
