@@ -143,6 +143,18 @@ def init_auth_db() -> None:
         """
     )
 
+        cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS activity_monthly_usage (
+            user_id INTEGER NOT NULL,
+            month_key TEXT NOT NULL,
+            generation_count INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY(user_id, month_key),
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+        """
+    )
+
     existing_cols = {
         row["name"]
         for row in cur.execute("PRAGMA table_info(users)").fetchall()
@@ -468,6 +480,74 @@ def increment_generation_count(user_id: int) -> None:
     conn.commit()
     conn.close()
 
+def get_activity_generation_count(user_id: int, month_key: Optional[str] = None) -> int:
+    month_key = month_key or get_month_key()
+    conn = _get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT generation_count
+        FROM activity_monthly_usage
+        WHERE user_id = ? AND month_key = ?
+        """,
+        (user_id, month_key),
+    )
+    row = cur.fetchone()
+    conn.close()
+    return int(row["generation_count"]) if row else 0
+
+
+def increment_activity_generation_count(user_id: int, month_key: Optional[str] = None) -> int:
+    month_key = month_key or get_month_key()
+    conn = _get_conn()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        INSERT INTO activity_monthly_usage (user_id, month_key, generation_count)
+        VALUES (?, ?, 1)
+        ON CONFLICT(user_id, month_key)
+        DO UPDATE SET generation_count = generation_count + 1
+        """,
+        (user_id, month_key),
+    )
+
+    conn.commit()
+
+    cur.execute(
+        """
+        SELECT generation_count
+        FROM activity_monthly_usage
+        WHERE user_id = ? AND month_key = ?
+        """,
+        (user_id, month_key),
+    )
+    row = cur.fetchone()
+    conn.close()
+    return int(row["generation_count"]) if row else 0
+
+
+def can_generate_activities(user: Dict[str, Any]) -> Dict[str, Any]:
+    limits = get_plan_limits(user["plan"])
+    activity_enabled = bool(limits.get("activity_generation", False))
+
+    used = get_activity_generation_count(user["id"])
+
+    if not activity_enabled:
+        return {
+            "allowed": False,
+            "used": used,
+            "limit": 0,
+            "remaining": 0,
+        }
+
+    return {
+        "allowed": True,
+        "used": used,
+        "limit": None,
+        "remaining": None,
+    }
+
 
 def can_generate_lessons(user: Dict[str, Any]) -> Dict[str, Any]:
     limits = PLAN_LIMITS.get(user["plan"], PLAN_LIMITS["free"])
@@ -507,10 +587,25 @@ def can_generate_activities(user: Dict[str, Any]) -> bool:
     return bool(limits.get("activity_generation", False))
 
 
-def get_plan_status(user: Dict[str, Any], current_saved_count: int) -> Dict[str, Any]:
-    generation_status = can_generate_lessons(user)
-    save_status = can_save_more_lessons(user, current_saved_count)
-    limits = PLAN_LIMITS.get(user["plan"], PLAN_LIMITS["free"])
+def get_plan_status(user: Dict[str, Any], saved_lesson_count: int) -> Dict[str, Any]:
+    generation = can_generate_lessons(user)
+    saved = can_save_more_lessons(user, saved_lesson_count)
+    activity = can_generate_activities(user)
+    limits = get_plan_limits(user["plan"])
+
+    return {
+        "plan": user["plan"],
+        "role": user["role"],
+        "subscription_status": user.get("subscription_status", "inactive"),
+        "payment_provider": user.get("payment_provider", ""),
+        "monthly_generations": generation,
+        "saved_lessons": saved,
+        "activity_generations": activity,
+        "docx_export": limits["docx_export"],
+        "pdf_export": limits["pdf_export"],
+        "ads_enabled": limits["ads_enabled"],
+        "activity_generation": limits.get("activity_generation", False),
+    }
 
     return {
         "monthly_generations": generation_status,
