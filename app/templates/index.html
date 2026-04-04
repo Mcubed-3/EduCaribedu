@@ -337,11 +337,19 @@
 
             <div class="activity-panel">
               <div class="panel-kicker">Optional extension</div>
-              <h3>Generate a classroom activity from this lesson</h3>
-              <p class="muted">Create quizzes, short responses, essays, case studies, exit tickets, homework sheets, and maths problem-solving tasks after generating a lesson.</p>
+              <h3>Generate a classroom activity</h3>
+              <p class="muted">Create activities from the current lesson or generate one as a standalone classroom resource.</p>
 
               {% if current_user.plan == "plus" or current_user.role == "admin" %}
               <div class="activity-grid">
+                <label class="field">
+                  <span>Activity source</span>
+                  <select id="activity_source_mode" name="activity_source_mode">
+                    <option value="lesson">Use current lesson</option>
+                    <option value="standalone">Standalone activity</option>
+                  </select>
+                </label>
+
                 <label class="field">
                   <span>Activity type</span>
                   <select id="activity_type" name="activity_type">
@@ -377,6 +385,31 @@
                     <option value="yes">Yes</option>
                   </select>
                 </label>
+
+                <label class="field">
+                  <span>Standalone curriculum</span>
+                  <select id="activity_curriculum" name="activity_curriculum"></select>
+                </label>
+
+                <label class="field">
+                  <span>Standalone subject</span>
+                  <select id="activity_subject" name="activity_subject"></select>
+                </label>
+
+                <label class="field">
+                  <span>Standalone grade / level</span>
+                  <select id="activity_grade_level" name="activity_grade_level"></select>
+                </label>
+
+                <label class="field">
+                  <span>Standalone difficulty</span>
+                  <select id="activity_difficulty" name="activity_difficulty"></select>
+                </label>
+
+                <label class="field field-full">
+                  <span>Standalone topic</span>
+                  <input type="text" id="activity_topic" name="activity_topic" placeholder="e.g. Breeds of Cattle in the Caribbean" />
+                </label>
               </div>
 
               <div class="action-row">
@@ -390,7 +423,7 @@
               {% else %}
               <div class="locked-card">
                 <strong>Activity generation is available on Pro Teacher Plus.</strong>
-                <p>Generate quizzes, case studies, exit tickets, homework sheets, and worksheet-style activities from the lesson you already created.</p>
+                <p>Generate quizzes, case studies, exit tickets, homework sheets, and worksheet-style activities from a lesson or as standalone classroom resources.</p>
                 <a href="/pricing" class="btn btn-primary btn-link">See Plus plan</a>
               </div>
               {% endif %}

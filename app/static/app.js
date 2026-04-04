@@ -1,6 +1,7 @@
 let currentLessonData = null;
 let currentUserContext = null;
 let currentActivityText = "";
+let currentConfig = null;
 
 function byId(id) {
   return document.getElementById(id);
@@ -150,10 +151,7 @@ function renderLesson(data) {
 }
 
 function updateDashboardStats(summary) {
-  const ids = [
-    ["savedCount", summary.saved_count ?? 0],
-  ];
-
+  const ids = [["savedCount", summary.saved_count ?? 0]];
   ids.forEach(([id, value]) => {
     const el = byId(id);
     if (el) el.textContent = value;
@@ -388,19 +386,40 @@ function clearBuilderForm() {
   setStatus("Ready for a new lesson.", "success");
 }
 
+function getActivitySourceMode() {
+  return byId("activity_source_mode")?.value || "lesson";
+}
+
 function activityPayload() {
-  return {
-    lesson_payload: currentLessonData,
+  const sourceMode = getActivitySourceMode();
+
+  const base = {
     activity_type: byId("activity_type")?.value || "",
     item_count: Number(byId("activity_item_count")?.value || 8),
     include_answer_key: (byId("activity_answer_key")?.value || "yes") === "yes",
     include_mark_scheme: (byId("activity_mark_scheme")?.value || "no") === "yes",
+    source_mode: sourceMode,
+  };
+
+  if (sourceMode === "lesson") {
+    return {
+      ...base,
+      lesson_payload: currentLessonData,
+    };
+  }
+
+  return {
+    ...base,
+    curriculum: byId("activity_curriculum")?.value || "",
+    subject: byId("activity_subject")?.value || "",
+    grade_level: byId("activity_grade_level")?.value || "",
+    difficulty: byId("activity_difficulty")?.value || "",
+    topic: byId("activity_topic")?.value || "",
   };
 }
 
 function formatActivityContent(content) {
   if (content == null) return "";
-
   if (typeof content === "string") return content;
 
   if (Array.isArray(content)) {
@@ -435,13 +454,8 @@ function formatActivityItem(item, index = 0) {
     return `${index + 1}. ${item}`;
   }
 
-  if (item == null) {
-    return `${index + 1}.`;
-  }
-
-  if (typeof item !== "object") {
-    return `${index + 1}. ${String(item)}`;
-  }
+  if (item == null) return `${index + 1}.`;
+  if (typeof item !== "object") return `${index + 1}. ${String(item)}`;
 
   const lines = [];
   const prompt =
@@ -461,17 +475,9 @@ function formatActivityItem(item, index = 0) {
     });
   }
 
-  if (item.answer) {
-    lines.push(`   Answer: ${formatActivityValue(item.answer)}`);
-  }
-
-  if (item.mark_scheme) {
-    lines.push(`   Mark Scheme: ${formatActivityValue(item.mark_scheme)}`);
-  }
-
-  if (item.explanation) {
-    lines.push(`   Explanation: ${formatActivityValue(item.explanation)}`);
-  }
+  if (item.answer) lines.push(`   Answer: ${formatActivityValue(item.answer)}`);
+  if (item.mark_scheme) lines.push(`   Mark Scheme: ${formatActivityValue(item.mark_scheme)}`);
+  if (item.explanation) lines.push(`   Explanation: ${formatActivityValue(item.explanation)}`);
 
   return lines.join("\n");
 }
@@ -498,21 +504,59 @@ function toTitle(value) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-async function generateActivity() {
-  if (!currentLessonData) {
-    setStatus("Generate a lesson first before creating an activity.", "error");
-    return;
-  }
+function updateActivityModeUI() {
+  const mode = getActivitySourceMode();
+  const standaloneIds = [
+    "activity_curriculum",
+    "activity_subject",
+    "activity_grade_level",
+    "activity_difficulty",
+    "activity_topic",
+  ];
 
+  standaloneIds.forEach((id) => {
+    const el = byId(id);
+    if (!el) return;
+    const wrapper = el.closest(".field");
+    if (!wrapper) return;
+    wrapper.style.display = mode === "standalone" ? "" : "none";
+  });
+
+  const insertBtn = byId("insertActivitySnippetBtn");
+  if (insertBtn) {
+    insertBtn.style.display = mode === "lesson" ? "" : "none";
+  }
+}
+
+async function generateActivity() {
   if (!canGenerateActivities()) {
     showUpgradeModal();
     return;
   }
 
+  const mode = getActivitySourceMode();
   const activityType = byId("activity_type")?.value || "";
   if (!activityType) {
     setStatus("Select an activity type first.", "error");
     return;
+  }
+
+  if (mode === "lesson" && !currentLessonData) {
+    setStatus("Generate or load a lesson first, or switch to standalone activity.", "error");
+    return;
+  }
+
+  if (mode === "standalone") {
+    const curriculum = byId("activity_curriculum")?.value || "";
+    const subject = byId("activity_subject")?.value || "";
+    const gradeLevel = byId("activity_grade_level")?.value || "";
+    const difficulty = byId("activity_difficulty")?.value || "";
+    const topic = byId("activity_topic")?.value || "";
+
+    if (!curriculum || !subject || !gradeLevel || !difficulty || !topic.trim()) {
+      setStatus("Complete all standalone activity fields first.", "error");
+      return;
+    }
   }
 
   setStatus("Generating activity...");
@@ -563,6 +607,7 @@ function insertActivitySnippetIntoLesson() {
 
 async function loadConfig() {
   const config = await fetchJSON("/api/config");
+  currentConfig = config;
 
   populateSelect("curriculum", config.curricula, "Select curriculum...");
   populateSelect("subject", config.subjects, "Select subject...");
@@ -570,6 +615,11 @@ async function loadConfig() {
   populateSelect("structure", config.structures, "Select structure...");
   populateSelect("difficulty", config.difficulties, "Select difficulty...");
   populateSelect("lesson_type", config.lesson_types, "Select lesson type...");
+
+  populateSelect("activity_curriculum", config.curricula, "Select curriculum...");
+  populateSelect("activity_subject", config.subjects, "Select subject...");
+  populateSelect("activity_grade_level", config.levels, "Select grade/level...");
+  populateSelect("activity_difficulty", config.difficulties, "Select difficulty...");
 }
 
 async function init() {
@@ -671,12 +721,15 @@ async function init() {
       scrollToBuilder();
     });
 
+    byId("activity_source_mode")?.addEventListener("change", updateActivityModeUI);
+
     byId("closeUpgradeModal")?.addEventListener("click", hideUpgradeModal);
     byId("dismissUpgradeModal")?.addEventListener("click", hideUpgradeModal);
 
     const output = byId("output");
     if (output) output.readOnly = true;
 
+    updateActivityModeUI();
     setStatus("Ready.");
   } catch (e) {
     console.error("Init failed:", e);
