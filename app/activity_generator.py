@@ -52,7 +52,7 @@ def _extract_lesson_context(payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-PROMPT_TEMPLATE = """
+PROMPT_TEMPLATE = r"""
 You are generating a classroom activity STRICTLY aligned to the teaching context provided.
 
 CRITICAL RULES:
@@ -63,6 +63,13 @@ CRITICAL RULES:
 - If include_mark_scheme is false, DO NOT return any mark scheme
 - DO NOT return teacher notes
 - DO NOT include a teacher notes section in any form
+- For ALL mathematics, use LaTeX delimiters
+- Inline maths must use \( ... \)
+- Display maths must use \[ ... \]
+- Fractions must use \frac{a}{b}
+- Powers must use x^2 or x^{10}
+- Square roots must use \sqrt{x}
+- Do not write maths only as plain text if proper notation is needed
 
 Return ONLY valid JSON:
 
@@ -161,9 +168,7 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
     objectives_text = "- None provided"
     if ctx["objectives"]:
         if isinstance(ctx["objectives"][0], dict):
-            objectives_text = "\n".join(
-                f"- {obj.get('text', '')}" for obj in ctx["objectives"]
-            )
+            objectives_text = "\n".join(f"- {obj.get('text', '')}" for obj in ctx["objectives"])
         else:
             objectives_text = "\n".join(f"- {obj}" for obj in ctx["objectives"])
 

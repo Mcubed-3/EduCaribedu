@@ -19,6 +19,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6817907304188010"
      crossorigin="anonymous"></script>
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body class="dashboard-body">
@@ -301,7 +315,7 @@
               <div>
                 <div class="panel-kicker">Lesson output</div>
                 <h2>Editable working draft</h2>
-                <p class="muted">This stays editable so teachers can personalise it before export.</p>
+                <p class="muted">Edit the raw text if needed, then review the rendered preview below for proper maths.</p>
               </div>
 
               <div class="output-actions">
@@ -319,21 +333,12 @@
               </div>
             </div>
 
-            {% if current_user.plan == "free" %}
-            <div class="callout">
-              <strong>Free plan:</strong> Upgrade to Pro Teacher for unlimited lessons and DOCX export. Need classroom activities too? Choose Pro Teacher Plus.
-            </div>
-            {% elif current_user.plan == "pro" %}
-            <div class="callout">
-              <strong>Pro Teacher:</strong> You have premium lesson planning and exports. Upgrade to Plus for quizzes, case studies, exit tickets, and homework sheets.
-            </div>
-            {% else %}
-            <div class="callout">
-              <strong>Pro Teacher Plus:</strong> You have full lesson planning and classroom activity generation access.
-            </div>
-            {% endif %}
+            <textarea id="output" class="output-textarea" rows="18" readonly>Your curriculum-aligned lesson plan will appear here.</textarea>
 
-            <textarea id="output" class="output-textarea" rows="24" readonly>Your curriculum match, objectives and lesson plan will appear here.</textarea>
+            <div class="math-preview-wrap">
+              <div class="panel-kicker">Rendered preview</div>
+              <div id="outputPreview" class="math-preview-box">Generated lesson preview will appear here.</div>
+            </div>
 
             <div class="activity-panel">
               <div class="panel-kicker">Optional extension</div>
@@ -408,7 +413,7 @@
 
                 <label class="field field-full">
                   <span>Standalone topic</span>
-                  <input type="text" id="activity_topic" name="activity_topic" placeholder="e.g. Breeds of Cattle in the Caribbean" />
+                  <input type="text" id="activity_topic" name="activity_topic" placeholder="e.g. Equivalent Fractions" />
                 </label>
               </div>
 
@@ -420,6 +425,11 @@
               </div>
 
               <textarea id="activityOutput" class="output-textarea activity-output" rows="12" readonly>Generated activity content will appear here.</textarea>
+
+              <div class="math-preview-wrap">
+                <div class="panel-kicker">Rendered activity preview</div>
+                <div id="activityPreview" class="math-preview-box">Generated activity preview will appear here.</div>
+              </div>
               {% else %}
               <div class="locked-card">
                 <strong>Activity generation is available on Pro Teacher Plus.</strong>
@@ -443,9 +453,7 @@
         <button id="closeUpgradeModal" class="modal-close">×</button>
       </div>
 
-      <p>
-        You’ve reached your free usage limit. Upgrade to continue. Pro Teacher unlocks unlimited lesson planning. Pro Teacher Plus adds classroom activity generation too.
-      </p>
+      <p>You’ve reached your free usage limit. Upgrade to continue.</p>
 
       <div class="upgrade-benefits">
         <div>✔ Unlimited lesson generation</div>

@@ -1,7 +1,6 @@
 let currentLessonData = null;
 let currentUserContext = null;
 let currentActivityText = "";
-let currentConfig = null;
 
 function byId(id) {
   return document.getElementById(id);
@@ -105,57 +104,9 @@ function populateSelect(id, values, placeholder = "Select...") {
   });
 }
 
-function lessonToText(data) {
-  const lesson = data.lesson;
-  const lines = [];
-
-  lines.push(`${data.title}`);
-  lines.push("");
-  lines.push(`Curriculum: ${lesson.curriculum}`);
-  lines.push(`Subject: ${lesson.subject}`);
-  lines.push(`Grade/Level: ${lesson.grade_level}`);
-  lines.push(`Topic: ${lesson.topic}`);
-  lines.push(`Structure: ${lesson.structure}`);
-  lines.push(`Difficulty: ${lesson.difficulty}`);
-  lines.push(`Generation Mode: ${lesson.generation_mode || "unknown"}`);
-  lines.push("");
-  lines.push("Objectives:");
-  (lesson.objectives || []).forEach((obj, i) => lines.push(`${i + 1}. ${obj}`));
-  lines.push("");
-  lines.push("Prior Knowledge:");
-  (lesson.prior_knowledge_questions || []).forEach((q) => lines.push(`- ${q}`));
-  lines.push("");
-  lines.push("Resources:");
-  (lesson.resources || []).forEach((r) => lines.push(`- ${r}`));
-  lines.push("");
-
-  Object.entries(lesson.sections || {}).forEach(([section, items]) => {
-    lines.push(`${section}:`);
-    (items || []).forEach((item) => lines.push(`- ${item}`));
-    lines.push("");
-  });
-
-  lines.push("Assessment:");
-  (lesson.assessment || []).forEach((item) => lines.push(`- ${item}`));
-  lines.push("");
-  lines.push("Reflection:");
-  (lesson.reflection || []).forEach((item) => lines.push(`- ${item}`));
-
-  return lines.join("\n");
-}
-
-function renderLesson(data) {
-  currentLessonData = data;
-  const output = byId("output");
-  if (output) output.value = lessonToText(data);
-}
-
 function updateDashboardStats(summary) {
-  const ids = [["savedCount", summary.saved_count ?? 0]];
-  ids.forEach(([id, value]) => {
-    const el = byId(id);
-    if (el) el.textContent = value;
-  });
+  const saved = byId("savedCount");
+  if (saved) saved.textContent = summary.saved_count ?? 0;
 
   const recentLessonsList = byId("recentLessonsList");
   if (!recentLessonsList) return;
@@ -246,6 +197,87 @@ async function loadSavedLessons() {
   await loadDashboardSummary();
 }
 
+function lessonToText(data) {
+  const lesson = data.lesson;
+  const lines = [];
+
+  lines.push(`${data.title}`);
+  lines.push("");
+  lines.push(`Curriculum: ${lesson.curriculum}`);
+  lines.push(`Subject: ${lesson.subject}`);
+  lines.push(`Grade/Level: ${lesson.grade_level}`);
+  lines.push(`Topic: ${lesson.topic}`);
+  lines.push(`Structure: ${lesson.structure}`);
+  lines.push(`Difficulty: ${lesson.difficulty}`);
+  lines.push(`Generation Mode: ${lesson.generation_mode || "unknown"}`);
+  lines.push("");
+  lines.push("Objectives:");
+  (lesson.objectives || []).forEach((obj, i) => lines.push(`${i + 1}. ${obj}`));
+  lines.push("");
+  lines.push("Prior Knowledge:");
+  (lesson.prior_knowledge_questions || []).forEach((q) => lines.push(`- ${q}`));
+  lines.push("");
+  lines.push("Resources:");
+  (lesson.resources || []).forEach((r) => lines.push(`- ${r}`));
+  lines.push("");
+
+  Object.entries(lesson.sections || {}).forEach(([section, items]) => {
+    lines.push(`${section}:`);
+    (items || []).forEach((item) => lines.push(`- ${item}`));
+    lines.push("");
+  });
+
+  lines.push("Assessment:");
+  (lesson.assessment || []).forEach((item) => lines.push(`- ${item}`));
+  lines.push("");
+  lines.push("Reflection:");
+  (lesson.reflection || []).forEach((item) => lines.push(`- ${item}`));
+
+  return lines.join("\n");
+}
+
+function renderLesson(data) {
+  currentLessonData = data;
+  const raw = lessonToText(data);
+  const output = byId("output");
+  if (output) output.value = raw;
+  renderMathPreview("output", "outputPreview");
+}
+
+function normalizeMathText(text) {
+  if (!text) return "";
+
+  let out = text;
+
+  out = out.replace(/(\d+)\s*\/\s*(\d+)/g, "\\\\(\\\\frac{$1}{$2}\\\\)");
+  out = out.replace(/([A-Za-z0-9\)\]])\^([A-Za-z0-9]+)/g, "\\\\($1^{$2}\\\\)");
+
+  return out;
+}
+
+async function renderMathPreview(textareaId, previewId) {
+  const src = byId(textareaId);
+  const dest = byId(previewId);
+  if (!src || !dest) return;
+
+  const normalized = normalizeMathText(src.value || "");
+  const html = normalized
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>");
+
+  dest.innerHTML = html;
+
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    try {
+      await window.MathJax.typesetPromise([dest]);
+    } catch (e) {
+      console.error("MathJax render failed", e);
+    }
+  }
+}
+
 async function saveCurrentLesson() {
   if (!currentLessonData) {
     setStatus("Generate a lesson first before saving.", "error");
@@ -304,7 +336,7 @@ function toggleEditMode() {
   const output = byId("output");
   if (!output) return;
   output.readOnly = !output.readOnly;
-  setStatus(output.readOnly ? "Edit mode off." : "Edit mode on. You can edit the text area.", "success");
+  setStatus(output.readOnly ? "Edit mode off." : "Edit mode on. Edit the raw text, preview updates below.", "success");
 }
 
 async function downloadExport(format, title, content) {
@@ -334,12 +366,6 @@ async function downloadExport(format, title, content) {
       const data = await res.json();
       if (data.detail) message = data.detail;
     } catch (_) {}
-
-    if ((message || "").toLowerCase().includes("pro plan only")) {
-      showUpgradeModal();
-      return;
-    }
-
     throw new Error(message);
   }
 
@@ -374,7 +400,7 @@ function clearBuilderForm() {
 
   const output = byId("output");
   if (output) {
-    output.value = "Your curriculum match, objectives and lesson plan will appear here.";
+    output.value = "Your curriculum-aligned lesson plan will appear here.";
     output.readOnly = true;
   }
 
@@ -383,6 +409,8 @@ function clearBuilderForm() {
     activityOutput.value = "Generated activity content will appear here.";
   }
 
+  renderMathPreview("output", "outputPreview");
+  renderMathPreview("activityOutput", "activityPreview");
   setStatus("Ready for a new lesson.", "success");
 }
 
@@ -428,19 +456,15 @@ function formatActivityContent(content) {
 
   if (typeof content === "object") {
     if (Array.isArray(content.items)) {
-      return content.items.map((item, index) => formatActivityItem(item, index)).join("\n\n").trim();
+      return content.map((item, index) => formatActivityItem(item, index)).join("\n\n").trim();
     }
 
     if (Array.isArray(content.questions)) {
       return content.questions.map((item, index) => formatActivityItem(item, index)).join("\n\n").trim();
     }
 
-    const filteredEntries = Object.entries(content).filter(([key]) => {
-      const normalized = String(key).toLowerCase();
-      return normalized !== "teacher_notes" && normalized !== "teachernotes";
-    });
-
-    return filteredEntries
+    return Object.entries(content)
+      .filter(([key]) => !["teacher_notes", "teachernotes"].includes(String(key).toLowerCase()))
       .map(([key, value]) => `${toTitle(key)}:\n${formatActivityValue(value)}`)
       .join("\n\n")
       .trim();
@@ -450,10 +474,7 @@ function formatActivityContent(content) {
 }
 
 function formatActivityItem(item, index = 0) {
-  if (typeof item === "string") {
-    return `${index + 1}. ${item}`;
-  }
-
+  if (typeof item === "string") return `${index + 1}. ${item}`;
   if (item == null) return `${index + 1}.`;
   if (typeof item !== "object") return `${index + 1}. ${String(item)}`;
 
@@ -488,10 +509,7 @@ function formatActivityValue(value) {
   if (Array.isArray(value)) return value.map((v) => formatActivityValue(v)).join(", ");
   if (typeof value === "object") {
     return Object.entries(value)
-      .filter(([k]) => {
-        const normalized = String(k).toLowerCase();
-        return normalized !== "teacher_notes" && normalized !== "teachernotes";
-      })
+      .filter(([k]) => !["teacher_notes", "teachernotes"].includes(String(k).toLowerCase()))
       .map(([k, v]) => `${toTitle(k)}: ${formatActivityValue(v)}`)
       .join("; ");
   }
@@ -571,10 +589,9 @@ async function generateActivity() {
     );
 
     const activityOutput = byId("activityOutput");
-    if (activityOutput) {
-      activityOutput.value = currentActivityText || "No activity content returned.";
-    }
+    if (activityOutput) activityOutput.value = currentActivityText || "No activity content returned.";
 
+    await renderMathPreview("activityOutput", "activityPreview");
     await loadCurrentUserContext();
     setStatus("Activity generated.", "success");
   } catch (e) {
@@ -586,7 +603,7 @@ async function generateActivity() {
   }
 }
 
-function insertActivitySnippetIntoLesson() {
+async function insertActivitySnippetIntoLesson() {
   const output = byId("output");
   if (!output) return;
 
@@ -602,12 +619,12 @@ function insertActivitySnippetIntoLesson() {
 
   const snippet = `\n\nClassroom Activity:\n${cleaned}\n`;
   output.value = `${output.value}${snippet}`;
+  await renderMathPreview("output", "outputPreview");
   setStatus("Activity inserted into lesson.", "success");
 }
 
 async function loadConfig() {
   const config = await fetchJSON("/api/config");
-  currentConfig = config;
 
   populateSelect("curriculum", config.curricula, "Select curriculum...");
   populateSelect("subject", config.subjects, "Select subject...");
@@ -661,6 +678,9 @@ async function init() {
     byId("updateLessonBtn")?.addEventListener("click", updateCurrentLesson);
     byId("toggleEditBtn")?.addEventListener("click", toggleEditMode);
 
+    byId("output")?.addEventListener("input", () => renderMathPreview("output", "outputPreview"));
+    byId("activityOutput")?.addEventListener("input", () => renderMathPreview("activityOutput", "activityPreview"));
+
     byId("refreshLessonsBtn")?.addEventListener("click", async () => {
       try {
         await loadCurrentUserContext();
@@ -697,7 +717,7 @@ async function init() {
 
     byId("exportActivityPdfBtn")?.addEventListener("click", async () => {
       try {
-        await downloadExport("pdf", "Classroom Activity", currentActivityText);
+        await downloadExport("pdf", "Classroom Activity", byId("activityOutput")?.value || "");
       } catch (e) {
         setStatus(e.message, "error");
       }
@@ -705,7 +725,7 @@ async function init() {
 
     byId("exportActivityDocxBtn")?.addEventListener("click", async () => {
       try {
-        await downloadExport("docx", "Classroom Activity", currentActivityText);
+        await downloadExport("docx", "Classroom Activity", byId("activityOutput")?.value || "");
       } catch (e) {
         setStatus(e.message, "error");
       }
@@ -730,6 +750,8 @@ async function init() {
     if (output) output.readOnly = true;
 
     updateActivityModeUI();
+    await renderMathPreview("output", "outputPreview");
+    await renderMathPreview("activityOutput", "activityPreview");
     setStatus("Ready.");
   } catch (e) {
     console.error("Init failed:", e);

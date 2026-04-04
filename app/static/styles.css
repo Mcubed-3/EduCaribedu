@@ -1408,3 +1408,27 @@ textarea:focus {
   height: 100%;
   object-fit: contain;
 }
+.math-preview-wrap {
+  margin-top: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.math-preview-box {
+  min-height: 120px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel-2);
+  padding: 16px;
+  line-height: 1.7;
+  color: var(--text);
+  overflow-x: auto;
+}
+
+.math-preview-box mjx-container {
+  margin: 0.1rem 0.2rem;
+}
+
+.output-textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
