@@ -1359,3 +1359,52 @@ textarea:focus {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
+.auth-brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.auth-brand-icon-wrap {
+  width: 76px;
+  height: 76px;
+  min-width: 76px;
+  border-radius: 22px;
+  background: linear-gradient(145deg, var(--navy), var(--navy-deep));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.auth-brand-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.auth-card-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.auth-card-brand-icon {
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, var(--navy), var(--navy-deep));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.auth-card-brand-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
