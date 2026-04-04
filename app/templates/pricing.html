@@ -4,125 +4,164 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EduCarib AI - Pricing</title>
-  <meta name="google-adsense-account" content="ca-pub-6817907304188010">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6817907304188010"
-     crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
-<body class="pricing-body">
-  <div class="marketing-shell">
-    <header class="marketing-topbar glass-panel">
-      <a href="/" class="brand-lockup no-underline">
-        <div class="brand-mark">EC</div>
+<body>
+  <div class="page-shell">
+    <aside class="sidebar">
+      <div class="brand-wrap">
+        <div class="brand">EduCarib AI</div>
+        <p class="muted">Pricing and subscription upgrades.</p>
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Navigation</h3>
+        <div class="sidebar-actions">
+          <a href="/" class="nav-link-btn">Back to Dashboard</a>
+          <a href="/logout" class="nav-link-btn">Log Out</a>
+        </div>
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Current Plan</h3>
+        <div class="account-chip">
+          <strong>{{ current_user.email }}</strong>
+          <span class="muted">Plan: {{ current_user.plan|upper }}</span>
+          <span class="muted">Status: {{ plan_status.subscription_status }}</span>
+        </div>
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Why upgrade?</h3>
+        <div class="summary-list">
+          <div class="summary-row"><span>Pro Teacher</span><strong>Unlimited lessons</strong></div>
+          <div class="summary-row"><span>Pro Teacher Plus</span><strong>Lesson + activities</strong></div>
+          <div class="summary-row"><span>Worksheet outputs</span><strong>PDF / DOCX</strong></div>
+          <div class="summary-row"><span>Mobile friendly</span><strong>Yes</strong></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="builder-header">
         <div>
-          <div class="brand-title">EduCarib AI</div>
-          <p class="muted brand-copy">Curriculum-aware planning for Caribbean classrooms.</p>
+          <div class="eyebrow">Pricing</div>
+          <h2>Choose a plan that fits your classroom workflow</h2>
+          <p class="muted small-text">Pro Teacher covers lesson planning. Pro Teacher Plus adds AI-generated classroom activities, puzzles, quizzes, case studies, answer keys, and downloadable worksheets.</p>
         </div>
-      </a>
-      <div class="topbar-actions">
-        <a href="/" class="nav-link-btn topbar-link">Dashboard</a>
-        <a href="/logout" class="nav-link-btn topbar-link">Log out</a>
-      </div>
-    </header>
+      </section>
 
-    <section class="pricing-hero glass-panel">
-      <div>
-        <div class="section-kicker">Pricing</div>
-        <h1 class="page-title">Plan faster. Teach better. Save hours every week.</h1>
-        <p class="muted page-subtitle">
-          Start free for light use, then upgrade when you need unlimited lesson generation, editable DOCX exports, and a cleaner ad-free workflow.
-        </p>
-      </div>
-      <div class="account-summary-pill">
-        <strong>{{ current_user.plan|upper }}</strong>
-        <span>{{ plan_status.subscription_status|capitalize }}</span>
-      </div>
-    </section>
+      <section class="pricing-grid">
+        <div class="pricing-card {% if current_user.plan == 'free' %}pricing-card-active{% endif %}">
+          <div class="pricing-badge">Free</div>
+          <h3>Free</h3>
+          <div class="pricing-price">US$0 <span>/ month</span></div>
+          <p class="muted">A starting plan for exploring the platform.</p>
+          <ul class="pricing-features">
+            <li>10 lesson generations / month</li>
+            <li>5 saved lessons</li>
+            <li>PDF export</li>
+            <li>DOCX export locked</li>
+            <li>Activity generator locked</li>
+            <li>Ads may be shown</li>
+          </ul>
+          <button type="button" class="secondary pricing-btn" id="downgradeBtn" {% if current_user.plan == 'free' %}disabled{% endif %}>
+            {% if current_user.plan == 'free' %}Current Plan{% else %}Switch to Free{% endif %}
+          </button>
+        </div>
 
-    <section class="pricing-grid pricing-grid-redesign">
-      <article class="pricing-card glass-panel {% if current_user.plan == 'free' %}pricing-card-active{% endif %}">
-        <div class="pricing-tier-label">Free</div>
-        <h2>Start free</h2>
-        <div class="pricing-price">US$0 <span>/ month</span></div>
-        <p class="muted">Best for trying the platform and generating a limited number of lessons each month.</p>
-        <ul class="pricing-features">
-          <li>10 lesson generations each month</li>
-          <li>5 saved lessons</li>
-          <li>PDF export included</li>
-          <li class="locked">DOCX export</li>
-          <li class="locked">Unlimited saved lessons</li>
-          <li>Ads shown on free</li>
-        </ul>
-        <button type="button" class="secondary pricing-btn" id="downgradeBtn" {% if current_user.plan == "free" %}disabled{% endif %}>
-          {% if current_user.plan == "free" %}Current plan{% else %}Switch to Free{% endif %}
-        </button>
-      </article>
+        <div class="pricing-card {% if current_user.plan == 'pro' %}pricing-card-active{% endif %}">
+          <div class="pricing-badge">Pro</div>
+          <h3>Pro Teacher</h3>
+          <div class="pricing-price">US$10 <span>/ month</span></div>
+          <p class="muted">Built for regular lesson planning and polished exports.</p>
+          <ul class="pricing-features">
+            <li>Unlimited lesson generations</li>
+            <li>Unlimited saved lessons</li>
+            <li>PDF export</li>
+            <li>DOCX export</li>
+            <li>No ads</li>
+            <li>Activity generator not included</li>
+          </ul>
+          {% if current_user.plan == 'pro' %}
+            <button type="button" class="pricing-btn" disabled>Current Plan</button>
+          {% else %}
+            <button type="button" class="pricing-btn checkout-btn" data-plan="pro">Upgrade to Pro</button>
+          {% endif %}
+        </div>
 
-      <article class="pricing-card pricing-card-featured glass-panel {% if current_user.plan == 'pro' or current_user.plan == 'admin' %}pricing-card-active{% endif %}">
-        <div class="pricing-tier-label pricing-tier-label-accent">Most popular</div>
-        <h2>Pro Teacher</h2>
-        <div class="pricing-price">US$10 <span>/ month</span></div>
-        <p class="muted">Built for teachers who plan regularly and need unlimited lessons, editable exports, and a smoother workflow.</p>
-        <ul class="pricing-features">
-          <li>Unlimited lesson generations</li>
-          <li>Unlimited saved lessons</li>
-          <li>PDF and DOCX export</li>
-          <li>No ads</li>
-          <li>Manage billing securely through Stripe</li>
-        </ul>
+        <div class="pricing-card pricing-card-featured {% if current_user.plan == 'plus' or current_user.plan == 'admin' %}pricing-card-active{% endif %}">
+          <div class="pricing-badge">Best Value</div>
+          <h3>Pro Teacher Plus</h3>
+          <div class="pricing-price">US$15 <span>/ month</span></div>
+          <div class="pricing-subprice muted">Lesson plans + activity generation</div>
+          <p class="muted">Designed for teachers who want ready-made classroom resources, not just lesson plans.</p>
+          <ul class="pricing-features">
+            <li>Everything in Pro Teacher</li>
+            <li>Mixed quizzes, MCQ, short-answer, essay and maths problem-solving sets</li>
+            <li>Crosswords and word-search puzzles</li>
+            <li>Case studies, exit tickets and homework sheets</li>
+            <li>Optional lesson-plan activity snippet</li>
+            <li>Answer key and mark scheme options</li>
+          </ul>
+          {% if current_user.plan == 'plus' or current_user.plan == 'admin' %}
+            <button type="button" class="pricing-btn" disabled>Current Plan</button>
+          {% else %}
+            <button type="button" class="pricing-btn checkout-btn" data-plan="plus">Upgrade to Plus</button>
+          {% endif %}
+        </div>
+      </section>
 
-        {% if current_user.plan == "pro" or current_user.plan == "admin" %}
-          <button type="button" class="pricing-btn" disabled>Current plan</button>
-          <button type="button" class="secondary pricing-btn" id="manageBillingBtn">Manage billing</button>
-        {% else %}
-          <button type="button" class="pricing-btn" id="stripeUpgradeBtn">Unlock Pro – US$10/month</button>
-        {% endif %}
-      </article>
-    </section>
-
-    <section class="dashboard-grid two-col">
-      <article class="content-card glass-panel">
+      <section class="dashboard-card">
         <div class="section-head">
-          <div>
-            <div class="section-kicker">Plan comparison</div>
-            <h2>See the difference clearly</h2>
-          </div>
+          <h2>Current Usage</h2>
+          <p class="muted small-text">Your current plan details.</p>
         </div>
 
-        <div class="summary-list modern-summary-list">
+        <div class="summary-list">
           <div class="summary-row">
             <span>Monthly lesson generations</span>
-            <strong>{% if plan_status.monthly_generations.limit is none %}Unlimited{% else %}{{ plan_status.monthly_generations.used }} / {{ plan_status.monthly_generations.limit }}{% endif %}</strong>
+            <strong>
+              {% if plan_status.monthly_generations.limit is none %}
+                Unlimited
+              {% else %}
+                {{ plan_status.monthly_generations.used }} / {{ plan_status.monthly_generations.limit }}
+              {% endif %}
+            </strong>
           </div>
           <div class="summary-row">
             <span>Saved lessons</span>
-            <strong>{% if plan_status.saved_lessons.limit is none %}Unlimited{% else %}{{ plan_status.saved_lessons.used }} / {{ plan_status.saved_lessons.limit }}{% endif %}</strong>
+            <strong>
+              {% if plan_status.saved_lessons.limit is none %}
+                Unlimited
+              {% else %}
+                {{ plan_status.saved_lessons.used }} / {{ plan_status.saved_lessons.limit }}
+              {% endif %}
+            </strong>
           </div>
-          <div class="summary-row"><span>PDF export</span><strong>{{ "Included" if plan_status.pdf_export else "Locked" }}</strong></div>
-          <div class="summary-row"><span>DOCX export</span><strong>{{ "Included" if plan_status.docx_export else "Locked on Free" }}</strong></div>
-          <div class="summary-row"><span>Ads</span><strong>{{ "Shown on free" if plan_status.ads_enabled else "Removed on Pro" }}</strong></div>
+          <div class="summary-row">
+            <span>Activity generation</span>
+            <strong>{% if plan_status.activity_generation %}Enabled{% else %}Locked{% endif %}</strong>
+          </div>
+          <div class="summary-row">
+            <span>DOCX export</span>
+            <strong>{{ "Enabled" if plan_status.docx_export else "Locked" }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Payment provider</span>
+            <strong>{{ current_user.payment_provider or "manual" }}</strong>
+          </div>
         </div>
-      </article>
 
-      <article class="content-card glass-panel">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Upgrade benefits</div>
-            <h2>What Pro unlocks</h2>
-          </div>
+        {% if current_user.plan in ['pro', 'plus', 'admin'] %}
+        <div class="sidebar-actions" style="margin-top:16px;">
+          <button type="button" class="secondary pricing-btn" id="manageBillingBtn">Manage billing</button>
         </div>
-        <ul class="feature-bullets feature-bullets-large">
-          <li>Unlimited lesson generation for regular classroom use</li>
-          <li>Unlimited saved lessons and refinements</li>
-          <li>Editable DOCX export for school submission</li>
-          <li>Clean ad-free workspace</li>
-        </ul>
-        <div id="pricingStatus" class="status modern-status"></div>
-      </article>
-    </section>
+        {% endif %}
+
+        <div id="pricingStatus" class="status"></div>
+      </section>
+    </main>
   </div>
 
   <script src="/static/pricing.js"></script>

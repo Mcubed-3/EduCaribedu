@@ -8,9 +8,11 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from .activity_generator import ACTIVITY_LABELS, generate_activity
 from .auth_service import (
     can_export_docx,
     can_export_pdf,
+    can_generate_activities,
     can_generate_lessons,
     can_save_more_lessons,
     cancel_user_paid_plan,
@@ -22,8 +24,9 @@ from .auth_service import (
     get_plan_status,
     get_user_by_email,
     get_user_by_session,
-    init_auth_db,
+    increment_activity_generation_count,
     increment_generation_count,
+    init_auth_db,
     list_users,
     update_user_billing,
     update_user_plan,
@@ -42,9 +45,11 @@ from .engine_state import engine
 from .export_service import export_to_docx, export_to_pdf
 from .lesson_generator import generate_lesson
 from .models import (
+    ActivityRequest,
     AdminBillingUpdateRequest,
     AdminFrameworkRequest,
     AdminUserUpdateRequest,
+    CheckoutSessionRequest,
     ExportRequest,
     LessonRequest,
     ObjectiveRequest,
@@ -52,27 +57,14 @@ from .models import (
     SaveLessonRequest,
     UpdateLessonRequest,
 )
-from .storage_service import (
-    delete_lesson,
-    get_lesson,
-    list_lessons,
-    save_new_lesson,
-    update_existing_lesson,
-)
-from .stripe_service import (
-    create_checkout_session,
-    create_portal_session,
-    get_stripe_public_config,
-    to_iso_from_unix,
-    verify_webhook,
-)
+from .storage_service import delete_lesson, get_lesson, list_lessons, save_new_lesson, update_existing_lesson
+from .stripe_service import create_checkout_session, create_portal_session, get_stripe_public_config, to_iso_from_unix, verify_webhook
 
-app = FastAPI(title="EduCarib AI Local Python")
+app = FastAPI(title="EduCarib AI")
 BASE_DIR = Path(__file__).parent
 
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
-
 SESSION_COOKIE = "educarib_session"
 
 init_auth_db()
@@ -100,13 +92,10 @@ def require_admin(request: Request):
 def _dashboard_summary(user_email: str):
     lessons = list_lessons(user_email)
     frameworks = engine.frameworks
-
     subjects = sorted({item.get("subject", "") for item in frameworks if item.get("subject")})
     curricula = sorted({item.get("curriculum", "") for item in frameworks if item.get("curriculum")})
     levels = sorted({item.get("level", "") for item in frameworks if item.get("level")})
-
     recent_lessons = lessons[:5]
-
     return {
         "saved_count": len(lessons),
         "framework_count": len(frameworks),
@@ -128,19 +117,9 @@ def home(request: Request):
     user = get_current_user(request)
     if not user:
         return RedirectResponse(url="/login", status_code=302)
-
     dashboard = _dashboard_summary(user["email"])
     plan_status = get_plan_status(user, dashboard["saved_count"])
-
-    return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "dashboard": dashboard,
-            "current_user": user,
-            "plan_status": plan_status,
-        },
-    )
+    return templates.TemplateResponse("index.html", {"request": request, "dashboard": dashboard, "current_user": user, "plan_status": plan_status, "activity_labels": ACTIVITY_LABELS})
 
 
 @app.get("/pricing", response_class=HTMLResponse)
@@ -148,18 +127,9 @@ def pricing_page(request: Request):
     user = get_current_user(request)
     if not user:
         return RedirectResponse(url="/login", status_code=302)
-
     saved_count = len(list_lessons(user["email"]))
     plan_status = get_plan_status(user, saved_count)
-
-    return templates.TemplateResponse(
-        "pricing.html",
-        {
-            "request": request,
-            "current_user": user,
-            "plan_status": plan_status,
-        },
-    )
+    return templates.TemplateResponse("pricing.html", {"request": request, "current_user": user, "plan_status": plan_status})
 
 
 @app.get("/login", response_class=HTMLResponse)
@@ -171,29 +141,13 @@ def login_page(request: Request):
 
 
 @app.post("/login", response_class=HTMLResponse)
-def login_submit(
-    request: Request,
-    email: str = Form(...),
-    password: str = Form(...),
-):
+def login_submit(request: Request, email: str = Form(...), password: str = Form(...)):
     user = verify_user(email, password)
     if not user:
-        return templates.TemplateResponse(
-            "login.html",
-            {"request": request, "mode": "login", "error": "Invalid email or password."},
-            status_code=400,
-        )
-
+        return templates.TemplateResponse("login.html", {"request": request, "mode": "login", "error": "Invalid email or password."}, status_code=400)
     token = create_session(user["id"])
     response = RedirectResponse(url="/", status_code=302)
-    response.set_cookie(
-        SESSION_COOKIE,
-        token,
-        httponly=True,
-        samesite="lax",
-        secure=False,
-        max_age=14 * 24 * 60 * 60,
-    )
+    response.set_cookie(SESSION_COOKIE, token, httponly=True, samesite="lax", secure=False, max_age=14 * 24 * 60 * 60)
     return response
 
 
@@ -206,39 +160,16 @@ def signup_page(request: Request):
 
 
 @app.post("/signup", response_class=HTMLResponse)
-def signup_submit(
-    request: Request,
-    email: str = Form(...),
-    password: str = Form(...),
-):
+def signup_submit(request: Request, email: str = Form(...), password: str = Form(...)):
     email = email.strip().lower()
-
     if get_user_by_email(email):
-        return templates.TemplateResponse(
-            "login.html",
-            {"request": request, "mode": "signup", "error": "An account with that email already exists."},
-            status_code=400,
-        )
-
+        return templates.TemplateResponse("login.html", {"request": request, "mode": "signup", "error": "An account with that email already exists."}, status_code=400)
     if len(password) < 6:
-        return templates.TemplateResponse(
-            "login.html",
-            {"request": request, "mode": "signup", "error": "Password must be at least 6 characters."},
-            status_code=400,
-        )
-
+        return templates.TemplateResponse("login.html", {"request": request, "mode": "signup", "error": "Password must be at least 6 characters."}, status_code=400)
     user = create_user(email, password, role="user", plan="free")
     token = create_session(user["id"])
-
     response = RedirectResponse(url="/", status_code=302)
-    response.set_cookie(
-        SESSION_COOKIE,
-        token,
-        httponly=True,
-        samesite="lax",
-        secure=False,
-        max_age=14 * 24 * 60 * 60,
-    )
+    response.set_cookie(SESSION_COOKIE, token, httponly=True, samesite="lax", secure=False, max_age=14 * 24 * 60 * 60)
     return response
 
 
@@ -288,25 +219,9 @@ def dashboard_data(request: Request):
 @app.get("/api/config")
 def config(request: Request):
     require_user(request)
-
-    subjects = sorted({
-        item.get("subject", "").strip()
-        for item in engine.frameworks
-        if item.get("subject", "").strip()
-    })
-
-    curricula = sorted({
-        item.get("curriculum", "").strip()
-        for item in engine.frameworks
-        if item.get("curriculum", "").strip()
-    })
-
-    levels = sorted({
-        item.get("level", "").strip()
-        for item in engine.frameworks
-        if item.get("level", "").strip()
-    })
-
+    subjects = sorted({item.get("subject", "").strip() for item in engine.frameworks if item.get("subject", "").strip()})
+    curricula = sorted({item.get("curriculum", "").strip() for item in engine.frameworks if item.get("curriculum", "").strip()})
+    levels = sorted({item.get("level", "").strip() for item in engine.frameworks if item.get("level", "").strip()})
     return {
         "subjects": subjects,
         "curricula": curricula,
@@ -314,33 +229,20 @@ def config(request: Request):
         "structures": ["5Es", "4Cs"],
         "difficulties": ["Beginner", "Intermediate", "Advanced"],
         "lesson_types": ["Theory", "Practical", "Discussion", "Mixed"],
+        "activity_types": [{"value": k, "label": v} for k, v in ACTIVITY_LABELS.items()],
     }
 
 
 @app.post("/api/curriculum/search")
 def curriculum_search(request: Request, payload: ObjectiveRequest):
     require_user(request)
-    return engine.search(
-        payload.curriculum,
-        payload.subject,
-        payload.grade_level,
-        payload.topic,
-        payload.description,
-    )
+    return engine.search(payload.curriculum, payload.subject, payload.grade_level, payload.topic, payload.description)
 
 
 @app.post("/api/objectives/generate")
 def objective_suggest(request: Request, payload: ObjectiveRequest):
     require_user(request)
-    objectives = engine.build_objectives(
-        payload.curriculum,
-        payload.subject,
-        payload.grade_level,
-        payload.topic,
-        payload.objective_count,
-        payload.difficulty,
-        payload.description,
-    )
+    objectives = engine.build_objectives(payload.curriculum, payload.subject, payload.grade_level, payload.topic, payload.objective_count, payload.difficulty, payload.description)
     return {"objectives": objectives, "verbs": engine.bloom_verbs(payload.difficulty)}
 
 
@@ -348,15 +250,21 @@ def objective_suggest(request: Request, payload: ObjectiveRequest):
 def lesson_generate(request: Request, payload: LessonRequest):
     user = require_user(request)
     usage = can_generate_lessons(user)
-
     if not usage["allowed"]:
-        raise HTTPException(
-            status_code=403,
-            detail=f"Monthly lesson generation limit reached for your {user['plan']} plan.",
-        )
-
+        raise HTTPException(status_code=403, detail=f"Monthly lesson generation limit reached for your {user['plan']} plan.")
     result = generate_lesson(payload.model_dump())
     increment_generation_count(user["id"])
+    return result
+
+
+@app.post("/api/activities/generate")
+def activity_generate(request: Request, payload: ActivityRequest):
+    user = require_user(request)
+    usage = can_generate_activities(user)
+    if not usage["allowed"]:
+        raise HTTPException(status_code=403, detail="Activity generation is available on the Pro Teacher Plus plan.")
+    result = generate_activity(payload.model_dump())
+    increment_activity_generation_count(user["id"])
     return result
 
 
@@ -380,13 +288,8 @@ def lesson_save(request: Request, payload: SaveLessonRequest):
     user = require_user(request)
     current_lessons = list_lessons(user["email"])
     allowance = can_save_more_lessons(user, len(current_lessons))
-
     if not allowance["allowed"]:
-        raise HTTPException(
-            status_code=403,
-            detail=f"Saved lesson limit reached for your {user['plan']} plan.",
-        )
-
+        raise HTTPException(status_code=403, detail=f"Saved lesson limit reached for your {user['plan']} plan.")
     saved = save_new_lesson(user["email"], payload.lesson_payload)
     return {"message": "Lesson saved.", "lesson": saved}
 
@@ -412,56 +315,31 @@ def lesson_remove(request: Request, lesson_id: str):
 @app.post("/api/export/docx")
 def export_docx(request: Request, payload: ExportRequest):
     user = require_user(request)
-
     if not can_export_docx(user):
-        raise HTTPException(
-            status_code=403,
-            detail="DOCX export is available on the Pro plan only.",
-        )
-
+        raise HTTPException(status_code=403, detail="DOCX export is available on the Pro plan only.")
     path = export_to_docx(payload.title, payload.content)
-    return FileResponse(
-        path,
-        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        filename=path.name,
-    )
+    return FileResponse(path, media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", filename=path.name)
 
 
 @app.post("/api/export/pdf")
 def export_pdf(request: Request, payload: ExportRequest):
     user = require_user(request)
-
     if not can_export_pdf(user):
-        raise HTTPException(
-            status_code=403,
-            detail="PDF export is not available on your current plan.",
-        )
-
+        raise HTTPException(status_code=403, detail="PDF export is not available on your current plan.")
     path = export_to_pdf(payload.title, payload.content)
-    return FileResponse(
-        path,
-        media_type="application/pdf",
-        filename=path.name,
-    )
+    return FileResponse(path, media_type="application/pdf", filename=path.name)
 
 
 @app.post("/api/plan/update")
 def update_plan(request: Request, payload: PlanUpdateRequest):
     user = require_user(request)
-
     if user["role"] == "admin":
         raise HTTPException(status_code=400, detail="Admin plan cannot be changed here.")
-
     updated = update_user_plan(user["id"], payload.plan)
     if not updated:
         raise HTTPException(status_code=404, detail="User not found")
-
     saved_count = len(list_lessons(updated["email"]))
-    return {
-        "message": "Plan updated.",
-        "user": updated,
-        "plan_status": get_plan_status(updated, saved_count),
-    }
+    return {"message": "Plan updated.", "user": updated, "plan_status": get_plan_status(updated, saved_count)}
 
 
 @app.get("/api/stripe/config")
@@ -471,32 +349,29 @@ def stripe_config(request: Request):
 
 
 @app.post("/api/stripe/create-checkout-session")
-def stripe_create_checkout_session(current_user=Depends(require_user)):
-    if current_user["plan"] in {"pro", "admin"}:
-        raise HTTPException(status_code=400, detail="You already have access to Pro.")
-
+def stripe_create_checkout_session(payload: CheckoutSessionRequest, current_user=Depends(require_user)):
+    if current_user["plan"] == "admin":
+        raise HTTPException(status_code=400, detail="Admin accounts already have full access.")
+    if payload.target_plan == current_user.get("plan"):
+        raise HTTPException(status_code=400, detail=f"You already have the {payload.target_plan} plan.")
     try:
-        session = create_checkout_session(user=current_user)
+        session = create_checkout_session(user=current_user, target_plan=payload.target_plan)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Stripe checkout setup failed: {exc}")
-
     return {"url": session.url, "id": session.id}
 
 
 @app.post("/api/stripe/create-portal-session")
 def stripe_create_portal_session(current_user=Depends(require_user)):
-    if current_user["plan"] not in {"pro", "admin"}:
+    if current_user["plan"] not in {"pro", "plus", "admin"}:
         raise HTTPException(status_code=400, detail="Billing portal is only available for paid plans.")
-
     customer_id = (current_user.get("stripe_customer_id") or "").strip()
     if not customer_id:
         raise HTTPException(status_code=400, detail="No Stripe customer is stored for this account yet.")
-
     try:
         session = create_portal_session(customer_id=customer_id)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Stripe billing portal failed: {exc}")
-
     return {"url": session.url}
 
 
@@ -504,7 +379,6 @@ def stripe_create_portal_session(current_user=Depends(require_user)):
 async def stripe_webhook(request: Request):
     payload = await request.body()
     sig = request.headers.get("stripe-signature")
-
     try:
         event = verify_webhook(payload=payload, signature=sig)
     except Exception as exc:
@@ -515,18 +389,16 @@ async def stripe_webhook(request: Request):
 
     if event_type == "checkout.session.completed":
         user_id_raw = (obj.get("metadata") or {}).get("user_id") or obj.get("client_reference_id")
+        target_plan = (obj.get("metadata") or {}).get("target_plan", "pro")
         if user_id_raw:
-            user_id = int(user_id_raw)
-            subscription_id = obj.get("subscription", "") or ""
-            customer_id = obj.get("customer", "") or ""
-
             update_user_stripe_subscription(
-                user_id,
-                stripe_customer_id=customer_id,
-                stripe_subscription_id=subscription_id,
+                int(user_id_raw),
+                stripe_customer_id=obj.get("customer", "") or "",
+                stripe_subscription_id=obj.get("subscription", "") or "",
                 subscription_status="active",
                 subscription_started_at=datetime.now(timezone.utc).isoformat(),
                 billing_notes="Stripe Checkout completed",
+                plan=target_plan,
             )
 
     elif event_type in {"customer.subscription.created", "customer.subscription.updated"}:
@@ -536,7 +408,7 @@ async def stripe_webhook(request: Request):
         current_period_end = obj.get("current_period_end")
         metadata = obj.get("metadata") or {}
         user_id_raw = metadata.get("user_id")
-
+        target_plan = metadata.get("target_plan", "pro")
         user_id = None
         if user_id_raw:
             user_id = int(user_id_raw)
@@ -544,7 +416,7 @@ async def stripe_webhook(request: Request):
             matched = find_user_by_stripe_customer_id(customer_id) or find_user_by_stripe_subscription_id(subscription_id)
             if matched:
                 user_id = int(matched["id"])
-
+                target_plan = matched.get("plan", target_plan)
         if user_id:
             update_user_stripe_subscription(
                 user_id,
@@ -554,17 +426,13 @@ async def stripe_webhook(request: Request):
                 subscription_started_at=datetime.now(timezone.utc).isoformat(),
                 subscription_renews_at=to_iso_from_unix(current_period_end),
                 billing_notes=f"Stripe subscription {status}",
+                plan=target_plan,
             )
 
     elif event_type in {"customer.subscription.deleted", "invoice.payment_failed"}:
         customer_id = obj.get("customer", "") or ""
-        subscription_id = (
-            obj.get("id", "") if event_type == "customer.subscription.deleted"
-            else obj.get("subscription", "") or ""
-        )
-
+        subscription_id = obj.get("id", "") if event_type == "customer.subscription.deleted" else obj.get("subscription", "") or ""
         matched = find_user_by_stripe_subscription_id(subscription_id) or find_user_by_stripe_customer_id(customer_id)
-
         if matched:
             if event_type == "invoice.payment_failed":
                 update_user_stripe_subscription(
@@ -575,6 +443,7 @@ async def stripe_webhook(request: Request):
                     subscription_started_at=matched.get("subscription_started_at", ""),
                     subscription_renews_at=matched.get("subscription_renews_at", ""),
                     billing_notes="Stripe invoice payment failed",
+                    plan=matched.get("plan", "pro"),
                 )
             else:
                 cancel_user_paid_plan(int(matched["id"]), note="Stripe subscription cancelled")
@@ -583,13 +452,7 @@ async def stripe_webhook(request: Request):
 
 
 @app.get("/api/admin/frameworks")
-def admin_list_frameworks(
-    request: Request,
-    curriculum: str = Query(default=""),
-    subject: str = Query(default=""),
-    level: str = Query(default=""),
-    query: str = Query(default=""),
-):
+def admin_list_frameworks(request: Request, curriculum: str = Query(default=""), subject: str = Query(default=""), level: str = Query(default=""), query: str = Query(default="")):
     require_admin(request)
     items = list_frameworks(curriculum=curriculum, subject=subject, level=level, query=query)
     return {"frameworks": items}
@@ -641,22 +504,18 @@ def admin_list_users(request: Request):
 @app.put("/api/admin/users/{user_id}")
 def admin_update_user(request: Request, user_id: int, payload: AdminUserUpdateRequest):
     require_admin(request)
-
     try:
         updated = update_user_role_plan(user_id, payload.role, payload.plan)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
     if not updated:
         raise HTTPException(status_code=404, detail="User not found")
-
     return {"message": "User updated.", "user": updated}
 
 
 @app.put("/api/admin/users/{user_id}/billing")
 def admin_update_user_billing(request: Request, user_id: int, payload: AdminBillingUpdateRequest):
     require_admin(request)
-
     try:
         updated = update_user_billing(
             user_id=user_id,
@@ -664,16 +523,14 @@ def admin_update_user_billing(request: Request, user_id: int, payload: AdminBill
             plan=payload.plan,
             subscription_status=payload.subscription_status,
             payment_provider=payload.payment_provider,
-            paypal_customer_id=payload.paypal_customer_id,
-            paypal_subscription_id=payload.paypal_subscription_id,
+            stripe_customer_id=payload.stripe_customer_id,
+            stripe_subscription_id=payload.stripe_subscription_id,
             subscription_started_at=payload.subscription_started_at,
             subscription_renews_at=payload.subscription_renews_at,
             billing_notes=payload.billing_notes,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
     if not updated:
         raise HTTPException(status_code=404, detail="User not found")
-
     return {"message": "User billing updated.", "user": updated}
