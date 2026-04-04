@@ -129,6 +129,15 @@ def _dashboard_summary(user_email: str):
     }
 
 
+@app.get("/robots.txt")
+def robots_txt():
+    return FileResponse(BASE_DIR / "static" / "robots.txt", media_type="text/plain")
+
+
+@app.get("/sitemap.xml")
+def sitemap_xml():
+    return FileResponse(BASE_DIR / "static" / "sitemap.xml", media_type="application/xml")
+    
 @app.get("/ads.txt")
 def ads_txt():
     return FileResponse(BASE_DIR / "static" / "ads.txt", media_type="text/plain")

@@ -12,24 +12,18 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5-mini").strip()
 
-
 ACTIVITY_LABELS = {
     "mixed_quiz": "Mixed Quiz",
     "mcq": "Multiple Choice Quiz",
     "short_answer": "Short Answer Questions",
     "essay": "Essay Questions",
     "math_problem_solving": "Math Problem-Solving Worksheet",
-    "crossword": "Crossword Puzzle",
-    "word_search": "Word Search Puzzle",
     "case_study": "Case Study Worksheet",
     "exit_ticket": "Exit Ticket",
     "homework_sheet": "Homework Sheet",
 }
 
 
-# ----------------------------
-# 🔥 NEW: EXTRACT LESSON DATA
-# ----------------------------
 def _extract_lesson_context(payload: Dict[str, Any]) -> Dict[str, Any]:
     lesson_payload = payload.get("lesson_payload")
 
@@ -45,7 +39,6 @@ def _extract_lesson_context(payload: Dict[str, Any]) -> Dict[str, Any]:
             "sections": lesson.get("sections", {}),
         }
 
-    # fallback (old system)
     return {
         "curriculum": payload.get("curriculum", ""),
         "subject": payload.get("subject", ""),
@@ -56,28 +49,31 @@ def _extract_lesson_context(payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-# ----------------------------
-# 🔥 STRICT PROMPT (FIXED)
-# ----------------------------
 PROMPT_TEMPLATE = """
 You are generating a classroom activity STRICTLY aligned to the lesson provided.
 
-⚠️ CRITICAL RULES:
+CRITICAL RULES:
 - ONLY generate content related to the lesson topic
-- DO NOT include unrelated subjects (NO maths, NO grammar, NO random science)
+- DO NOT include unrelated subjects
 - ALL questions must directly match the lesson content
 - Use the objectives and lesson sections to guide the activity
+- If include_mark_scheme is false, DO NOT return any mark scheme
+- DO NOT return teacher notes
+- DO NOT include a teacher notes section in any form
 
 Return ONLY valid JSON:
 
-{{
+{
   "title": "string",
   "student_instructions": ["string"],
   "worksheet_items": ["string"],
-  "answer_key": ["string"],
-  "mark_scheme": ["string"],
-  "teacher_notes": ["string"]
-}}
+  "answer_key": ["string"]
+}
+
+If include_mark_scheme is true, you may also include:
+{
+  "mark_scheme": ["string"]
+}
 
 Lesson Details:
 Subject: {subject}
@@ -93,6 +89,8 @@ Lesson Sections:
 
 Activity Type: {activity_type}
 Number of items: {count}
+Include answer key: {include_answer_key}
+Include mark scheme: {include_mark_scheme}
 
 Make it:
 - Relevant to Caribbean context where possible
@@ -101,10 +99,7 @@ Make it:
 """.strip()
 
 
-# ----------------------------
-# FORMAT OUTPUT
-# ----------------------------
-def _to_text(data: Dict[str, Any]) -> str:
+def _to_text(data: Dict[str, Any], include_mark_scheme: bool) -> str:
     lines: List[str] = []
 
     lines.append(data.get("title", "Activity"))
@@ -113,7 +108,7 @@ def _to_text(data: Dict[str, Any]) -> str:
     if data.get("student_instructions"):
         lines.append("Student Instructions:")
         for i in data["student_instructions"]:
-            lines.append(f"- {i}")
+          lines.append(f"- {i}")
         lines.append("")
 
     if data.get("worksheet_items"):
@@ -128,28 +123,21 @@ def _to_text(data: Dict[str, Any]) -> str:
             lines.append(f"- {i}")
         lines.append("")
 
-    if data.get("mark_scheme"):
+    if include_mark_scheme and data.get("mark_scheme"):
         lines.append("Mark Scheme:")
         for i in data["mark_scheme"]:
-            lines.append(f"- {i}")
-        lines.append("")
-
-    if data.get("teacher_notes"):
-        lines.append("Teacher Notes:")
-        for i in data["teacher_notes"]:
             lines.append(f"- {i}")
 
     return "\n".join(lines).strip()
 
 
-# ----------------------------
-# MAIN GENERATOR
-# ----------------------------
 def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
     ctx = _extract_lesson_context(payload)
 
     activity_type = payload["activity_type"]
     count = payload.get("item_count", 8)
+    include_answer_key = bool(payload.get("include_answer_key", True))
+    include_mark_scheme = bool(payload.get("include_mark_scheme", False))
 
     title = f"{ACTIVITY_LABELS.get(activity_type, 'Activity')} - {ctx['topic']}"
 
@@ -173,6 +161,8 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
         sections=json.dumps(ctx["sections"], indent=2),
         activity_type=ACTIVITY_LABELS.get(activity_type, activity_type),
         count=count,
+        include_answer_key="yes" if include_answer_key else "no",
+        include_mark_scheme="yes" if include_mark_scheme else "no",
     )
 
     response = client.responses.create(
@@ -184,20 +174,23 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         data = json.loads(raw_text)
-    except:
+    except Exception:
         data = {
             "title": title,
             "student_instructions": ["Complete the activity below."],
             "worksheet_items": [raw_text],
             "answer_key": [],
-            "mark_scheme": [],
-            "teacher_notes": [],
         }
+
+    data.pop("teacher_notes", None)
+
+    if not include_mark_scheme and "mark_scheme" in data:
+        data.pop("mark_scheme", None)
 
     return {
         "title": data.get("title", title),
         "activity_type": activity_type,
-        "content": _to_text(data),
+        "content": _to_text(data, include_mark_scheme=include_mark_scheme),
         "lesson_snippet": "",
         "raw": data,
     }

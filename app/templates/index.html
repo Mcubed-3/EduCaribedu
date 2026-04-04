@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EduCarib AI</title>
+  <meta name="description" content="Generate curriculum-aligned lesson plans and classroom activities for Caribbean classrooms with EduCarib AI." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="{{ site_url }}/" />
+  <meta property="og:title" content="EduCarib AI" />
+  <meta property="og:description" content="AI-powered lesson planning for Caribbean teachers." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="{{ site_url }}/" />
+  <meta property="og:image" content="{{ site_url }}/static/logo.png" />
   <meta name="google-adsense-account" content="ca-pub-6817907304188010">
   <link rel="icon" type="image/png" href="/static/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -155,24 +163,6 @@
           <strong id="savedCount">{{ dashboard.saved_count }}</strong>
           <small>Reusable teaching plans</small>
         </article>
-
-        <article class="stat-card">
-          <span class="stat-label">Subjects</span>
-          <strong id="subjectCount">{{ dashboard.subject_count }}</strong>
-          <small>Across your framework</small>
-        </article>
-
-        <article class="stat-card">
-          <span class="stat-label">Levels</span>
-          <strong id="levelCount">{{ dashboard.level_count }}</strong>
-          <small>Primary to secondary coverage</small>
-        </article>
-
-        <article class="stat-card">
-          <span class="stat-label">Curricula</span>
-          <strong id="curriculumCount">{{ dashboard.curriculum_count }}</strong>
-          <small>Aligned frameworks</small>
-        </article>
       </section>
 
       <section class="content-grid">
@@ -300,8 +290,6 @@
             </div>
 
             <div class="action-row">
-              <button type="button" id="matchBtn" class="btn btn-secondary">Find curriculum match</button>
-              <button type="button" id="objectiveBtn" class="btn btn-secondary">Suggest objectives</button>
               <button type="submit" class="btn btn-primary">Generate lesson</button>
             </div>
 

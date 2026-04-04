@@ -149,52 +149,9 @@ function renderLesson(data) {
   if (output) output.value = lessonToText(data);
 }
 
-function renderMatch(data) {
-  const output = byId("output");
-  if (!output) return;
-
-  const match = data.match;
-  if (!match) {
-    output.value = "No curriculum match found.";
-    return;
-  }
-
-  const lines = [
-    `Best Match: ${match.name}`,
-    `Curriculum: ${match.curriculum}`,
-    `Subject: ${match.subject}`,
-    `Level: ${match.level}`,
-    `Strand: ${match.strand}`,
-    `Confidence Score: ${data.score}`,
-    "",
-    "Objectives:",
-  ];
-
-  (match.objectives || []).forEach((obj, i) =>
-    lines.push(`${i + 1}. ${obj.text} [${obj.bloom}]`)
-  );
-  output.value = lines.join("\n");
-}
-
-function renderObjectives(data) {
-  const output = byId("output");
-  if (!output) return;
-
-  const lines = ["Suggested Objectives:", ""];
-  (data.objectives || []).forEach((obj, i) =>
-    lines.push(`${i + 1}. ${obj.text} [${obj.bloom}]`)
-  );
-  lines.push("", `Bloom verbs for selected difficulty: ${(data.verbs || []).join(", ")}`);
-  output.value = lines.join("\n");
-}
-
 function updateDashboardStats(summary) {
   const ids = [
     ["savedCount", summary.saved_count ?? 0],
-    ["frameworkCount", summary.framework_count ?? 0],
-    ["subjectCount", summary.subject_count ?? 0],
-    ["levelCount", summary.level_count ?? 0],
-    ["curriculumCount", summary.curriculum_count ?? 0],
   ];
 
   ids.forEach(([id, value]) => {
@@ -444,34 +401,27 @@ function activityPayload() {
 function formatActivityContent(content) {
   if (content == null) return "";
 
-  if (typeof content === "string") {
-    return content;
-  }
+  if (typeof content === "string") return content;
 
   if (Array.isArray(content)) {
-    return content
-      .map((item, index) => formatActivityItem(item, index))
-      .join("\n\n")
-      .trim();
+    return content.map((item, index) => formatActivityItem(item, index)).join("\n\n").trim();
   }
 
   if (typeof content === "object") {
-    // Common backend shapes
     if (Array.isArray(content.items)) {
-      return content.items
-        .map((item, index) => formatActivityItem(item, index))
-        .join("\n\n")
-        .trim();
+      return content.items.map((item, index) => formatActivityItem(item, index)).join("\n\n").trim();
     }
 
     if (Array.isArray(content.questions)) {
-      return content.questions
-        .map((item, index) => formatActivityItem(item, index))
-        .join("\n\n")
-        .trim();
+      return content.questions.map((item, index) => formatActivityItem(item, index)).join("\n\n").trim();
     }
 
-    return Object.entries(content)
+    const filteredEntries = Object.entries(content).filter(([key]) => {
+      const normalized = String(key).toLowerCase();
+      return normalized !== "teacher_notes" && normalized !== "teachernotes";
+    });
+
+    return filteredEntries
       .map(([key, value]) => `${toTitle(key)}:\n${formatActivityValue(value)}`)
       .join("\n\n")
       .trim();
@@ -516,7 +466,7 @@ function formatActivityItem(item, index = 0) {
   }
 
   if (item.mark_scheme) {
-    lines.push(`   Mark scheme: ${formatActivityValue(item.mark_scheme)}`);
+    lines.push(`   Mark Scheme: ${formatActivityValue(item.mark_scheme)}`);
   }
 
   if (item.explanation) {
@@ -532,6 +482,10 @@ function formatActivityValue(value) {
   if (Array.isArray(value)) return value.map((v) => formatActivityValue(v)).join(", ");
   if (typeof value === "object") {
     return Object.entries(value)
+      .filter(([k]) => {
+        const normalized = String(k).toLowerCase();
+        return normalized !== "teacher_notes" && normalized !== "teachernotes";
+      })
       .map(([k, v]) => `${toTitle(k)}: ${formatActivityValue(v)}`)
       .join("; ");
   }
@@ -597,7 +551,12 @@ function insertActivitySnippetIntoLesson() {
     return;
   }
 
-  const snippet = `\n\nClassroom Activity:\n${currentActivityText}\n`;
+  const cleaned = currentActivityText
+    .split("\n")
+    .filter((line) => !line.trim().toLowerCase().startsWith("teacher notes"))
+    .join("\n");
+
+  const snippet = `\n\nClassroom Activity:\n${cleaned}\n`;
   output.value = `${output.value}${snippet}`;
   setStatus("Activity inserted into lesson.", "success");
 }
@@ -644,36 +603,6 @@ async function init() {
           showUpgradeModal();
           return;
         }
-        setStatus(e.message, "error");
-      }
-    });
-
-    byId("matchBtn")?.addEventListener("click", async () => {
-      setStatus("Finding curriculum match...");
-      try {
-        const data = await fetchJSON("/api/curriculum/search", {
-          method: "POST",
-          body: JSON.stringify(formPayload()),
-        });
-        renderMatch(data);
-        scrollToBuilder();
-        setStatus("Curriculum match ready.", "success");
-      } catch (e) {
-        setStatus(e.message, "error");
-      }
-    });
-
-    byId("objectiveBtn")?.addEventListener("click", async () => {
-      setStatus("Generating objectives...");
-      try {
-        const data = await fetchJSON("/api/objectives/generate", {
-          method: "POST",
-          body: JSON.stringify(formPayload()),
-        });
-        renderObjectives(data);
-        scrollToBuilder();
-        setStatus("Objectives generated.", "success");
-      } catch (e) {
         setStatus(e.message, "error");
       }
     });
