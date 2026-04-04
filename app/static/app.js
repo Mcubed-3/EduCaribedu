@@ -441,6 +441,109 @@ function activityPayload() {
   };
 }
 
+function formatActivityContent(content) {
+  if (content == null) return "";
+
+  if (typeof content === "string") {
+    return content;
+  }
+
+  if (Array.isArray(content)) {
+    return content
+      .map((item, index) => formatActivityItem(item, index))
+      .join("\n\n")
+      .trim();
+  }
+
+  if (typeof content === "object") {
+    // Common backend shapes
+    if (Array.isArray(content.items)) {
+      return content.items
+        .map((item, index) => formatActivityItem(item, index))
+        .join("\n\n")
+        .trim();
+    }
+
+    if (Array.isArray(content.questions)) {
+      return content.questions
+        .map((item, index) => formatActivityItem(item, index))
+        .join("\n\n")
+        .trim();
+    }
+
+    return Object.entries(content)
+      .map(([key, value]) => `${toTitle(key)}:\n${formatActivityValue(value)}`)
+      .join("\n\n")
+      .trim();
+  }
+
+  return String(content);
+}
+
+function formatActivityItem(item, index = 0) {
+  if (typeof item === "string") {
+    return `${index + 1}. ${item}`;
+  }
+
+  if (item == null) {
+    return `${index + 1}.`;
+  }
+
+  if (typeof item !== "object") {
+    return `${index + 1}. ${String(item)}`;
+  }
+
+  const lines = [];
+  const prompt =
+    item.question ||
+    item.prompt ||
+    item.text ||
+    item.title ||
+    item.clue ||
+    `Item ${index + 1}`;
+
+  lines.push(`${index + 1}. ${prompt}`);
+
+  if (Array.isArray(item.options) && item.options.length) {
+    item.options.forEach((opt, i) => {
+      const label = String.fromCharCode(65 + i);
+      lines.push(`   ${label}. ${typeof opt === "string" ? opt : formatActivityValue(opt)}`);
+    });
+  }
+
+  if (item.answer) {
+    lines.push(`   Answer: ${formatActivityValue(item.answer)}`);
+  }
+
+  if (item.mark_scheme) {
+    lines.push(`   Mark scheme: ${formatActivityValue(item.mark_scheme)}`);
+  }
+
+  if (item.explanation) {
+    lines.push(`   Explanation: ${formatActivityValue(item.explanation)}`);
+  }
+
+  return lines.join("\n");
+}
+
+function formatActivityValue(value) {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map((v) => formatActivityValue(v)).join(", ");
+  if (typeof value === "object") {
+    return Object.entries(value)
+      .map(([k, v]) => `${toTitle(k)}: ${formatActivityValue(v)}`)
+      .join("; ");
+  }
+  return String(value);
+}
+
+function toTitle(value) {
+  return String(value)
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 async function generateActivity() {
   if (!currentLessonData) {
     setStatus("Generate a lesson first before creating an activity.", "error");
@@ -465,9 +568,14 @@ async function generateActivity() {
       body: JSON.stringify(activityPayload()),
     });
 
-    currentActivityText = data.content || "";
+    currentActivityText = formatActivityContent(
+      data.content ?? data.activity ?? data.items ?? data.questions ?? data
+    );
+
     const activityOutput = byId("activityOutput");
-    if (activityOutput) activityOutput.value = currentActivityText || "No activity content returned.";
+    if (activityOutput) {
+      activityOutput.value = currentActivityText || "No activity content returned.";
+    }
 
     await loadCurrentUserContext();
     setStatus("Activity generated.", "success");
