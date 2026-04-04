@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduCarib AI - Feedback</title>
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body class="dashboard-body">
+  <div class="dashboard-shell">
+    <aside class="sidebar">
+      <div class="brand-card">
+        <a href="/" class="brand-lockup">
+          <div class="brand-mark-wrap">
+            <img src="/static/logo.png" alt="EduCarib AI logo" class="brand-mark-img" />
+          </div>
+          <div class="brand-copy-wrap">
+            <div class="brand-title">EduCarib AI</div>
+            <div class="brand-subtitle">Feedback and issue reporting</div>
+          </div>
+        </a>
+      </div>
+
+      <section class="sidebar-card">
+        <div class="sidebar-kicker">Navigation</div>
+        <h3 class="sidebar-title">Workspace</h3>
+        <div class="sidebar-actions">
+          <a href="/" class="btn btn-secondary btn-link">Back to dashboard</a>
+          <a href="/pricing" class="btn btn-secondary btn-link">Pricing</a>
+          {% if current_user.role == "admin" %}
+            <a href="/admin" class="btn btn-secondary btn-link">Curriculum admin</a>
+            <a href="/admin/users" class="btn btn-secondary btn-link">User management</a>
+          {% endif %}
+          <a href="/logout" class="btn btn-secondary btn-link">Log out</a>
+        </div>
+      </section>
+    </aside>
+
+    <main class="main-content">
+      <header class="hero-card">
+        <div class="hero-text">
+          <div class="hero-kicker">Support</div>
+          <h1>Feedback and issue reporting</h1>
+          <p>Share suggestions, report bugs, and tell us what needs improving before wider rollout.</p>
+        </div>
+      </header>
+
+      <section class="builder-grid admin-builder-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">Send a message</div>
+              <h2>Feedback form</h2>
+              <p class="muted">Use this for bugs, product ideas, workflow issues, or account questions.</p>
+            </div>
+          </div>
+
+          <form id="feedbackForm" class="form-grid">
+            <label class="field">
+              <span>Category</span>
+              <select id="feedback_category" required>
+                <option value="">Select category...</option>
+                <option value="feedback">General feedback</option>
+                <option value="bug_report">Bug report</option>
+                <option value="feature_request">Feature request</option>
+                <option value="account_billing">Account / billing issue</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Page or feature</span>
+              <input type="text" id="feedback_page" placeholder="e.g. Lesson Builder, Pricing, Admin" />
+            </label>
+
+            <label class="field field-full">
+              <span>Subject</span>
+              <input type="text" id="feedback_subject" placeholder="Short summary of the issue or suggestion" required />
+            </label>
+
+            <label class="field field-full">
+              <span>Message</span>
+              <textarea id="feedback_message" rows="8" placeholder="Describe the issue, suggestion, or experience in detail..." required></textarea>
+            </label>
+
+            <div class="output-actions">
+              <button type="submit" class="btn btn-primary">Send message</button>
+            </div>
+
+            <div id="feedbackStatus" class="status-box">Ready.</div>
+          </form>
+        </article>
+
+        <article class="panel output-panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-kicker">
+                {% if current_user.role == "admin" %}All submissions{% else %}Your submissions{% endif %}
+              </div>
+              <h2>Feedback inbox</h2>
+              <p class="muted">
+                {% if current_user.role == "admin" %}
+                  Admin view shows all submitted feedback and bug reports.
+                {% else %}
+                  You can review the messages you have already submitted.
+                {% endif %}
+              </p>
+            </div>
+          </div>
+
+          <div id="feedbackList" class="feedback-list-grid"></div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/feedback.js"></script>
+</body>
+</html>

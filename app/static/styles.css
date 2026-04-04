@@ -1295,3 +1295,67 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 }
+/* ---------- FEEDBACK PAGE ---------- */
+
+.feedback-list-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.feedback-entry-card {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.feedback-entry-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+
+.feedback-entry-head strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.feedback-entry-head small {
+  color: var(--muted);
+  display: block;
+  line-height: 1.5;
+}
+
+.feedback-entry-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.feedback-entry-card p {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.feedback-entry-time {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.feedback-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(24, 59, 86, 0.08);
+  color: var(--navy-deep);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
