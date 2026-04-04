@@ -66,17 +66,17 @@ CRITICAL RULES:
 
 Return ONLY valid JSON:
 
-{
+{{
   "title": "string",
   "student_instructions": ["string"],
   "worksheet_items": ["string"],
   "answer_key": ["string"]
-}
+}}
 
 If include_mark_scheme is true, you may also include:
-{
+{{
   "mark_scheme": ["string"]
-}
+}}
 
 Activity Context:
 Mode: {mode}
@@ -158,6 +158,17 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
 
     client = OpenAI(api_key=OPENAI_API_KEY)
 
+    objectives_text = "- None provided"
+    if ctx["objectives"]:
+        if isinstance(ctx["objectives"][0], dict):
+            objectives_text = "\n".join(
+                f"- {obj.get('text', '')}" for obj in ctx["objectives"]
+            )
+        else:
+            objectives_text = "\n".join(f"- {obj}" for obj in ctx["objectives"])
+
+    sections_text = json.dumps(ctx["sections"], indent=2) if ctx["sections"] else "{}"
+
     prompt = PROMPT_TEMPLATE.format(
         mode=ctx["mode"],
         curriculum=ctx["curriculum"],
@@ -165,8 +176,8 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
         grade_level=ctx["grade_level"],
         topic=ctx["topic"],
         difficulty=ctx["difficulty"] or payload.get("difficulty", "Intermediate"),
-        objectives="\n".join(f"- {o}" for o in ctx["objectives"]) if ctx["objectives"] else "- None provided",
-        sections=json.dumps(ctx["sections"], indent=2) if ctx["sections"] else "{}",
+        objectives=objectives_text,
+        sections=sections_text,
         activity_type=ACTIVITY_LABELS.get(activity_type, activity_type),
         count=count,
         include_answer_key="yes" if include_answer_key else "no",
