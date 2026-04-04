@@ -752,3 +752,66 @@ button.secondary {
 .upgrade-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
 #activityOutput { min-height: 520px; }
 @media (max-width: 900px) { .dashboard-row { grid-template-columns: 1fr; } .form-actions { grid-template-columns: 1fr; } }
+.pricing-grid-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pricing-tier-label-plus {
+  background: rgba(112, 76, 255, 0.12);
+  color: var(--primary-2);
+}
+
+.activity-panel {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 16px;
+}
+
+.activity-panel-head h3 {
+  margin: 6px 0 8px;
+  font-size: 24px;
+  letter-spacing: -0.03em;
+}
+
+.activity-builder-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.activity-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.activity-output {
+  min-height: 240px;
+}
+
+.locked-activity-card {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  background: rgba(255,255,255,0.62);
+  display: grid;
+  gap: 10px;
+}
+
+.locked-activity-card strong {
+  font-size: 16px;
+}
+
+@media (max-width: 1200px) {
+  .pricing-grid-three {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .activity-builder-grid {
+    grid-template-columns: 1fr;
+  }
+}
