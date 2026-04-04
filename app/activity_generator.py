@@ -69,7 +69,6 @@ CRITICAL RULES:
 - Fractions must use \frac{a}{b}
 - Powers must use x^2 or x^{10}
 - Square roots must use \sqrt{x}
-- Do not write maths only as plain text if proper notation is needed
 
 Return ONLY valid JSON:
 
@@ -112,6 +111,53 @@ Make it:
 """.strip()
 
 
+def _fallback_activity(ctx: Dict[str, Any], activity_type: str, count: int, include_answer_key: bool, include_mark_scheme: bool) -> Dict[str, Any]:
+    topic = ctx.get("topic", "the topic")
+    subject = ctx.get("subject", "the subject")
+    grade_level = ctx.get("grade_level", "the selected grade")
+    title = f"{ACTIVITY_LABELS.get(activity_type, 'Activity')} - {topic}"
+
+    items = []
+    answers = []
+    mark_scheme = []
+
+    if activity_type == "mcq":
+        for i in range(1, count + 1):
+            items.append(
+                f"{i}. Multiple choice: Which statement best relates to {topic} in {subject} for {grade_level}?\n"
+                f"   A. Unrelated idea\n"
+                f"   B. Core idea about {topic}\n"
+                f"   C. Incorrect detail\n"
+                f"   D. Random option"
+            )
+            if include_answer_key:
+                answers.append(f"{i}. B")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. 1 mark for selecting the correct option.")
+    else:
+        for i in range(1, count + 1):
+            items.append(f"{i}. Write a short response about {topic} in {subject}.")
+            if include_answer_key:
+                answers.append(f"{i}. Accept a relevant answer connected to {topic}.")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. Award 1 mark for a relevant and accurate response.")
+
+    data = {
+        "title": title,
+        "student_instructions": [
+            f"Complete this {ACTIVITY_LABELS.get(activity_type, 'activity').lower()} on {topic}.",
+            "Write clearly and use full working where needed."
+        ],
+        "worksheet_items": items,
+        "answer_key": answers if include_answer_key else [],
+    }
+
+    if include_mark_scheme:
+        data["mark_scheme"] = mark_scheme
+
+    return data
+
+
 def _to_text(data: Dict[str, Any], include_mark_scheme: bool) -> str:
     lines: List[str] = []
 
@@ -148,26 +194,26 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
     ctx = _extract_lesson_context(payload)
 
     activity_type = payload["activity_type"]
-    count = payload.get("item_count", 8)
+    count = int(payload.get("item_count", 8))
     include_answer_key = bool(payload.get("include_answer_key", True))
     include_mark_scheme = bool(payload.get("include_mark_scheme", False))
 
-    title = f"{ACTIVITY_LABELS.get(activity_type, 'Activity')} - {ctx['topic']}"
+    title = f"{ACTIVITY_LABELS.get(activity_type, 'Activity')} - {ctx.get('topic', '')}"
 
     if not OPENAI_API_KEY:
+        data = _fallback_activity(ctx, activity_type, count, include_answer_key, include_mark_scheme)
         return {
-            "title": title,
+            "title": data.get("title", title),
             "activity_type": activity_type,
-            "content": f"Fallback activity for {ctx['topic']}",
+            "content": _to_text(data, include_mark_scheme=include_mark_scheme),
             "lesson_snippet": "",
-            "raw": {},
+            "raw": data,
         }
-
-    client = OpenAI(api_key=OPENAI_API_KEY)
 
     objectives_text = "- None provided"
     if ctx["objectives"]:
-        if isinstance(ctx["objectives"][0], dict):
+        first = ctx["objectives"][0]
+        if isinstance(first, dict):
             objectives_text = "\n".join(f"- {obj.get('text', '')}" for obj in ctx["objectives"])
         else:
             objectives_text = "\n".join(f"- {obj}" for obj in ctx["objectives"])
@@ -189,27 +235,34 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
         include_mark_scheme="yes" if include_mark_scheme else "no",
     )
 
-    response = client.responses.create(
-        model=OPENAI_MODEL,
-        input=prompt,
-    )
-
-    raw_text = getattr(response, "output_text", "").strip()
-
     try:
-        data = json.loads(raw_text)
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        response = client.responses.create(
+            model=OPENAI_MODEL,
+            input=prompt,
+        )
+        raw_text = getattr(response, "output_text", "").strip()
+
+        try:
+            data = json.loads(raw_text)
+        except Exception:
+            data = {
+                "title": title,
+                "student_instructions": ["Complete the activity below."],
+                "worksheet_items": [raw_text or f"Create an activity about {ctx.get('topic', 'the topic')}."],
+                "answer_key": [],
+            }
+
     except Exception:
-        data = {
-            "title": title,
-            "student_instructions": ["Complete the activity below."],
-            "worksheet_items": [raw_text],
-            "answer_key": [],
-        }
+        data = _fallback_activity(ctx, activity_type, count, include_answer_key, include_mark_scheme)
 
     data.pop("teacher_notes", None)
 
     if not include_mark_scheme:
         data.pop("mark_scheme", None)
+
+    if not include_answer_key:
+        data["answer_key"] = []
 
     return {
         "title": data.get("title", title),
