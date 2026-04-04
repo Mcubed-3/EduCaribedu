@@ -53,7 +53,6 @@ def _extract_lesson_context(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 PROMPT_TEMPLATE = r"""
-PROMPT_TEMPLATE = r"""
 You are generating a classroom activity STRICTLY aligned to the teaching context provided.
 
 CRITICAL RULES:
@@ -112,15 +111,21 @@ Make it:
 """.strip()
 
 
-def _fallback_activity(ctx: Dict[str, Any], activity_type: str, count: int, include_answer_key: bool, include_mark_scheme: bool) -> Dict[str, Any]:
+def _fallback_activity(
+    ctx: Dict[str, Any],
+    activity_type: str,
+    count: int,
+    include_answer_key: bool,
+    include_mark_scheme: bool,
+) -> Dict[str, Any]:
     topic = ctx.get("topic", "the topic")
     subject = ctx.get("subject", "the subject")
     grade_level = ctx.get("grade_level", "the selected grade")
     title = f"{ACTIVITY_LABELS.get(activity_type, 'Activity')} - {topic}"
 
-    items = []
-    answers = []
-    mark_scheme = []
+    items: List[str] = []
+    answers: List[str] = []
+    mark_scheme: List[str] = []
 
     if activity_type == "mcq":
         for i in range(1, count + 1):
@@ -143,11 +148,11 @@ def _fallback_activity(ctx: Dict[str, Any], activity_type: str, count: int, incl
             if include_mark_scheme:
                 mark_scheme.append(f"{i}. Award 1 mark for a relevant and accurate response.")
 
-    data = {
+    data: Dict[str, Any] = {
         "title": title,
         "student_instructions": [
             f"Complete this {ACTIVITY_LABELS.get(activity_type, 'activity').lower()} on {topic}.",
-            "Write clearly and use full working where needed."
+            "Write clearly and use full working where needed.",
         ],
         "worksheet_items": items,
         "answer_key": answers if include_answer_key else [],
