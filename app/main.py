@@ -540,9 +540,14 @@ def activity_generate(request: Request, payload: ActivityRequest):
                 detail="Curriculum, subject, grade level, and topic are required for standalone activity generation.",
             )
 
-    result = generate_activity(payload.model_dump())
-    increment_activity_generation_count(user["id"])
-    return result
+    try:
+        result = generate_activity(payload.model_dump())
+        increment_activity_generation_count(user["id"])
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Activity generation failed: {str(e)}")
 
 
 @app.get("/api/lessons")
