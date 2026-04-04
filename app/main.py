@@ -137,7 +137,7 @@ def robots_txt():
 @app.get("/sitemap.xml")
 def sitemap_xml():
     return FileResponse(BASE_DIR / "static" / "sitemap.xml", media_type="application/xml")
-    
+
 @app.get("/ads.txt")
 def ads_txt():
     return FileResponse(BASE_DIR / "static" / "ads.txt", media_type="text/plain")
@@ -525,8 +525,20 @@ def activity_generate(request: Request, payload: ActivityRequest):
             detail="Activity generation is available on the Plus plan only.",
         )
 
-    if not payload.lesson_payload:
-        raise HTTPException(status_code=400, detail="Lesson data is required before generating an activity.")
+    source_mode = getattr(payload, "source_mode", "lesson")
+
+    if source_mode == "lesson":
+        if not payload.lesson_payload:
+            raise HTTPException(
+                status_code=400,
+                detail="Lesson data is required before generating an activity.",
+            )
+    else:
+        if not payload.curriculum or not payload.subject or not payload.grade_level or not payload.topic:
+            raise HTTPException(
+                status_code=400,
+                detail="Curriculum, subject, grade level, and topic are required for standalone activity generation.",
+            )
 
     result = generate_activity(payload.model_dump())
     increment_activity_generation_count(user["id"])
