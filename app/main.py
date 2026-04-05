@@ -662,14 +662,29 @@ def export_pdf(request: Request, payload: dict):
             detail="PDF export is not available on your current plan.",
         )
 
-    html = payload.get("html", "")
-    path = export_to_pdf(html)
+    html = payload.get("html")
 
-    return FileResponse(
-        path,
-        media_type="application/pdf",
-        filename=path.name,
-    )
+    if not html:
+        raise HTTPException(
+            status_code=400,
+            detail="No rendered content provided for export.",
+        )
+
+    try:
+        path = export_to_pdf(html)
+
+        return FileResponse(
+            path,
+            media_type="application/pdf",
+            filename=path.name,
+        )
+
+    except Exception as e:
+        print("PDF EXPORT ERROR:", e)
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to generate PDF.",
+        )
 
 
 @app.post("/api/plan/update")
