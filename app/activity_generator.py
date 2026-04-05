@@ -23,6 +23,18 @@ ACTIVITY_LABELS = {
     "homework_sheet": "Homework Sheet",
 }
 
+MATH_HEAVY_SUBJECTS = {
+    "mathematics",
+    "math",
+    "physics",
+    "chemistry",
+    "integrated science",
+    "science",
+    "agricultural science",
+    "information technology",
+    "it",
+}
+
 
 def _extract_lesson_context(payload: Dict[str, Any]) -> Dict[str, Any]:
     lesson_payload = payload.get("lesson_payload")
@@ -52,6 +64,30 @@ def _extract_lesson_context(payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def _math_rules(subject: str) -> str:
+    if subject.strip().lower() not in MATH_HEAVY_SUBJECTS:
+        return (
+            "If formulas, symbols, measurements, ratios, or expressions appear, "
+            "format them cleanly using MathJax-friendly LaTeX delimiters."
+        )
+
+    return """
+CRITICAL MATH FORMAT RULES:
+- Any equation, expression, fraction, exponent, root, coordinate, variable, or formula MUST be written in MathJax-friendly LaTeX.
+- Inline maths must use \\( ... \\)
+- Display maths must use \\[ ... \\]
+- Fractions must use \\frac{a}{b}
+- Powers must use x^2 or x^{10} inside math delimiters
+- Roots must use \\sqrt{x}
+- Coordinates must be written like \\((2, -1)\\)
+- Simultaneous equations must be cleanly written, for example:
+  \\(2x + 3y = 16\\) and \\(x - y = 1\\)
+- Do NOT insert stray delimiters around plain words.
+- Do NOT output malformed strings like \\(a\\) short scenario or \\(m\\) unless m is truly a variable.
+- Do NOT double-escape delimiters.
+""".strip()
+
+
 PROMPT_TEMPLATE = r"""
 You are generating a classroom activity STRICTLY aligned to the teaching context provided.
 
@@ -63,26 +99,32 @@ CRITICAL RULES:
 - If include_mark_scheme is false, DO NOT return any mark scheme.
 - DO NOT return teacher notes.
 - DO NOT include a teacher notes section in any form.
-- For ALL mathematics and maths-like content, use LaTeX delimiters.
-- Inline maths must use \( ... \)
-- Display maths must use \[ ... \]
-- Fractions must use \frac{{a}}{{b}}
-- Powers must use x^2 or x^{{10}}
-- Square roots must use \sqrt{{x}}
+- Keep all wording classroom-ready, readable, and clean.
+- Make answer keys structured, step-by-step where appropriate, and easy for teachers to use.
+- Do not produce strange slashes, broken delimiters, or random symbolic wrappers around normal words.
+- {math_rules}
 
-Return ONLY valid JSON:
+Return ONLY valid JSON in this exact structure:
 
 {{
   "title": "string",
-  "student_instructions": ["string"],
-  "worksheet_items": ["string"],
-  "answer_key": ["string"]
+  "student_instructions": ["string", "string"],
+  "worksheet_items": ["string", "string"],
+  "answer_key": ["string", "string"]
 }}
 
 If include_mark_scheme is true, you may also include:
 {{
-  "mark_scheme": ["string"]
+  "mark_scheme": ["string", "string"]
 }}
+
+Formatting rules for output:
+- worksheet_items must be clean questions only
+- answer_key must be organized item-by-item in the same order as worksheet_items
+- each answer_key item should begin with the matching number, e.g. "1. ..."
+- if a worked solution is needed, write it clearly and in order
+- if activity_type is MCQ, include options inside worksheet_items
+- if activity_type is math_problem_solving, use properly formatted mathematical notation and readable working
 
 Activity Context:
 Mode: {mode}
@@ -130,16 +172,21 @@ def _fallback_activity(
     if activity_type == "math_problem_solving":
         for i in range(1, count + 1):
             items.append(
-                f"{i}. Solve the problem related to {topic}. Show all working using \\( ... \\) or \\[ ... \\] where needed."
+                f"{i}. Solve a problem related to {topic}. Show all working clearly and use proper mathematical notation."
             )
             if include_answer_key:
-                answers.append(f"{i}. Accept a correct worked solution related to {topic}.")
+                answers.append(
+                    f"{i}. Accept any correct worked solution related to {topic}, with clear method and correct final answer."
+                )
             if include_mark_scheme:
-                mark_scheme.append(f"{i}. Award marks for method, working, and correct final answer.")
+                mark_scheme.append(
+                    f"{i}. Award marks for correct method, accurate working, and correct final answer."
+                )
+
     elif activity_type == "mcq":
         for i in range(1, count + 1):
             items.append(
-                f"{i}. Multiple choice: Which statement best relates to {topic} in {subject} for {grade_level}?\n"
+                f"{i}. Which statement best relates to {topic} in {subject} for {grade_level}?\n"
                 f"   A. Unrelated idea\n"
                 f"   B. Core idea about {topic}\n"
                 f"   C. Incorrect detail\n"
@@ -149,11 +196,12 @@ def _fallback_activity(
                 answers.append(f"{i}. B")
             if include_mark_scheme:
                 mark_scheme.append(f"{i}. 1 mark for selecting the correct option.")
+
     else:
         for i in range(1, count + 1):
             items.append(f"{i}. Write a short response about {topic} in {subject}.")
             if include_answer_key:
-                answers.append(f"{i}. Accept a relevant answer connected to {topic}.")
+                answers.append(f"{i}. Accept any relevant and accurate response connected to {topic}.")
             if include_mark_scheme:
                 mark_scheme.append(f"{i}. Award 1 mark for a relevant and accurate response.")
 
@@ -161,7 +209,7 @@ def _fallback_activity(
         "title": title,
         "student_instructions": [
             f"Complete this {ACTIVITY_LABELS.get(activity_type, 'activity').lower()} on {topic}.",
-            "Write clearly and use full working where needed.",
+            "Write clearly and show full working where needed.",
         ],
         "worksheet_items": items,
         "answer_key": answers if include_answer_key else [],
@@ -171,6 +219,40 @@ def _fallback_activity(
         data["mark_scheme"] = mark_scheme
 
     return data
+
+
+def _clean_string(value: Any) -> str:
+    text = str(value or "").strip()
+
+    text = text.replace("\\\\(", "\\(").replace("\\\\)", "\\)")
+    text = text.replace("\\\\[", "\\[").replace("\\\\]", "\\]")
+
+    # Remove stray inline delimiters around plain letters in normal prose
+    text = text.replace("\\(a\\) ", "a ")
+    text = text.replace("\\(A\\) ", "A ")
+    text = text.replace("\\(m\\)", "m")
+    text = text.replace("\\(b\\)", "b")
+    text = text.replace("\\(y\\)", "y")
+    text = text.replace("\\(x\\)", "x")
+
+    return text.strip()
+
+
+def _normalize_activity_json(data: Dict[str, Any], include_answer_key: bool, include_mark_scheme: bool) -> Dict[str, Any]:
+    normalized = {
+        "title": _clean_string(data.get("title", "Activity")),
+        "student_instructions": [_clean_string(x) for x in data.get("student_instructions", []) if _clean_string(x)],
+        "worksheet_items": [_clean_string(x) for x in data.get("worksheet_items", []) if _clean_string(x)],
+        "answer_key": [_clean_string(x) for x in data.get("answer_key", []) if _clean_string(x)],
+    }
+
+    if include_mark_scheme:
+        normalized["mark_scheme"] = [_clean_string(x) for x in data.get("mark_scheme", []) if _clean_string(x)]
+
+    if not include_answer_key:
+        normalized["answer_key"] = []
+
+    return normalized
 
 
 def _to_text(data: Dict[str, Any], include_mark_scheme: bool) -> str:
@@ -194,13 +276,13 @@ def _to_text(data: Dict[str, Any], include_mark_scheme: bool) -> str:
     if data.get("answer_key"):
         lines.append("Answer Key:")
         for item in data["answer_key"]:
-            lines.append(f"- {item}")
+            lines.append(str(item))
         lines.append("")
 
     if include_mark_scheme and data.get("mark_scheme"):
         lines.append("Mark Scheme:")
         for item in data["mark_scheme"]:
-            lines.append(f"- {item}")
+            lines.append(str(item))
 
     return "\n".join(lines).strip()
 
@@ -238,6 +320,7 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
         count=count,
         include_answer_key="yes" if include_answer_key else "no",
         include_mark_scheme="yes" if include_mark_scheme else "no",
+        math_rules=_math_rules(ctx["subject"]),
     )
 
     try:
@@ -270,13 +353,16 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
     if not include_mark_scheme:
         data.pop("mark_scheme", None)
 
-    if not include_answer_key:
-        data["answer_key"] = []
+    normalized = _normalize_activity_json(
+        data,
+        include_answer_key=include_answer_key,
+        include_mark_scheme=include_mark_scheme,
+    )
 
     return {
-        "title": data.get("title", title),
+        "title": normalized.get("title", title),
         "activity_type": activity_type,
-        "content": _to_text(data, include_mark_scheme=include_mark_scheme),
+        "content": _to_text(normalized, include_mark_scheme=include_mark_scheme),
         "lesson_snippet": "",
-        "raw": data,
+        "raw": normalized,
     }
