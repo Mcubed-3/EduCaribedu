@@ -22,6 +22,7 @@ from .auth_service import (
     find_user_by_stripe_customer_id,
     find_user_by_stripe_subscription_id,
     get_plan_status,
+    get_user_profile,
     get_user_by_email,
     get_user_by_session,
     increment_activity_generation_count,
@@ -33,6 +34,7 @@ from .auth_service import (
     update_user_role_plan,
     update_user_stripe_subscription,
     verify_user,
+    save_user_profile,
 )
 from .curriculum_admin_service import (
     create_framework,
@@ -381,7 +383,27 @@ def admin_users_page(request: Request):
 def me(request: Request):
     user = require_user(request)
     saved_count = len(list_lessons(user["email"]))
-    return {"user": user, "plan_status": get_plan_status(user, saved_count)}
+    profile = get_user_profile(user["id"])
+    return {"user": user, "profile": profile, "plan_status": get_plan_status(user, saved_count)}
+
+
+@app.get("/api/profile")
+def api_get_profile(request: Request):
+    user = require_user(request)
+    return get_user_profile(user["id"])
+
+
+@app.post("/api/profile")
+async def api_save_profile(request: Request):
+    user = require_user(request)
+    payload = await request.json()
+    profile = save_user_profile(
+        user["id"],
+        payload.get("subjects", []),
+        payload.get("grade_levels", []),
+        payload.get("curriculum", ""),
+    )
+    return profile
 
 
 @app.get("/api/dashboard")
@@ -392,7 +414,8 @@ def dashboard_data(request: Request):
 
 @app.get("/api/config")
 def config(request: Request):
-    require_user(request)
+    user = require_user(request)
+    profile = get_user_profile(user["id"])
 
     subjects = sorted({
         item.get("subject", "").strip()
@@ -427,6 +450,7 @@ def config(request: Request):
         "structures": ["5Es", "4Cs"],
         "difficulties": ["Beginner", "Intermediate", "Advanced"],
         "lesson_types": ["Theory", "Practical", "Discussion", "Mixed"],
+        "profile": profile,
     }
 
 
@@ -509,7 +533,18 @@ def lesson_generate(request: Request, payload: LessonRequest):
             detail=f"Monthly lesson generation limit reached for your {user['plan']} plan.",
         )
 
-    result = generate_lesson(payload.model_dump())
+    profile = get_user_profile(user["id"])
+    payload_data = payload.model_dump()
+    payload_data["teacher_profile"] = profile
+
+    if profile.get("curriculum") and not payload_data.get("curriculum"):
+        payload_data["curriculum"] = profile["curriculum"]
+    if profile.get("subjects") and not payload_data.get("subject"):
+        payload_data["subject"] = profile["subjects"][0]
+    if profile.get("grade_levels") and not payload_data.get("grade_level"):
+        payload_data["grade_level"] = profile["grade_levels"][0]
+
+    result = generate_lesson(payload_data)
     increment_generation_count(user["id"])
     return result
 

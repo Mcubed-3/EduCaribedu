@@ -2,6 +2,97 @@ let currentLessonData = null;
 let currentUserContext = null;
 let currentActivityText = "";
 
+
+function parseCommaList(value) {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function showProfileModal() {
+  const modal = byId("profileModal");
+  if (modal) modal.classList.remove("hidden");
+}
+
+function hideProfileModal() {
+  const modal = byId("profileModal");
+  if (modal) modal.classList.add("hidden");
+}
+
+function profileSummaryText(profile) {
+  const subjects = (profile?.subjects || []).join(", ") || "No subjects set";
+  const levels = (profile?.grade_levels || []).join(", ") || "No grade levels set";
+  const curriculum = profile?.curriculum || "No curriculum set";
+  return `${subjects} • ${levels} • ${curriculum}`;
+}
+
+function populateProfileModal(profile) {
+  if (byId("profile_subjects")) byId("profile_subjects").value = (profile?.subjects || []).join(", ");
+  if (byId("profile_grade_levels")) byId("profile_grade_levels").value = (profile?.grade_levels || []).join(", ");
+  if (byId("profile_curriculum")) byId("profile_curriculum").value = profile?.curriculum || "";
+}
+
+function applyProfileDefaultsToBuilder() {
+  const profile = currentUserContext?.profile || {};
+  const completed = !!profile.profile_completed;
+  const banner = byId("profileSummaryBanner");
+  const summaryText = byId("profileSummaryText");
+  const drivenFields = document.querySelectorAll(".profile-driven-field");
+
+  if (summaryText) {
+    summaryText.textContent = profileSummaryText(profile);
+  }
+
+  if (completed) {
+    if (banner) banner.classList.remove("hidden");
+
+    if (profile.curriculum && byId("curriculum")) byId("curriculum").value = profile.curriculum;
+    if (profile.curriculum && byId("activity_curriculum")) byId("activity_curriculum").value = profile.curriculum;
+    if (Array.isArray(profile.subjects) && profile.subjects.length && byId("subject")) byId("subject").value = profile.subjects[0];
+    if (Array.isArray(profile.subjects) && profile.subjects.length && byId("activity_subject")) byId("activity_subject").value = profile.subjects[0];
+    if (Array.isArray(profile.grade_levels) && profile.grade_levels.length && byId("grade_level")) byId("grade_level").value = profile.grade_levels[0];
+    if (Array.isArray(profile.grade_levels) && profile.grade_levels.length && byId("activity_grade_level")) byId("activity_grade_level").value = profile.grade_levels[0];
+
+    drivenFields.forEach((field) => {
+      field.style.display = "none";
+    });
+  } else {
+    if (banner) banner.classList.add("hidden");
+    drivenFields.forEach((field) => {
+      field.style.display = "";
+    });
+    showProfileModal();
+  }
+}
+
+async function saveProfileFromModal() {
+  const subjects = parseCommaList(byId("profile_subjects")?.value || "");
+  const gradeLevels = parseCommaList(byId("profile_grade_levels")?.value || "");
+  const curriculum = byId("profile_curriculum")?.value || "";
+
+  if (!subjects.length || !gradeLevels.length || !curriculum) {
+    setStatus("Complete subject, grade level, and curriculum before saving your profile.", "error");
+    return;
+  }
+
+  await fetchJSON("/api/profile", {
+    method: "POST",
+    body: JSON.stringify({
+      subjects,
+      grade_levels: gradeLevels,
+      curriculum,
+    }),
+  });
+
+  await loadCurrentUserContext();
+  populateProfileModal(currentUserContext?.profile || {});
+  applyProfileDefaultsToBuilder();
+  hideProfileModal();
+  setStatus("Profile saved. Your dashboard will now use those defaults.", "success");
+}
+
+
 function byId(id) {
   return document.getElementById(id);
 }
@@ -198,22 +289,59 @@ async function loadSavedLessons() {
 }
 
 function lessonToText(data) {
-  const lesson = data.lesson;
+  const lesson = data.lesson || {};
   const lines = [];
 
-  lines.push(`${data.title}`);
+  lines.push(`${data.title || "Lesson Plan"}`);
   lines.push("");
-  lines.push(`Curriculum: ${lesson.curriculum}`);
-  lines.push(`Subject: ${lesson.subject}`);
-  lines.push(`Grade/Level: ${lesson.grade_level}`);
-  lines.push(`Topic: ${lesson.topic}`);
-  lines.push(`Structure: ${lesson.structure}`);
-  lines.push(`Difficulty: ${lesson.difficulty}`);
+  lines.push(`Curriculum: ${lesson.curriculum || ""}`);
+  lines.push(`Subject: ${lesson.subject || ""}`);
+  lines.push(`Grade/Level: ${lesson.grade_level || ""}`);
+  lines.push(`Topic: ${lesson.topic || ""}`);
+  lines.push(`Structure: ${lesson.structure || ""}`);
+  lines.push(`Difficulty: ${lesson.difficulty || ""}`);
   lines.push(`Generation Mode: ${lesson.generation_mode || "unknown"}`);
   lines.push("");
+
+  if (lesson.attainment_target) {
+    lines.push("Attainment Target:");
+    lines.push(lesson.attainment_target);
+    lines.push("");
+  }
+
+  if (lesson.theme || lesson.strand) {
+    lines.push(`Theme: ${lesson.theme || ""}`);
+    lines.push(`Strand: ${lesson.strand || ""}`);
+    lines.push("");
+  }
+
+  if (lesson.class_profile && Object.keys(lesson.class_profile).length) {
+    lines.push("Class Profile:");
+    Object.entries(lesson.class_profile).forEach(([key, value]) => {
+      const rendered = Array.isArray(value) ? value.join(", ") : value;
+      lines.push(`- ${prettifyLabel(key)}: ${rendered}`);
+    });
+    lines.push("");
+  }
+
+  if (lesson.domain_objectives && Object.keys(lesson.domain_objectives).length) {
+    lines.push("Specific Objectives:");
+    lines.push(`- Cognitive: ${lesson.domain_objectives.cognitive || ""}`);
+    lines.push(`- Affective: ${lesson.domain_objectives.affective || ""}`);
+    lines.push(`- Psychomotor: ${lesson.domain_objectives.psychomotor || ""}`);
+    lines.push("");
+  }
+
   lines.push("Objectives:");
   (lesson.objectives || []).forEach((obj, i) => lines.push(`${i + 1}. ${obj}`));
   lines.push("");
+
+  if (lesson.prior_learning) {
+    lines.push("Prior Learning:");
+    lines.push(lesson.prior_learning);
+    lines.push("");
+  }
+
   lines.push("Prior Knowledge:");
   (lesson.prior_knowledge_questions || []).forEach((q) => lines.push(`- ${q}`));
   lines.push("");
@@ -226,6 +354,24 @@ function lessonToText(data) {
     (items || []).forEach((item) => lines.push(`- ${item}`));
     lines.push("");
   });
+
+  if (Array.isArray(lesson.apse_pathways) && lesson.apse_pathways.length) {
+    lines.push("APSE Pathways:");
+    lesson.apse_pathways.forEach((item) => lines.push(`- ${item}`));
+    lines.push("");
+  }
+
+  if (Array.isArray(lesson.stem_skills) && lesson.stem_skills.length) {
+    lines.push("STEM / Skills:");
+    lesson.stem_skills.forEach((item) => lines.push(`- ${item}`));
+    lines.push("");
+  }
+
+  if (lesson.assessment_criteria) {
+    lines.push("Assessment Criteria:");
+    lines.push(lesson.assessment_criteria);
+    lines.push("");
+  }
 
   lines.push("Assessment:");
   (lesson.assessment || []).forEach((item) => lines.push(`- ${item}`));
@@ -637,6 +783,9 @@ async function loadConfig() {
   populateSelect("activity_subject", config.subjects, "Select subject...");
   populateSelect("activity_grade_level", config.levels, "Select grade/level...");
   populateSelect("activity_difficulty", config.difficulties, "Select difficulty...");
+
+  populateProfileModal(config.profile || currentUserContext?.profile || {});
+  applyProfileDefaultsToBuilder();
 }
 
 async function init() {
@@ -742,6 +891,17 @@ async function init() {
     });
 
     byId("activity_source_mode")?.addEventListener("change", updateActivityModeUI);
+
+    byId("saveProfileBtn")?.addEventListener("click", saveProfileFromModal);
+    byId("closeProfileModal")?.addEventListener("click", hideProfileModal);
+    byId("editProfileSidebarBtn")?.addEventListener("click", () => {
+      populateProfileModal(currentUserContext?.profile || {});
+      showProfileModal();
+    });
+    byId("editProfileBannerBtn")?.addEventListener("click", () => {
+      populateProfileModal(currentUserContext?.profile || {});
+      showProfileModal();
+    });
 
     byId("closeUpgradeModal")?.addEventListener("click", hideUpgradeModal);
     byId("dismissUpgradeModal")?.addEventListener("click", hideUpgradeModal);

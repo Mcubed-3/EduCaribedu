@@ -1,11 +1,24 @@
 from __future__ import annotations
 
 from typing import Dict, List
+
 from .ai_generator import generate_dynamic_lesson_parts
 from .engine_state import engine
 
 FIVE_E_SECTIONS = ["Engagement", "Exploration", "Explanation", "Evaluation", "Extension"]
 FOUR_C_SECTIONS = ["Creativity", "Critical Thinking", "Communication", "Collaboration"]
+STEM_SUBJECTS = {
+    "agricultural science",
+    "mathematics",
+    "math",
+    "biology",
+    "chemistry",
+    "physics",
+    "integrated science",
+    "science",
+    "information technology",
+    "it",
+}
 
 
 def format_objectives(objectives: List[Dict[str, str]]) -> List[str]:
@@ -44,6 +57,10 @@ def _prior_questions(topic: str, subject: str, difficulty: str) -> List[str]:
             f"What people, places, events, or issues connect to {topic}?",
             f"How does {topic} relate to community, society, or the wider world?",
         ],
+        "Agricultural Science": [
+            f"What farming, crop, or livestock ideas already connect to {topic}?",
+            f"How does {topic} support Caribbean food production or farm management?",
+        ],
     }
 
     questions.extend(subject_map.get(subject, []))
@@ -54,9 +71,9 @@ def _prior_questions(topic: str, subject: str, difficulty: str) -> List[str]:
         questions.append(f"What deeper question or problem about {topic} would you like to explore?")
 
     deduped = []
-    for q in questions:
-        if q not in deduped:
-            deduped.append(q)
+    for question in questions:
+        if question not in deduped:
+            deduped.append(question)
 
     return deduped[:5]
 
@@ -66,13 +83,19 @@ def _resources(match: Dict, user_resources: str, subject: str, topic: str, lesso
 
     fallback = [
         f"{subject} textbook section on {topic}",
-        f"YouTube title suggestion: {topic} explained for {subject}",
-        f"Website suggestion: BBC Bitesize or Khan Academy topic page for {topic}",
+        f"Teacher-made notes or slides on {topic}",
+        f"Board, projector, or chart paper for class discussion",
     ]
+
+    if subject.strip().lower() == "agricultural science":
+        fallback.extend([
+            f"Images or cards showing examples linked to {topic}",
+            "Local or Caribbean farm examples for discussion",
+        ])
 
     if lesson_type == "Practical":
         fallback.extend([
-            f"Worksheet or lab/activity sheet on {topic}",
+            f"Worksheet or activity sheet on {topic}",
             f"Simple classroom materials for a practical activity on {topic}",
         ])
 
@@ -86,7 +109,7 @@ def _resources(match: Dict, user_resources: str, subject: str, topic: str, lesso
         if item not in deduped:
             deduped.append(item)
 
-    return deduped
+    return deduped[:6]
 
 
 def _build_4c_sections(topic: str, subject: str, lesson_type: str, difficulty: str, objectives: List[str]) -> Dict[str, List[str]]:
@@ -120,6 +143,9 @@ def _build_4c_sections(topic: str, subject: str, lesson_type: str, difficulty: s
         communication[0] = f"Students discuss, present, write, or respond using ideas linked to {topic}."
     elif subject == "Integrated Science":
         critical_thinking[0] = f"Students analyze scientific examples, observations, or investigations related to {topic}."
+    elif subject == "Agricultural Science":
+        critical_thinking[0] = f"Students compare and classify examples linked to {topic} and connect them to Caribbean farming needs."
+        collaboration[0] = f"Pairs or groups complete a card sort, comparison chart, or decision-making task related to {topic}."
 
     if lesson_type == "Practical":
         collaboration[0] = f"Pairs or groups complete a hands-on task or short investigation related to {topic}."
@@ -183,6 +209,11 @@ def _build_5e_sections(topic: str, subject: str, lesson_type: str, difficulty: s
     elif subject == "Social Studies":
         exploration[0] = f"Students explore {topic} through case examples, short texts, discussion prompts, or issue-based tasks."
         explanation[0] = f"Teacher clarifies the key social, civic, or environmental ideas related to {topic}."
+    elif subject == "Agricultural Science":
+        engagement[0] = f"Use photos, breed cards, a farm scenario, or a quick sorting activity to introduce {topic}."
+        exploration[0] = f"Students examine examples, images, fact cards, or comparison charts linked to {topic}, with emphasis on Caribbean farming contexts."
+        explanation[0] = f"Teacher clarifies important terms, characteristics, and practical farm uses linked to {topic}."
+        extension[0] = f"Students apply learning on {topic} to Caribbean farming needs, management choices, or small-scale enterprise ideas."
 
     if lesson_type == "Practical":
         exploration[0] = f"Students investigate {topic} through a practical activity, observation, experiment, or hands-on task."
@@ -206,7 +237,7 @@ def _build_5e_sections(topic: str, subject: str, lesson_type: str, difficulty: s
     }
 
 
-def _build_sections(structure: str, topic: str, subject: str, lesson_type: str, difficulty: str, objectives: List[str], description: str) -> Dict[str, List[str]]:
+def _build_sections(structure: str, topic: str, subject: str, lesson_type: str, difficulty: str, objectives: List[str]) -> Dict[str, List[str]]:
     if structure == "4Cs":
         return _build_4c_sections(topic, subject, lesson_type, difficulty, objectives)
     return _build_5e_sections(topic, subject, lesson_type, difficulty, objectives)
@@ -225,6 +256,8 @@ def _build_reflection(topic: str, subject: str, difficulty: str) -> List[str]:
         reflection.append(f"Were students able to show accurate working and explain their reasoning for tasks related to {topic}?")
     elif subject in ["English", "Language Arts"]:
         reflection.append(f"Did students communicate their ideas clearly and use appropriate language related to {topic}?")
+    elif subject == "Agricultural Science":
+        reflection.append(f"Were students able to connect the content to Caribbean farming needs, safe practice, or farm decision-making?")
 
     if difficulty == "Beginner":
         reflection.append(f"Did students need more scaffolding, modelling, or simpler examples to understand {topic}?")
@@ -234,13 +267,54 @@ def _build_reflection(topic: str, subject: str, difficulty: str) -> List[str]:
     return reflection[:5]
 
 
+def _fallback_domain_objectives(topic: str, subject: str) -> Dict[str, str]:
+    return {
+        "cognitive": f"Students explain and apply the key ideas related to {topic} in {subject}.",
+        "affective": f"Students show appreciation for the value and relevance of {topic} in classroom and real-life settings.",
+        "psychomotor": f"Students complete a practical, written, oral, or visual task linked to {topic}.",
+    }
+
+
+def _fallback_class_profile(subject: str, difficulty: str) -> Dict[str, object]:
+    return {
+        "learner_profile": f"This class includes learners with varied readiness levels, interests, and prior knowledge in {subject}. The lesson should provide clear explanations, modelling, and opportunities for guided and independent work.",
+        "learning_styles": ["Visual", "Auditory", "Kinesthetic"],
+        "mixed_ability_support": f"Provide scaffolds, peer support, teacher check-ins, and extension prompts so {difficulty.lower()}-level learners can all participate meaningfully.",
+    }
+
+
+def _fallback_prior_learning(topic: str, subject: str) -> str:
+    return f"Students should already have some basic background knowledge, vocabulary, or everyday experience connected to {topic} in {subject}."
+
+
+def _fallback_assessment_criteria(topic: str) -> str:
+    return f"Students should accurately use key vocabulary, respond to questions or tasks on {topic}, and demonstrate understanding through discussion, written work, or practical application."
+
+
+def _fallback_apse_pathways(topic: str, subject: str) -> List[str]:
+    return [
+        f"Career awareness linked to {subject} and the study of {topic}",
+        f"Communication, teamwork, and problem-solving through classroom tasks on {topic}",
+        f"Real-world application of {topic} to community, work, or everyday decision-making",
+    ]
+
+
+def _fallback_stem_skills(subject: str, topic: str) -> List[str]:
+    if subject.strip().lower() not in STEM_SUBJECTS:
+        return []
+    return [
+        f"Observation and analysis linked to {topic}",
+        "Problem-solving and evidence-based thinking",
+        "Practical application of subject knowledge",
+    ]
+
+
 def _normalize_ai_sections(structure: str, ai_sections: Dict, fallback_sections: Dict[str, List[str]]) -> Dict[str, List[str]]:
     expected = FOUR_C_SECTIONS if structure == "4Cs" else FIVE_E_SECTIONS
-
     normalized: Dict[str, List[str]] = {}
+
     for section_name in expected:
         value = ai_sections.get(section_name)
-
         if isinstance(value, list) and value:
             normalized[section_name] = [str(item).strip() for item in value if str(item).strip()]
         elif isinstance(value, str) and value.strip():
@@ -250,7 +324,14 @@ def _normalize_ai_sections(structure: str, ai_sections: Dict, fallback_sections:
 
     return normalized
 
+
 def generate_lesson(payload: dict) -> dict:
+    payload["grade_level"] = payload.get("grade_level") or payload.get("grade") or ""
+    payload["structure"] = payload.get("structure") or "5Es"
+    payload["difficulty"] = payload.get("difficulty") or "Intermediate"
+    payload["lesson_type"] = payload.get("lesson_type") or "Theory"
+    payload["objective_count"] = payload.get("objective_count") or 3
+    payload["duration_minutes"] = payload.get("duration_minutes") or 60
 
     objectives = engine.build_objectives(
         payload["curriculum"],
@@ -269,59 +350,8 @@ def generate_lesson(payload: dict) -> dict:
         payload["topic"],
         payload.get("description", ""),
     )
-
-    match = search_result["match"] or {}
-
+    match = search_result.get("match") or {}
     objective_text = format_objectives(objectives)
-
-    print("TRYING AI GENERATION...")
-    ai_parts = generate_dynamic_lesson_parts(
-        payload=payload,
-        objectives=objective_text,
-        strand=match.get("strand", "General Strand"),
-        resource_suggestions=[],
-    )
-
-    if not ai_parts:
-        print("AI FAILED ❌")
-        return {"error": "AI generation failed"}
-
-    lesson = {
-        "curriculum": payload["curriculum"],
-        "subject": payload["subject"],
-        "grade": payload["grade_level"],
-        "topic": payload["topic"],
-
-        "attainment_target": ai_parts.get("attainment_target"),
-        "theme": ai_parts.get("theme"),
-        "strand": ai_parts.get("strand"),
-
-        "class_profile": ai_parts.get("class_profile"),
-
-        "objectives": ai_parts.get("objectives"),
-
-        "prior_learning": ai_parts.get("prior_learning"),
-
-        "engage": ai_parts.get("engage"),
-        "explore": ai_parts.get("explore"),
-        "explain": ai_parts.get("explain"),
-        "elaborate": ai_parts.get("elaborate"),
-        "evaluate": ai_parts.get("evaluate"),
-
-        "assessment_criteria": ai_parts.get("assessment_criteria"),
-
-        "apse_pathways": ai_parts.get("apse_pathways"),
-
-        "stem_skills": ai_parts.get("stem_skills"),
-
-        "reflection": ai_parts.get("reflection"),
-    }
-
-    return {
-        "title": f"{payload['subject']} Lesson Plan - {payload['topic']}",
-        "curriculum_match": match,
-        "lesson": lesson,
-    }
 
     fallback_sections = _build_sections(
         payload["structure"],
@@ -330,15 +360,8 @@ def generate_lesson(payload: dict) -> dict:
         payload["lesson_type"],
         payload["difficulty"],
         objective_text,
-        payload.get("description", ""),
     )
-
-    fallback_prior = _prior_questions(
-        payload["topic"],
-        payload["subject"],
-        payload["difficulty"],
-    )
-
+    fallback_prior = _prior_questions(payload["topic"], payload["subject"], payload["difficulty"])
     fallback_resources = _resources(
         match,
         payload.get("resources", ""),
@@ -346,27 +369,13 @@ def generate_lesson(payload: dict) -> dict:
         payload["topic"],
         payload["lesson_type"],
     )
-
-    fallback_reflection = _build_reflection(
-        payload["topic"],
-        payload["subject"],
-        payload["difficulty"],
-    )
-
+    fallback_reflection = _build_reflection(payload["topic"], payload["subject"], payload["difficulty"])
     fallback_assessment = [
         f"Check students' responses against the stated objectives for {payload['topic']}.",
         "Use oral questioning and at least one written or performance-based task to gather evidence of learning.",
     ]
 
-    print("TRYING AI GENERATION...")
-    ai_parts = generate_dynamic_lesson_parts(
-        payload=payload,
-        objectives=objective_text,
-        strand=match.get("strand", "General Strand"),
-        resource_suggestions=fallback_resources,
-    )
-
-    lesson = {
+    fallback_lesson = {
         "curriculum": payload["curriculum"],
         "subject": payload["subject"],
         "grade_level": payload["grade_level"],
@@ -377,31 +386,53 @@ def generate_lesson(payload: dict) -> dict:
         "lesson_type": payload["lesson_type"],
         "duration_minutes": payload["duration_minutes"],
         "description": payload.get("description") or "",
+        "attainment_target": match.get("attainment_target", "") or f"Students build understanding and practical application related to {payload['topic']}.",
+        "theme": match.get("theme", "") or "Curriculum theme",
+        "strand": match.get("strand", "") or "General Strand",
+        "class_profile": _fallback_class_profile(payload["subject"], payload["difficulty"]),
+        "domain_objectives": _fallback_domain_objectives(payload["topic"], payload["subject"]),
+        "prior_learning": _fallback_prior_learning(payload["topic"], payload["subject"]),
         "objectives": objective_text,
         "suggested_standards": [match.get("strand", "General Strand")],
         "prior_knowledge_questions": fallback_prior,
         "resources": fallback_resources,
         "sections": fallback_sections,
         "assessment": fallback_assessment,
+        "assessment_criteria": _fallback_assessment_criteria(payload["topic"]),
+        "apse_pathways": _fallback_apse_pathways(payload["topic"], payload["subject"]),
+        "stem_skills": _fallback_stem_skills(payload["subject"], payload["topic"]),
         "reflection": fallback_reflection,
         "generation_mode": "fallback",
     }
 
-    if ai_parts:
-        print("AI USED ✅")
+    ai_parts = generate_dynamic_lesson_parts(
+        payload=payload,
+        objectives=objective_text,
+        strand=match.get("strand", "General Strand"),
+        resource_suggestions=fallback_resources,
+    )
 
-        ai_sections = ai_parts.get("sections", {})
-        lesson["prior_knowledge_questions"] = ai_parts.get("prior_knowledge_questions", fallback_prior)
-        lesson["resources"] = ai_parts.get("resources", fallback_resources)
-        lesson["sections"] = _normalize_ai_sections(payload["structure"], ai_sections, fallback_sections)
-        lesson["assessment"] = ai_parts.get("assessment", fallback_assessment)
-        lesson["reflection"] = ai_parts.get("reflection", fallback_reflection)
+    lesson = dict(fallback_lesson)
+
+    if ai_parts:
+        lesson["attainment_target"] = ai_parts.get("attainment_target", lesson["attainment_target"])
+        lesson["theme"] = ai_parts.get("theme", lesson["theme"])
+        lesson["strand"] = ai_parts.get("strand", lesson["strand"])
+        lesson["class_profile"] = ai_parts.get("class_profile", lesson["class_profile"])
+        lesson["domain_objectives"] = ai_parts.get("domain_objectives", lesson["domain_objectives"])
+        lesson["prior_learning"] = ai_parts.get("prior_learning", lesson["prior_learning"])
+        lesson["prior_knowledge_questions"] = ai_parts.get("prior_knowledge_questions", lesson["prior_knowledge_questions"])
+        lesson["resources"] = ai_parts.get("resources", lesson["resources"])
+        lesson["sections"] = _normalize_ai_sections(payload["structure"], ai_parts.get("sections", {}), fallback_sections)
+        lesson["assessment"] = ai_parts.get("assessment", lesson["assessment"])
+        lesson["assessment_criteria"] = ai_parts.get("assessment_criteria", lesson["assessment_criteria"])
+        lesson["apse_pathways"] = ai_parts.get("apse_pathways", lesson["apse_pathways"])
+        lesson["stem_skills"] = ai_parts.get("stem_skills", lesson["stem_skills"])
+        lesson["reflection"] = ai_parts.get("reflection", lesson["reflection"])
         lesson["generation_mode"] = "ai"
-    else:
-        print("FALLBACK USED ❌")
 
     return {
-        "title": f"{payload['subject']} Lesson Plan - {payload['topic']}",
+        "title": f"{payload.get('subject', '')} Lesson Plan - {payload.get('topic', '')}",
         "curriculum_match": match,
         "lesson": lesson,
     }

@@ -13,7 +13,8 @@ BASE_DIR = Path(__file__).parent
 STORAGE_DIR = BASE_DIR / "storage"
 STORAGE_DIR.mkdir(exist_ok=True)
 
-DB_PATH = STORAGE_DIR / "auth.db"
+DB_PATH = Path(os.getenv("AUTH_DB_PATH", str(STORAGE_DIR / "auth.db")))
+DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 SESSION_DAYS = 14
 
@@ -154,6 +155,20 @@ def init_auth_db() -> None:
             month_key TEXT NOT NULL,
             generation_count INTEGER NOT NULL DEFAULT 0,
             PRIMARY KEY(user_id, month_key),
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_profiles (
+            user_id INTEGER PRIMARY KEY,
+            subjects TEXT NOT NULL DEFAULT '[]',
+            grade_levels TEXT NOT NULL DEFAULT '[]',
+            curriculum TEXT NOT NULL DEFAULT '',
+            profile_completed INTEGER NOT NULL DEFAULT 0,
+            updated_at TEXT NOT NULL DEFAULT '',
             FOREIGN KEY(user_id) REFERENCES users(id)
         )
         """
@@ -530,6 +545,74 @@ def increment_activity_generation_count(user_id: int, month_key: Optional[str] =
     conn.close()
     return int(row["generation_count"]) if row else 0
 
+
+
+def get_user_profile(user_id: int) -> Dict[str, Any]:
+    conn = _get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT user_id, subjects, grade_levels, curriculum, profile_completed, updated_at
+        FROM user_profiles
+        WHERE user_id = ?
+        """,
+        (user_id,),
+    )
+    row = cur.fetchone()
+    conn.close()
+
+    if not row:
+        return {
+            "subjects": [],
+            "grade_levels": [],
+            "curriculum": "",
+            "profile_completed": False,
+            "updated_at": "",
+        }
+
+    import json
+
+    return {
+        "subjects": json.loads(row["subjects"] or "[]"),
+        "grade_levels": json.loads(row["grade_levels"] or "[]"),
+        "curriculum": row["curriculum"] or "",
+        "profile_completed": bool(row["profile_completed"]),
+        "updated_at": row["updated_at"] or "",
+    }
+
+
+def save_user_profile(user_id: int, subjects: List[str], grade_levels: List[str], curriculum: str) -> Dict[str, Any]:
+    import json
+
+    clean_subjects = [str(item).strip() for item in (subjects or []) if str(item).strip()]
+    clean_levels = [str(item).strip() for item in (grade_levels or []) if str(item).strip()]
+    clean_curriculum = (curriculum or "").strip()
+    now = datetime.utcnow().isoformat()
+
+    conn = _get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO user_profiles (user_id, subjects, grade_levels, curriculum, profile_completed, updated_at)
+        VALUES (?, ?, ?, ?, 1, ?)
+        ON CONFLICT(user_id) DO UPDATE SET
+            subjects = excluded.subjects,
+            grade_levels = excluded.grade_levels,
+            curriculum = excluded.curriculum,
+            profile_completed = 1,
+            updated_at = excluded.updated_at
+        """,
+        (
+            user_id,
+            json.dumps(clean_subjects),
+            json.dumps(clean_levels),
+            clean_curriculum,
+            now,
+        ),
+    )
+    conn.commit()
+    conn.close()
+    return get_user_profile(user_id)
 
 def can_generate_lessons(user: Dict[str, Any]) -> Dict[str, Any]:
     limits = get_plan_limits(user["plan"])

@@ -13,35 +13,94 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5-mini").strip()
 
 
+class ClassProfile(BaseModel):
+    learner_profile: str = Field(min_length=20, max_length=260)
+    learning_styles: List[str] = Field(min_length=2, max_length=4)
+    mixed_ability_support: str = Field(min_length=20, max_length=240)
+
+
+class DomainObjectives(BaseModel):
+    cognitive: str = Field(min_length=12, max_length=220)
+    affective: str = Field(min_length=12, max_length=220)
+    psychomotor: str = Field(min_length=12, max_length=220)
+
+
 class LessonSections5E(BaseModel):
-    Engagement: List[str] = Field(min_length=2, max_length=3)
-    Exploration: List[str] = Field(min_length=2, max_length=3)
-    Explanation: List[str] = Field(min_length=2, max_length=3)
-    Evaluation: List[str] = Field(min_length=2, max_length=3)
-    Extension: List[str] = Field(min_length=1, max_length=2)
+    Engagement: List[str] = Field(min_length=2, max_length=4)
+    Exploration: List[str] = Field(min_length=2, max_length=4)
+    Explanation: List[str] = Field(min_length=2, max_length=4)
+    Evaluation: List[str] = Field(min_length=2, max_length=4)
+    Extension: List[str] = Field(min_length=1, max_length=3)
 
 
 class LessonSections4C(BaseModel):
-    Creativity: List[str] = Field(min_length=2, max_length=3)
-    Critical_Thinking: List[str] = Field(min_length=2, max_length=3)
-    Communication: List[str] = Field(min_length=2, max_length=3)
-    Collaboration: List[str] = Field(min_length=2, max_length=3)
+    Creativity: List[str] = Field(min_length=2, max_length=4)
+    Critical_Thinking: List[str] = Field(min_length=2, max_length=4)
+    Communication: List[str] = Field(min_length=2, max_length=4)
+    Collaboration: List[str] = Field(min_length=2, max_length=4)
 
 
 class LessonParts5E(BaseModel):
-    prior_knowledge_questions: List[str] = Field(min_length=3, max_length=4)
-    resources: List[str] = Field(min_length=3, max_length=5)
+    attainment_target: str = Field(min_length=20, max_length=280)
+    theme: str = Field(min_length=3, max_length=120)
+    strand: str = Field(min_length=3, max_length=120)
+    class_profile: ClassProfile
+    domain_objectives: DomainObjectives
+    prior_learning: str = Field(min_length=20, max_length=260)
+    prior_knowledge_questions: List[str] = Field(min_length=3, max_length=5)
+    resources: List[str] = Field(min_length=3, max_length=6)
     sections: LessonSections5E
-    assessment: List[str] = Field(min_length=2, max_length=3)
-    reflection: List[str] = Field(min_length=3, max_length=4)
+    assessment: List[str] = Field(min_length=2, max_length=4)
+    assessment_criteria: str = Field(min_length=20, max_length=260)
+    apse_pathways: List[str] = Field(min_length=2, max_length=4)
+    stem_skills: List[str] = Field(default_factory=list, max_length=5)
+    reflection: List[str] = Field(min_length=3, max_length=5)
 
 
 class LessonParts4C(BaseModel):
-    prior_knowledge_questions: List[str] = Field(min_length=3, max_length=4)
-    resources: List[str] = Field(min_length=3, max_length=5)
+    attainment_target: str = Field(min_length=20, max_length=280)
+    theme: str = Field(min_length=3, max_length=120)
+    strand: str = Field(min_length=3, max_length=120)
+    class_profile: ClassProfile
+    domain_objectives: DomainObjectives
+    prior_learning: str = Field(min_length=20, max_length=260)
+    prior_knowledge_questions: List[str] = Field(min_length=3, max_length=5)
+    resources: List[str] = Field(min_length=3, max_length=6)
     sections: LessonSections4C
-    assessment: List[str] = Field(min_length=2, max_length=3)
-    reflection: List[str] = Field(min_length=3, max_length=4)
+    assessment: List[str] = Field(min_length=2, max_length=4)
+    assessment_criteria: str = Field(min_length=20, max_length=260)
+    apse_pathways: List[str] = Field(min_length=2, max_length=4)
+    stem_skills: List[str] = Field(default_factory=list, max_length=5)
+    reflection: List[str] = Field(min_length=3, max_length=5)
+
+
+STEM_SUBJECTS = {
+    "agricultural science",
+    "mathematics",
+    "math",
+    "biology",
+    "chemistry",
+    "physics",
+    "integrated science",
+    "science",
+    "information technology",
+    "it",
+}
+
+
+def _teacher_profile_text(payload: dict) -> str:
+    profile = payload.get("teacher_profile") or {}
+    subjects = ", ".join(profile.get("subjects", []) or [])
+    grade_levels = ", ".join(profile.get("grade_levels", []) or [])
+    curriculum = profile.get("curriculum", "")
+
+    if not any([subjects, grade_levels, curriculum]):
+        return "No teacher profile details were provided."
+
+    return (
+        f"Teacher profile defaults: subjects={subjects or 'not set'}; "
+        f"grade levels={grade_levels or 'not set'}; curriculum={curriculum or 'not set'}."
+    )
 
 
 def _build_prompt(payload: dict, objectives: List[str], strand: str, resource_suggestions: List[str]) -> str:
@@ -54,6 +113,8 @@ def _build_prompt(payload: dict, objectives: List[str], strand: str, resource_su
     subtopic = payload.get("subtopic", "")
     description = payload.get("description", "")
     user_resources = payload.get("resources", "")
+    curriculum = payload["curriculum"]
+    is_stem = subject.strip().lower() in STEM_SUBJECTS
 
     section_names = (
         "Creativity, Critical Thinking, Communication, Collaboration"
@@ -61,58 +122,61 @@ def _build_prompt(payload: dict, objectives: List[str], strand: str, resource_su
         else "Engagement, Exploration, Explanation, Evaluation, Extension"
     )
 
+    stem_text = (
+        "Include practical or skill-building STEM elements where natural: observation, classification, measuring, problem-solving, data use, or application."
+        if is_stem
+        else "Do not force STEM language if it does not fit the subject, but keep the lesson skill-based and practical where possible."
+    )
+
     return f"""
-Create a concise, classroom-ready lesson plan body.
+Create a polished, curriculum-aligned Caribbean lesson plan that feels like a real teacher wrote it.
 
-Style rules:
-- Write for a teacher who wants a usable lesson plan, not a long teaching script.
-- Keep the output practical, clear, and professional.
-- Avoid overly long paragraphs.
-- Avoid repeating the topic name in every bullet.
-- Keep each bullet focused on one concrete action.
-- Give definite classroom activities, not vague suggestions.
-- State what the teacher does and what students do.
-- Use age-appropriate language for {grade_level}.
-- Match the lesson to {subject}.
-- Match the topic exactly: "{topic}".
-- Use the selected structure exactly: {structure}.
-- Use the selected lesson type exactly: {lesson_type}.
-- Use the selected difficulty exactly: {difficulty}.
-- Keep the lesson realistic for a normal classroom period.
-- Prefer standard classroom resources unless the lesson type clearly requires practical materials.
-- Do not turn the lesson into a full lab manual unless the lesson type is Practical.
-- Do not make the resources list too long.
-- Do not make the reflection section too long.
-- Keep assessment concise and classroom-appropriate.
-- Resources must be plain text only, not clickable links.
+Context:
+- Curriculum: {curriculum}
+- Subject: {subject}
+- Grade/Level: {grade_level}
+- Topic: {topic}
+- Subtopic: {subtopic}
+- Strand match: {strand}
+- Structure: {structure}
+- Lesson type: {lesson_type}
+- Difficulty: {difficulty}
+- Duration: {payload.get('duration_minutes', 60)} minutes
+- Objectives from curriculum engine: {objectives}
+- Teacher brief: {description}
+- User resources: {user_resources}
+- Suggested resources: {resource_suggestions}
+- {_teacher_profile_text(payload)}
 
-Output quality rules:
-- Prior knowledge questions must be topic-specific and short.
-- Resources should be 3 to 5 concise items.
-- Section activities should be detailed enough to use, but not over-explained.
-- Most sections should have 2 bullets. A third bullet is only allowed if truly needed.
-- Assessment should be 2 or 3 concise bullets.
-- Reflection should be 3 or 4 concise bullets.
-- If practical, include hands-on activity steps, but keep them summary-level.
-- If theory or discussion, avoid pretending it is a lab.
+Required quality rules:
+- Keep the lesson classroom-ready, realistic, and teacher-friendly.
+- Use Caribbean-appropriate examples or contexts where natural.
+- Include mixed-ability support and learning styles in the class profile.
+- Include APSE pathways as career or life-skill links that genuinely connect to the topic.
+- {stem_text}
+- Do not write generic filler like “students will learn many things.”
+- Do not repeat the topic unnecessarily.
+- Keep every bullet concrete and actionable.
+- Sections must use these names exactly: {section_names}
+- Reflection should sound like a teacher’s after-lesson review.
+- Resources must be plain text items, not clickable links.
 
-Curriculum context:
-Curriculum: {payload['curriculum']}
-Subject: {subject}
-Grade/Level: {grade_level}
-Topic: {topic}
-Subtopic: {subtopic}
-Strand: {strand}
-Objectives: {objectives}
-Teacher description: {description}
-User-supplied resources: {user_resources}
-Suggested resources: {resource_suggestions}
-
-Important:
-- The sections must use these names exactly: {section_names}
-- The output should feel varied and natural, not repetitive.
-- The lesson must align with the listed objectives.
-- Keep the overall tone concise, polished, and teacher-friendly.
+Structure guidance:
+- attainment_target: one strong sentence.
+- theme and strand: concise and relevant.
+- class_profile.learner_profile: 1 concise paragraph about readiness/interests/needs.
+- class_profile.learning_styles: 2 to 4 items such as Visual, Auditory, Kinesthetic.
+- class_profile.mixed_ability_support: 1 concise paragraph.
+- domain_objectives: one sentence each for cognitive, affective, psychomotor.
+- prior_learning: one concise paragraph.
+- prior_knowledge_questions: 3 to 5 short, topic-specific questions.
+- resources: 3 to 6 realistic items.
+- section bullets: 2 to 4 bullets each, with teacher and student actions.
+- assessment: 2 to 4 concise bullets.
+- assessment_criteria: one concise paragraph.
+- apse_pathways: 2 to 4 concise items.
+- stem_skills: 0 to 5 concise items.
+- reflection: 3 to 5 concise bullets.
 """.strip()
 
 
@@ -129,25 +193,20 @@ def generate_dynamic_lesson_parts(
     try:
         client = OpenAI(api_key=OPENAI_API_KEY)
         prompt = _build_prompt(payload, objectives, strand, resource_suggestions)
-
         schema_model = LessonParts4C if payload["structure"] == "4Cs" else LessonParts5E
-
-        print(f"AI DEBUG: Calling model {OPENAI_MODEL} with Pydantic structured parsing...")
 
         response = client.responses.parse(
             model=OPENAI_MODEL,
             instructions=(
                 "You are an expert Caribbean curriculum-aligned lesson planner. "
-                "Produce concise, high-quality, classroom-ready lesson content. "
-                "Do not be verbose. Do not output a teaching script. "
-                "Return content that fits the provided schema."
+                "Return only structured lesson content that fits the provided schema. "
+                "Do not add markdown, code fences, or commentary."
             ),
             input=prompt,
             text_format=schema_model,
         )
 
         parsed = response.output_parsed
-
         if not parsed:
             print("AI DEBUG: No parsed output returned.")
             print(f"AI DEBUG: Raw response = {response}")
@@ -161,9 +220,8 @@ def generate_dynamic_lesson_parts(
                 sections["Critical Thinking"] = sections.pop("Critical_Thinking")
             data["sections"] = sections
 
-        print("AI DEBUG: Parsed structured output successfully.")
         return data
 
-    except Exception as e:
-        print(f"AI DEBUG: Exception during API call: {type(e).__name__}: {e}")
+    except Exception as exc:
+        print(f"AI DEBUG: Exception during API call: {type(exc).__name__}: {exc}")
         return None

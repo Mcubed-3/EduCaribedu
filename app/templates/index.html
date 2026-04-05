@@ -102,6 +102,7 @@
         <div class="sidebar-actions">
           <button type="button" id="newLessonBtn" class="btn btn-primary">New lesson</button>
           <button type="button" id="refreshLessonsBtn" class="btn btn-secondary">Refresh workspace</button>
+          <button type="button" id="editProfileSidebarBtn" class="btn btn-secondary">Edit profile</button>
           <a href="/pricing" class="btn btn-secondary btn-link">Pricing</a>
           <a href="/feedback" class="btn btn-secondary btn-link">Feedback</a>
           {% if current_user.role == "admin" %}
@@ -237,22 +238,30 @@
           <p>Select the lesson context, define the topic, then generate, save, and export.</p>
         </div>
 
+        <div id="profileSummaryBanner" class="upgrade-banner hidden">
+          <div>
+            <strong>Profile-linked lesson setup:</strong>
+            <span id="profileSummaryText">Your subject, grade, and curriculum will be pulled from your teacher profile.</span>
+          </div>
+          <button type="button" id="editProfileBannerBtn" class="btn btn-primary">Edit profile</button>
+        </div>
+
         <div class="builder-grid">
           <form id="lessonForm" class="panel">
             <input type="hidden" id="currentLessonId" value="" />
 
             <div class="form-grid">
-              <label class="field">
+              <label class="field profile-driven-field" data-profile-field="curriculum">
                 <span>Curriculum</span>
                 <select name="curriculum" id="curriculum"></select>
               </label>
 
-              <label class="field">
+              <label class="field profile-driven-field" data-profile-field="subject">
                 <span>Subject</span>
                 <select name="subject" id="subject"></select>
               </label>
 
-              <label class="field">
+              <label class="field profile-driven-field" data-profile-field="grade_level">
                 <span>Grade / Level</span>
                 <select name="grade_level" id="grade_level"></select>
               </label>
@@ -442,6 +451,43 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <div id="profileModal" class="upgrade-modal hidden">
+    <div class="upgrade-modal-content">
+      <div class="upgrade-modal-header">
+        <h2>Complete your teacher profile</h2>
+        <button id="closeProfileModal" class="modal-close">×</button>
+      </div>
+
+      <p>Set your main teaching subject, grade levels, and curriculum once. EduCarib will use those defaults for lesson generation, and you can edit them later.</p>
+
+      <div class="form-grid">
+        <label class="field field-full">
+          <span>Subject areas</span>
+          <input type="text" id="profile_subjects" placeholder="e.g. Agricultural Science, Mathematics" />
+        </label>
+
+        <label class="field field-full">
+          <span>Grade / levels taught</span>
+          <input type="text" id="profile_grade_levels" placeholder="e.g. Grade 7, Grade 8, Grade 9" />
+        </label>
+
+        <label class="field field-full">
+          <span>Primary curriculum</span>
+          <select id="profile_curriculum">
+            <option value="">Select curriculum...</option>
+            <option value="NSC">NSC</option>
+            <option value="CSEC">CSEC</option>
+            <option value="APSE">APSE</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="action-row">
+        <button id="saveProfileBtn" class="btn btn-primary">Save profile</button>
+      </div>
+    </div>
   </div>
 
   <script src="/static/app.js"></script>
