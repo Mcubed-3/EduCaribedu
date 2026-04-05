@@ -298,7 +298,6 @@ def _fallback_class_profile(subject: str, difficulty: str) -> Dict[str, object]:
         )
 
     return profile
-}
 
 
 def _fallback_prior_learning(topic: str, subject: str) -> str:
