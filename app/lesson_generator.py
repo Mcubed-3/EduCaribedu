@@ -1,24 +1,110 @@
 from __future__ import annotations
-
 from typing import Dict, List
+import hashlib
+import json
 
 from .ai_generator import generate_dynamic_lesson_parts
 from .engine_state import engine
 
-FIVE_E_SECTIONS = ["Engagement", "Exploration", "Explanation", "Evaluation", "Extension"]
-FOUR_C_SECTIONS = ["Creativity", "Critical Thinking", "Communication", "Collaboration"]
-STEM_SUBJECTS = {
-    "agricultural science",
-    "mathematics",
-    "math",
-    "biology",
-    "chemistry",
-    "physics",
-    "integrated science",
-    "science",
-    "information technology",
-    "it",
-}
+CACHE = {}
+
+def cache_key(payload):
+    return hashlib.md5(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+
+def generate_lesson(payload: dict) -> dict:
+    key = cache_key(payload)
+    if key in CACHE:
+        return CACHE[key]
+
+    curriculum = payload.get("curriculum", "")
+    subject = payload.get("subject", "")
+    grade = payload.get("grade_level", "")
+    topic = payload.get("topic", "")
+    difficulty = payload.get("difficulty", "Intermediate")
+
+    # ---- OBJECTIVES ----
+    objectives = engine.build_objectives(
+        curriculum,
+        subject,
+        grade,
+        topic,
+        3,
+        difficulty,
+        payload.get("description", ""),
+    )
+    objective_text = [o["text"] for o in objectives]
+
+    # ---- BASE STRUCTURE ----
+    lesson = {
+        "curriculum": curriculum,
+        "subject": subject,
+        "grade_level": grade,
+        "topic": topic,
+        "difficulty": difficulty,
+        "structure": "5Es",
+        "generation_mode": "fallback",
+
+        "attainment_target": f"Students understand and apply concepts of {topic}.",
+        "theme": topic,
+        "strand": "General Strand",
+
+        "class_profile": {
+            "learning_styles": ["Visual", "Auditory", "Kinesthetic"],
+            "mixed_ability_support": "Differentiation, scaffolding, and extension tasks included.",
+        },
+
+        "objectives": objective_text,
+
+        "prior_learning": f"Students have basic familiarity with concepts related to {topic}.",
+
+        "sections": {
+            "Engagement": [f"Introduce {topic} using real-world example."],
+            "Exploration": [f"Students investigate {topic} through guided activity."],
+            "Explanation": [f"Teacher explains key concepts of {topic}."],
+            "Evaluation": ["Quick assessment or exit ticket."],
+            "Extension": ["Apply knowledge in real-world context."]
+        },
+
+        "assessment": ["Questioning", "Exit ticket"],
+        "assessment_criteria": "Accuracy, understanding, application",
+
+        "apse_pathways": ["Problem solving", "Collaboration"],
+        "stem_skills": ["Critical thinking", "Analysis"],
+
+        "reflection": [
+            "What worked well?",
+            "What needs improvement?"
+        ],
+    }
+
+    # ---- AI ENHANCEMENT ----
+    try:
+        ai = generate_dynamic_lesson_parts(
+            payload=payload,
+            objectives=objective_text,
+            strand="General Strand",
+            resource_suggestions=[]
+        )
+
+        if ai:
+            lesson["generation_mode"] = "ai-enhanced"
+
+            if ai.get("sections"):
+                lesson["sections"].update(ai["sections"])
+
+            lesson["reflection"] = ai.get("reflection", lesson["reflection"])
+
+    except Exception as e:
+        print("AI ERROR:", e)
+
+    result = {
+        "title": f"{subject} Lesson Plan - {topic}",
+        "lesson": lesson
+    }
+
+    CACHE[key] = result
+    return result
 
 
 def format_objectives(objectives: List[Dict[str, str]]) -> List[str]:

@@ -158,19 +158,17 @@ function canGenerateActivities() {
 }
 
 function formPayload() {
+  const profile = currentUserContext?.profile || {};
+
   return {
-    curriculum: byId("curriculum")?.value || "",
-    subject: byId("subject")?.value || "",
-    grade_level: byId("grade_level")?.value || "",
-    structure: byId("structure")?.value || "",
-    difficulty: byId("difficulty")?.value || "",
-    lesson_type: byId("lesson_type")?.value || "",
+    curriculum: profile.curriculum || byId("curriculum")?.value,
+    subject: profile.subjects?.[0] || byId("subject")?.value,
+    grade_level: profile.grade_levels?.[0] || byId("grade_level")?.value,
+
     topic: byId("topic")?.value || "",
-    subtopic: byId("subtopic")?.value || "",
-    objective_count: Number(byId("objective_count")?.value || 3),
-    duration_minutes: Number(byId("duration_minutes")?.value || 60),
+    objective_count: 3,
+    duration_minutes: 60,
     description: byId("description")?.value || "",
-    resources: byId("resources")?.value || "",
   };
 }
 
@@ -485,49 +483,36 @@ function toggleEditMode() {
   setStatus(output.readOnly ? "Edit mode off." : "Edit mode on. Edit the raw text, preview updates below.", "success");
 }
 
-async function downloadExport(format, title, content) {
-  if (!content || !content.trim()) {
-    setStatus("Nothing to export yet.", "error");
-    return;
-  }
+async function downloadExport(format) {
+  const html = byId("outputPreview")?.innerHTML;
 
-  if (format === "docx" && isDocxLocked()) {
-    showUpgradeModal();
-    return;
-  }
-
-  const endpoint = format === "pdf" ? "/api/export/pdf" : "/api/export/docx";
-  setStatus(`Exporting ${format.toUpperCase()}...`);
-
-  const res = await fetch(endpoint, {
+  const res = await fetch(`/api/export/${format}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ title, content }),
+    body: JSON.stringify({
+      title: currentLessonData?.title,
+      html: html
+    })
   });
 
   if (!res.ok) {
-    let message = `Export failed: ${res.status}`;
-    try {
-      const data = await res.json();
-      if (data.detail) message = data.detail;
-    } catch (_) {}
-    throw new Error(message);
+    setStatus("Export failed", "error");
+    return;
   }
 
   const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
+
   const a = document.createElement("a");
   a.href = url;
-  const extension = format === "pdf" ? "pdf" : "docx";
-  const safeTitle = (title || "export").replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
-  a.download = `${safeTitle}.${extension}`;
+  a.download = `lesson.${format}`;
   document.body.appendChild(a);
   a.click();
   a.remove();
-  window.URL.revokeObjectURL(url);
 
-  setStatus(`${format.toUpperCase()} exported.`, "success");
+  URL.revokeObjectURL(url);
+
+  setStatus(`${format.toUpperCase()} exported`, "success");
 }
 
 function scrollToBuilder() {

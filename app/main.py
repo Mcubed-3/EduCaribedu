@@ -653,7 +653,7 @@ def export_docx(request: Request, payload: ExportRequest):
 
 
 @app.post("/api/export/pdf")
-def export_pdf(request: Request, payload: ExportRequest):
+def export_pdf(request: Request, payload: dict):
     user = require_user(request)
 
     if not can_export_pdf(user):
@@ -662,7 +662,9 @@ def export_pdf(request: Request, payload: ExportRequest):
             detail="PDF export is not available on your current plan.",
         )
 
-    path = export_to_pdf(payload.title, payload.content)
+    html = payload.get("html", "")
+    path = export_to_pdf(html)
+
     return FileResponse(
         path,
         media_type="application/pdf",
