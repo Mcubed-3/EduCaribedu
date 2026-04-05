@@ -342,10 +342,6 @@ function lessonToText(data) {
     lines.push("");
   }
 
-  lines.push("Objectives:");
-  (lesson.objectives || []).forEach((obj, i) => lines.push(`${i + 1}. ${obj}`));
-  lines.push("");
-
   if (lesson.prior_learning) {
     lines.push("Prior Learning:");
     lines.push(lesson.prior_learning);
@@ -355,6 +351,7 @@ function lessonToText(data) {
   lines.push("Prior Knowledge:");
   (lesson.prior_knowledge_questions || []).forEach((q) => lines.push(`- ${q}`));
   lines.push("");
+
   lines.push("Resources:");
   (lesson.resources || []).forEach((r) => lines.push(`- ${r}`));
   lines.push("");
@@ -386,6 +383,7 @@ function lessonToText(data) {
   lines.push("Assessment:");
   (lesson.assessment || []).forEach((item) => lines.push(`- ${item}`));
   lines.push("");
+
   lines.push("Reflection:");
   (lesson.reflection || []).forEach((item) => lines.push(`- ${item}`));
 
@@ -412,19 +410,34 @@ function normalizeMathText(text) {
 
   let out = String(text);
 
+  // Convert double-escaped delimiters from AI/text output into real MathJax delimiters
+  out = out.replace(/\\\\\(/g, "\\(").replace(/\\\\\)/g, "\\)");
+  out = out.replace(/\\\\\[/g, "\\[").replace(/\\\\\]/g, "\\]");
+
+  // Common symbols
   out = out.replace(/÷/g, "/");
   out = out.replace(/×/g, "\\times ");
 
-  // Wrap simple powers like x^2, y^10
+  // Wrap simple polynomial/power expressions if they are not already inside delimiters
   out = out.replace(
-    /(^|[\s(])([A-Za-z][A-Za-z0-9]*)\^([A-Za-z0-9]+)/g,
+    /(^|[\s:(-])([A-Za-z][A-Za-z0-9]*)\^([A-Za-z0-9]+)(?=$|[\s),.;:!?+\-])/g,
     '$1\\\\($2^{$3}\\\\)'
   );
 
-  // Wrap simple fractions like 3/4
+  // Wrap simple fractions
   out = out.replace(
-    /(^|[\s(])(\d+)\s*\/\s*(\d+)(?=$|[\s),.;:!?])/g,
+    /(^|[\s:(-])(\d+)\s*\/\s*(\d+)(?=$|[\s),.;:!?])/g,
     '$1\\\\(\\\\frac{$2}{$3}\\\\)'
+  );
+
+  // Wrap simple linear/quadratic expressions like x^2 - 5x or 2x + 3
+  out = out.replace(
+    /(^|[\s:(-])((?:[+-]?\d*[A-Za-z](?:\^\d+)?)(?:\s*[+-]\s*\d*[A-Za-z](?:\^\d+)?)*(?:\s*[+-]\s*\d+)?)(?=$|[\s),.;:!?])/g,
+    (match, prefix, expr) => {
+      if (expr.includes("\\(") || expr.includes("\\[")) return match;
+      if (!/[A-Za-z]/.test(expr)) return match;
+      return `${prefix}\\\\(${expr.replace(/\^(\d+)/g, '^{$1}')}\\\\)`;
+    }
   );
 
   return out;

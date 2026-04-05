@@ -449,7 +449,7 @@ def config(request: Request):
         "curricula": curricula,
         "levels": levels,
         "structures": ["5Es", "4Cs"],
-        "difficulties": ["Beginner", "Intermediate", "Advanced"],
+        "difficulties": ["Beginner", "Intermediate", "Advanced", "Mixed Ability"],
         "lesson_types": ["Theory", "Practical", "Discussion", "Mixed"],
         "profile": profile,
     }

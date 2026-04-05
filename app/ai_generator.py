@@ -26,10 +26,14 @@ STEM_SUBJECTS = {
 }
 
 
+# =========================
+# MODELS
+# =========================
+
 class ClassProfile(BaseModel):
     learner_profile: str = Field(min_length=20, max_length=320)
     learning_styles: List[str] = Field(min_length=2, max_length=4)
-    mixed_ability_support: str = Field(min_length=20, max_length=320)
+    mixed_ability_support: Optional[str] = None  # ✅ NOW OPTIONAL
 
 
 class DomainObjectives(BaseModel):
@@ -39,53 +43,57 @@ class DomainObjectives(BaseModel):
 
 
 class LessonSections5E(BaseModel):
-    Engagement: List[str] = Field(min_length=2, max_length=4)
-    Exploration: List[str] = Field(min_length=2, max_length=4)
-    Explanation: List[str] = Field(min_length=2, max_length=4)
-    Evaluation: List[str] = Field(min_length=2, max_length=4)
-    Extension: List[str] = Field(min_length=1, max_length=3)
+    Engagement: List[str]
+    Exploration: List[str]
+    Explanation: List[str]
+    Evaluation: List[str]
+    Extension: List[str]
 
 
 class LessonSections4C(BaseModel):
-    Creativity: List[str] = Field(min_length=2, max_length=4)
-    Critical_Thinking: List[str] = Field(min_length=2, max_length=4)
-    Communication: List[str] = Field(min_length=2, max_length=4)
-    Collaboration: List[str] = Field(min_length=2, max_length=4)
+    Creativity: List[str]
+    Critical_Thinking: List[str]
+    Communication: List[str]
+    Collaboration: List[str]
 
 
 class LessonParts5E(BaseModel):
-    attainment_target: str = Field(min_length=20, max_length=320)
-    theme: str = Field(min_length=3, max_length=120)
-    strand: str = Field(min_length=3, max_length=120)
+    attainment_target: str
+    theme: str
+    strand: str
     class_profile: ClassProfile
     domain_objectives: DomainObjectives
-    prior_learning: str = Field(min_length=20, max_length=320)
-    prior_knowledge_questions: List[str] = Field(min_length=3, max_length=5)
-    resources: List[str] = Field(min_length=3, max_length=6)
+    prior_learning: str
+    prior_knowledge_questions: List[str]
+    resources: List[str]
     sections: LessonSections5E
-    assessment: List[str] = Field(min_length=2, max_length=4)
-    assessment_criteria: str = Field(min_length=20, max_length=320)
-    apse_pathways: List[str] = Field(min_length=2, max_length=4)
-    stem_skills: List[str] = Field(default_factory=list, max_length=5)
-    reflection: List[str] = Field(min_length=3, max_length=5)
+    assessment: List[str]
+    assessment_criteria: str
+    apse_pathways: List[str]
+    stem_skills: List[str] = []
+    reflection: List[str]
 
 
 class LessonParts4C(BaseModel):
-    attainment_target: str = Field(min_length=20, max_length=320)
-    theme: str = Field(min_length=3, max_length=120)
-    strand: str = Field(min_length=3, max_length=120)
+    attainment_target: str
+    theme: str
+    strand: str
     class_profile: ClassProfile
     domain_objectives: DomainObjectives
-    prior_learning: str = Field(min_length=20, max_length=320)
-    prior_knowledge_questions: List[str] = Field(min_length=3, max_length=5)
-    resources: List[str] = Field(min_length=3, max_length=6)
+    prior_learning: str
+    prior_knowledge_questions: List[str]
+    resources: List[str]
     sections: LessonSections4C
-    assessment: List[str] = Field(min_length=2, max_length=4)
-    assessment_criteria: str = Field(min_length=20, max_length=320)
-    apse_pathways: List[str] = Field(min_length=2, max_length=4)
-    stem_skills: List[str] = Field(default_factory=list, max_length=5)
-    reflection: List[str] = Field(min_length=3, max_length=5)
+    assessment: List[str]
+    assessment_criteria: str
+    apse_pathways: List[str]
+    stem_skills: List[str] = []
+    reflection: List[str]
 
+
+# =========================
+# PROMPT BUILDER
+# =========================
 
 def _teacher_profile_text(payload: dict) -> str:
     profile = payload.get("teacher_profile") or {}
@@ -102,136 +110,87 @@ def _teacher_profile_text(payload: dict) -> str:
     )
 
 
-def _build_prompt(
-    payload: dict,
-    objectives: List[str],
-    strand: str,
-    resource_suggestions: List[str],
-) -> str:
+def _build_prompt(payload, objectives, strand, resource_suggestions):
     structure = payload["structure"]
     lesson_type = payload["lesson_type"]
     difficulty = payload["difficulty"]
     subject = payload["subject"]
     grade_level = payload["grade_level"]
     topic = payload["topic"]
-    subtopic = payload.get("subtopic", "")
-    description = payload.get("description", "")
-    user_resources = payload.get("resources", "")
-    curriculum = payload["curriculum"]
-    is_stem = subject.strip().lower() in STEM_SUBJECTS
 
-    section_names = (
-        "Creativity, Critical Thinking, Communication, Collaboration"
-        if structure == "4Cs"
-        else "Engagement, Exploration, Explanation, Evaluation, Extension"
-    )
+    is_stem = subject.lower() in STEM_SUBJECTS
+
+    # 🔥 Conditional mixed ability instruction
+    if difficulty == "Mixed Ability":
+        mixed_ability_text = "Include mixed-ability support in the class profile."
+    else:
+        mixed_ability_text = "Do NOT include mixed-ability support."
 
     stem_text = (
-        "Include practical or skill-building STEM elements where natural: observation, classification, measuring, problem-solving, data use, or application."
-        if is_stem
-        else "Do not force STEM language if it does not fit the subject, but keep the lesson skill-based and practical where possible."
+        "Include practical STEM or skill-based activities."
+        if is_stem else
+        "Keep the lesson practical and skill-based where appropriate."
     )
 
     return f"""
-Create a polished, curriculum-aligned Caribbean lesson plan that feels like a real teacher wrote it.
+Create a Caribbean-standard lesson plan.
 
 Context:
-- Curriculum: {curriculum}
 - Subject: {subject}
-- Grade/Level: {grade_level}
+- Grade: {grade_level}
 - Topic: {topic}
-- Subtopic: {subtopic}
-- Strand match: {strand}
 - Structure: {structure}
-- Lesson type: {lesson_type}
 - Difficulty: {difficulty}
-- Duration: {payload.get('duration_minutes', 60)} minutes
-- Objectives from curriculum engine: {objectives}
-- Teacher brief: {description}
-- User resources: {user_resources}
-- Suggested resources: {resource_suggestions}
-- {_teacher_profile_text(payload)}
+- Strand: {strand}
+- Objectives: {objectives}
 
-Required quality rules:
-- Keep the lesson classroom-ready, realistic, and teacher-friendly.
-- Use Caribbean-appropriate examples or contexts where natural.
-- Include mixed-ability support and learning styles in the class profile.
-- Include APSE pathways as career or life-skill links that genuinely connect to the topic.
+Rules:
+- Keep it teacher-ready and realistic
+- Include learning styles
+- {mixed_ability_text}
 - {stem_text}
-- Do not write generic filler like “students will learn many things.”
-- Do not repeat the topic unnecessarily.
-- Keep every bullet concrete and actionable.
-- Sections must use these names exactly: {section_names}
-- Reflection should sound like a teacher’s after-lesson review.
-- Resources must be plain text items, not clickable links.
+- Do NOT repeat objectives
+- Do NOT include a separate 'Objectives' section
+- Only include 'Specific Objectives'
 
-Structure guidance:
-- attainment_target: one strong sentence.
-- theme and strand: concise and relevant.
-- class_profile.learner_profile: 1 concise paragraph about readiness/interests/needs.
-- class_profile.learning_styles: 2 to 4 items such as Visual, Auditory, Kinesthetic.
-- class_profile.mixed_ability_support: 1 concise paragraph.
-- domain_objectives: one sentence each for cognitive, affective, psychomotor.
-- prior_learning: one concise paragraph.
-- prior_knowledge_questions: 3 to 5 short, topic-specific questions.
-- resources: 3 to 6 realistic items.
-- section bullets: 2 to 4 bullets each, with teacher and student actions.
-- assessment: 2 to 4 concise bullets.
-- assessment_criteria: one concise paragraph.
-- apse_pathways: 2 to 4 concise items.
-- stem_skills: 0 to 5 concise items.
-- reflection: 3 to 5 concise bullets.
-""".strip()
+Ensure all sections are detailed but concise.
+"""
 
+
+# =========================
+# MAIN GENERATOR
+# =========================
 
 def generate_dynamic_lesson_parts(
-    payload: dict,
-    objectives: List[str],
-    strand: str,
-    resource_suggestions: List[str],
-) -> Optional[Dict[str, Any]]:
-    required = ["curriculum", "subject", "grade_level", "topic", "structure", "lesson_type", "difficulty"]
-    missing = [key for key in required if not payload.get(key)]
-    if missing:
-        print("AI DEBUG: Missing lesson payload keys:", missing)
-        return None
-
+    payload,
+    objectives,
+    strand,
+    resource_suggestions,
+):
     if not OPENAI_API_KEY:
-        print("AI DEBUG: No OPENAI_API_KEY found.")
         return None
 
     try:
         client = OpenAI(api_key=OPENAI_API_KEY)
+
         prompt = _build_prompt(payload, objectives, strand, resource_suggestions)
-        schema_model = LessonParts4C if payload["structure"] == "4Cs" else LessonParts5E
+
+        schema = LessonParts4C if payload["structure"] == "4Cs" else LessonParts5E
 
         response = client.responses.parse(
             model=OPENAI_MODEL,
-            instructions=(
-                "You are an expert Caribbean curriculum-aligned lesson planner. "
-                "Return only structured lesson content that fits the provided schema. "
-                "Do not add markdown, code fences, or commentary."
-            ),
             input=prompt,
-            text_format=schema_model,
+            text_format=schema,
         )
 
-        parsed = response.output_parsed
-        if not parsed:
-            print("AI DEBUG: No parsed output returned.")
-            print(f"AI DEBUG: Raw response = {response}")
-            return None
+        data = response.output_parsed.model_dump()
 
-        data = parsed.model_dump()
-
-        if payload["structure"] == "4Cs":
-            sections = data.get("sections", {})
-            if "Critical_Thinking" in sections:
-                sections["Critical Thinking"] = sections.pop("Critical_Thinking")
-            data["sections"] = sections
+        # 🔥 CLEANUP: Remove mixed ability if not selected
+        if payload["difficulty"] != "Mixed Ability":
+            data["class_profile"].pop("mixed_ability_support", None)
 
         return data
 
-    except Exception as exc:
-        print(f"AI DEBUG: Exception during API call: {type(exc).__name__}: {exc}")
+    except Exception as e:
+        print("AI ERROR:", e)
         return None

@@ -284,11 +284,21 @@ def _fallback_domain_objectives(topic: str, subject: str) -> Dict[str, str]:
 
 
 def _fallback_class_profile(subject: str, difficulty: str) -> Dict[str, object]:
-    return {
-        "learner_profile": f"This class includes learners with varied readiness levels, interests, and prior knowledge in {subject}. The lesson should provide clear explanations, modelling, and opportunities for guided and independent work.",
+    profile = {
+        "learner_profile": (
+            f"This class includes learners with varied readiness levels, interests, and prior knowledge in {subject}. "
+            "The lesson should provide clear explanations, modelling, and opportunities for guided and independent work."
+        ),
         "learning_styles": ["Visual", "Auditory", "Kinesthetic"],
-        "mixed_ability_support": f"Provide scaffolds, peer support, teacher check-ins, and extension prompts so {difficulty.lower()}-level learners can all participate meaningfully.",
     }
+
+    if difficulty == "Mixed Ability":
+        profile["mixed_ability_support"] = (
+            "Provide scaffolds, peer support, teacher check-ins, and extension prompts so learners at different readiness levels can all participate meaningfully."
+        )
+
+    return profile
+}
 
 
 def _fallback_prior_learning(topic: str, subject: str) -> str:
