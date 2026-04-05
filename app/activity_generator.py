@@ -56,14 +56,14 @@ PROMPT_TEMPLATE = r"""
 You are generating a classroom activity STRICTLY aligned to the teaching context provided.
 
 CRITICAL RULES:
-- ONLY generate content related to the subject and topic provided
-- DO NOT include unrelated subjects
-- If lesson objectives and lesson sections are provided, use them directly
-- If no lesson is provided, generate an original standalone activity aligned to the curriculum, subject, grade level, difficulty, and topic
-- If include_mark_scheme is false, DO NOT return any mark scheme
-- DO NOT return teacher notes
-- DO NOT include a teacher notes section in any form
-- For ALL mathematics, use LaTeX delimiters
+- ONLY generate content related to the subject and topic provided.
+- DO NOT include unrelated subjects.
+- If lesson objectives and lesson sections are provided, use them directly.
+- If no lesson is provided, generate an original standalone activity aligned to the curriculum, subject, grade level, difficulty, and topic.
+- If include_mark_scheme is false, DO NOT return any mark scheme.
+- DO NOT return teacher notes.
+- DO NOT include a teacher notes section in any form.
+- For ALL mathematics and maths-like content, use LaTeX delimiters.
 - Inline maths must use \( ... \)
 - Display maths must use \[ ... \]
 - Fractions must use \frac{{a}}{{b}}
@@ -127,7 +127,16 @@ def _fallback_activity(
     answers: List[str] = []
     mark_scheme: List[str] = []
 
-    if activity_type == "mcq":
+    if activity_type == "math_problem_solving":
+        for i in range(1, count + 1):
+            items.append(
+                f"{i}. Solve the problem related to {topic}. Show all working using \\( ... \\) or \\[ ... \\] where needed."
+            )
+            if include_answer_key:
+                answers.append(f"{i}. Accept a correct worked solution related to {topic}.")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. Award marks for method, working, and correct final answer.")
+    elif activity_type == "mcq":
         for i in range(1, count + 1):
             items.append(
                 f"{i}. Multiple choice: Which statement best relates to {topic} in {subject} for {grade_level}?\n"
@@ -199,22 +208,12 @@ def _to_text(data: Dict[str, Any], include_mark_scheme: bool) -> str:
 def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
     ctx = _extract_lesson_context(payload)
 
-    activity_type = payload["activity_type"]
-    count = int(payload.get("item_count", 8))
+    activity_type = (payload.get("activity_type") or "short_answer").strip()
+    count = int(payload.get("item_count") or 8)
     include_answer_key = bool(payload.get("include_answer_key", True))
     include_mark_scheme = bool(payload.get("include_mark_scheme", False))
 
-    title = f"{ACTIVITY_LABELS.get(activity_type, 'Activity')} - {ctx.get('topic', '')}"
-
-    if not OPENAI_API_KEY:
-        data = _fallback_activity(ctx, activity_type, count, include_answer_key, include_mark_scheme)
-        return {
-            "title": data.get("title", title),
-            "activity_type": activity_type,
-            "content": _to_text(data, include_mark_scheme=include_mark_scheme),
-            "lesson_snippet": "",
-            "raw": data,
-        }
+    title = f"{ACTIVITY_LABELS.get(activity_type, 'Activity')} - {ctx.get('topic', 'Topic')}"
 
     objectives_text = "- None provided"
     if ctx["objectives"]:
@@ -242,6 +241,9 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
     )
 
     try:
+        if not OPENAI_API_KEY:
+            raise RuntimeError("Missing OPENAI_API_KEY")
+
         client = OpenAI(api_key=OPENAI_API_KEY)
         response = client.responses.create(
             model=OPENAI_MODEL,
@@ -259,7 +261,8 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
                 "answer_key": [],
             }
 
-    except Exception:
+    except Exception as exc:
+        print(f"ACTIVITY AI DEBUG: {type(exc).__name__}: {exc}")
         data = _fallback_activity(ctx, activity_type, count, include_answer_key, include_mark_scheme)
 
     data.pop("teacher_notes", None)

@@ -12,11 +12,24 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5-mini").strip()
 
+STEM_SUBJECTS = {
+    "agricultural science",
+    "mathematics",
+    "math",
+    "biology",
+    "chemistry",
+    "physics",
+    "integrated science",
+    "science",
+    "information technology",
+    "it",
+}
+
 
 class ClassProfile(BaseModel):
-    learner_profile: str = Field(min_length=20, max_length=260)
+    learner_profile: str = Field(min_length=20, max_length=320)
     learning_styles: List[str] = Field(min_length=2, max_length=4)
-    mixed_ability_support: str = Field(min_length=20, max_length=240)
+    mixed_ability_support: str = Field(min_length=20, max_length=320)
 
 
 class DomainObjectives(BaseModel):
@@ -41,51 +54,37 @@ class LessonSections4C(BaseModel):
 
 
 class LessonParts5E(BaseModel):
-    attainment_target: str = Field(min_length=20, max_length=280)
+    attainment_target: str = Field(min_length=20, max_length=320)
     theme: str = Field(min_length=3, max_length=120)
     strand: str = Field(min_length=3, max_length=120)
     class_profile: ClassProfile
     domain_objectives: DomainObjectives
-    prior_learning: str = Field(min_length=20, max_length=260)
+    prior_learning: str = Field(min_length=20, max_length=320)
     prior_knowledge_questions: List[str] = Field(min_length=3, max_length=5)
     resources: List[str] = Field(min_length=3, max_length=6)
     sections: LessonSections5E
     assessment: List[str] = Field(min_length=2, max_length=4)
-    assessment_criteria: str = Field(min_length=20, max_length=260)
+    assessment_criteria: str = Field(min_length=20, max_length=320)
     apse_pathways: List[str] = Field(min_length=2, max_length=4)
     stem_skills: List[str] = Field(default_factory=list, max_length=5)
     reflection: List[str] = Field(min_length=3, max_length=5)
 
 
 class LessonParts4C(BaseModel):
-    attainment_target: str = Field(min_length=20, max_length=280)
+    attainment_target: str = Field(min_length=20, max_length=320)
     theme: str = Field(min_length=3, max_length=120)
     strand: str = Field(min_length=3, max_length=120)
     class_profile: ClassProfile
     domain_objectives: DomainObjectives
-    prior_learning: str = Field(min_length=20, max_length=260)
+    prior_learning: str = Field(min_length=20, max_length=320)
     prior_knowledge_questions: List[str] = Field(min_length=3, max_length=5)
     resources: List[str] = Field(min_length=3, max_length=6)
     sections: LessonSections4C
     assessment: List[str] = Field(min_length=2, max_length=4)
-    assessment_criteria: str = Field(min_length=20, max_length=260)
+    assessment_criteria: str = Field(min_length=20, max_length=320)
     apse_pathways: List[str] = Field(min_length=2, max_length=4)
     stem_skills: List[str] = Field(default_factory=list, max_length=5)
     reflection: List[str] = Field(min_length=3, max_length=5)
-
-
-STEM_SUBJECTS = {
-    "agricultural science",
-    "mathematics",
-    "math",
-    "biology",
-    "chemistry",
-    "physics",
-    "integrated science",
-    "science",
-    "information technology",
-    "it",
-}
 
 
 def _teacher_profile_text(payload: dict) -> str:
@@ -103,7 +102,12 @@ def _teacher_profile_text(payload: dict) -> str:
     )
 
 
-def _build_prompt(payload: dict, objectives: List[str], strand: str, resource_suggestions: List[str]) -> str:
+def _build_prompt(
+    payload: dict,
+    objectives: List[str],
+    strand: str,
+    resource_suggestions: List[str],
+) -> str:
     structure = payload["structure"]
     lesson_type = payload["lesson_type"]
     difficulty = payload["difficulty"]
