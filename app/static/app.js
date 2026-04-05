@@ -2,6 +2,9 @@ let currentLessonData = null;
 let currentUserContext = null;
 let currentActivityText = "";
 
+function byId(id) {
+  return document.getElementById(id);
+}
 
 function parseCommaList(value) {
   return String(value || "")
@@ -49,10 +52,20 @@ function applyProfileDefaultsToBuilder() {
 
     if (profile.curriculum && byId("curriculum")) byId("curriculum").value = profile.curriculum;
     if (profile.curriculum && byId("activity_curriculum")) byId("activity_curriculum").value = profile.curriculum;
-    if (Array.isArray(profile.subjects) && profile.subjects.length && byId("subject")) byId("subject").value = profile.subjects[0];
-    if (Array.isArray(profile.subjects) && profile.subjects.length && byId("activity_subject")) byId("activity_subject").value = profile.subjects[0];
-    if (Array.isArray(profile.grade_levels) && profile.grade_levels.length && byId("grade_level")) byId("grade_level").value = profile.grade_levels[0];
-    if (Array.isArray(profile.grade_levels) && profile.grade_levels.length && byId("activity_grade_level")) byId("activity_grade_level").value = profile.grade_levels[0];
+
+    if (Array.isArray(profile.subjects) && profile.subjects.length && byId("subject")) {
+      byId("subject").value = profile.subjects[0];
+    }
+    if (Array.isArray(profile.subjects) && profile.subjects.length && byId("activity_subject")) {
+      byId("activity_subject").value = profile.subjects[0];
+    }
+
+    if (Array.isArray(profile.grade_levels) && profile.grade_levels.length && byId("grade_level")) {
+      byId("grade_level").value = profile.grade_levels[0];
+    }
+    if (Array.isArray(profile.grade_levels) && profile.grade_levels.length && byId("activity_grade_level")) {
+      byId("activity_grade_level").value = profile.grade_levels[0];
+    }
 
     drivenFields.forEach((field) => {
       field.style.display = "none";
@@ -90,11 +103,6 @@ async function saveProfileFromModal() {
   applyProfileDefaultsToBuilder();
   hideProfileModal();
   setStatus("Profile saved. Your dashboard will now use those defaults.", "success");
-}
-
-
-function byId(id) {
-  return document.getElementById(id);
 }
 
 function showUpgradeModal() {
@@ -392,15 +400,18 @@ function renderLesson(data) {
   renderMathPreview("output", "outputPreview");
 }
 
+function escapeHtml(text) {
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 function normalizeMathText(text) {
   if (!text) return "";
-
-  let out = text;
-
-  out = out.replace(/(\d+)\s*\/\s*(\d+)/g, "\\\\(\\\\frac{$1}{$2}\\\\)");
-  out = out.replace(/([A-Za-z0-9\)\]])\^([A-Za-z0-9]+)/g, "\\\\($1^{$2}\\\\)");
-
-  return out;
+  return String(text)
+    .replace(/÷/g, "/")
+    .replace(/×/g, "\\times ");
 }
 
 async function renderMathPreview(textareaId, previewId) {
@@ -409,13 +420,14 @@ async function renderMathPreview(textareaId, previewId) {
   if (!src || !dest) return;
 
   const normalized = normalizeMathText(src.value || "");
-  const html = normalized
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\n/g, "<br>");
-
+  const html = escapeHtml(normalized).replace(/\n/g, "<br>");
   dest.innerHTML = html;
+
+  if (window.MathJax && window.MathJax.typesetClear) {
+    try {
+      window.MathJax.typesetClear([dest]);
+    } catch (_) {}
+  }
 
   if (window.MathJax && window.MathJax.typesetPromise) {
     try {
@@ -487,36 +499,105 @@ function toggleEditMode() {
   setStatus(output.readOnly ? "Edit mode off." : "Edit mode on. Edit the raw text, preview updates below.", "success");
 }
 
-async function downloadExport(format) {
-  const html = byId("outputPreview")?.innerHTML;
-
-  const res = await fetch(`/api/export/${format}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title: currentLessonData?.title,
-      html: html
-    })
-  });
-
+async function triggerFileDownloadFromResponse(res, fallbackName) {
   if (!res.ok) {
-    setStatus("Export failed", "error");
-    return;
+    let message = "Export failed";
+    try {
+      const data = await res.json();
+      if (data.detail) message = data.detail;
+    } catch (_) {}
+    throw new Error(message);
   }
 
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement("a");
   a.href = url;
-  a.download = `lesson.${format}`;
+  a.download = fallbackName;
   document.body.appendChild(a);
   a.click();
   a.remove();
-
   URL.revokeObjectURL(url);
+}
 
-  setStatus(`${format.toUpperCase()} exported`, "success");
+async function downloadLessonExport(format) {
+  const title = currentLessonData?.title || "Lesson Plan";
+  const textContent = byId("output")?.value || "";
+  const htmlContent = byId("outputPreview")?.innerHTML || "";
+
+  if (format === "docx") {
+    if (isDocxLocked()) {
+      showUpgradeModal();
+      return;
+    }
+
+    const res = await fetch("/api/export/docx", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        title,
+        content: textContent,
+      }),
+    });
+
+    await triggerFileDownloadFromResponse(res, "lesson.docx");
+    setStatus("DOCX exported", "success");
+    return;
+  }
+
+  const res = await fetch("/api/export/pdf", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      title,
+      html: htmlContent,
+    }),
+  });
+
+  await triggerFileDownloadFromResponse(res, "lesson.pdf");
+  setStatus("PDF exported", "success");
+}
+
+async function downloadActivityExport(format) {
+  const title = "Classroom Activity";
+  const textContent = byId("activityOutput")?.value || "";
+  const htmlContent = byId("activityPreview")?.innerHTML || "";
+
+  if (format === "docx") {
+    if (isDocxLocked()) {
+      showUpgradeModal();
+      return;
+    }
+
+    const res = await fetch("/api/export/docx", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        title,
+        content: textContent,
+      }),
+    });
+
+    await triggerFileDownloadFromResponse(res, "activity.docx");
+    setStatus("Activity DOCX exported", "success");
+    return;
+  }
+
+  const res = await fetch("/api/export/pdf", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      title,
+      html: htmlContent,
+    }),
+  });
+
+  await triggerFileDownloadFromResponse(res, "activity.pdf");
+  setStatus("Activity PDF exported", "success");
 }
 
 function scrollToBuilder() {
@@ -591,7 +672,7 @@ function formatActivityContent(content) {
 
   if (typeof content === "object") {
     if (Array.isArray(content.items)) {
-      return content.map((item, index) => formatActivityItem(item, index)).join("\n\n").trim();
+      return content.items.map((item, index) => formatActivityItem(item, index)).join("\n\n").trim();
     }
 
     if (Array.isArray(content.questions)) {
@@ -652,7 +733,7 @@ function formatActivityValue(value) {
 }
 
 function toTitle(value) {
-  return String(value)
+  return String(value || "")
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
@@ -832,9 +913,7 @@ async function init() {
 
     byId("exportDocxBtn")?.addEventListener("click", async () => {
       try {
-        const output = byId("output");
-        const title = currentLessonData?.title || "Lesson Plan";
-        await downloadExport("docx", title, output?.value || "");
+        await downloadLessonExport("docx");
       } catch (e) {
         setStatus(e.message, "error");
       }
@@ -842,9 +921,7 @@ async function init() {
 
     byId("exportPdfBtn")?.addEventListener("click", async () => {
       try {
-        const output = byId("output");
-        const title = currentLessonData?.title || "Lesson Plan";
-        await downloadExport("pdf", title, output?.value || "");
+        await downloadLessonExport("pdf");
       } catch (e) {
         setStatus(e.message, "error");
       }
@@ -855,7 +932,7 @@ async function init() {
 
     byId("exportActivityPdfBtn")?.addEventListener("click", async () => {
       try {
-        await downloadExport("pdf", "Classroom Activity", byId("activityOutput")?.value || "");
+        await downloadActivityExport("pdf");
       } catch (e) {
         setStatus(e.message, "error");
       }
@@ -863,7 +940,7 @@ async function init() {
 
     byId("exportActivityDocxBtn")?.addEventListener("click", async () => {
       try {
-        await downloadExport("docx", "Classroom Activity", byId("activityOutput")?.value || "");
+        await downloadActivityExport("docx");
       } catch (e) {
         setStatus(e.message, "error");
       }
