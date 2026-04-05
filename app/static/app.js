@@ -321,7 +321,7 @@ function lessonToText(data) {
     lines.push("Class Profile:");
     Object.entries(lesson.class_profile).forEach(([key, value]) => {
       const rendered = Array.isArray(value) ? value.join(", ") : value;
-      lines.push(`- ${prettifyLabel(key)}: ${rendered}`);
+      lines.push(`- ${toTitle(key)}: ${rendered}`);
     });
     lines.push("");
   }
