@@ -251,6 +251,7 @@ def _normalize_ai_sections(structure: str, ai_sections: Dict, fallback_sections:
     return normalized
 
 def generate_lesson(payload: dict) -> dict:
+
     objectives = engine.build_objectives(
         payload["curriculum"],
         payload["subject"],
@@ -268,9 +269,59 @@ def generate_lesson(payload: dict) -> dict:
         payload["topic"],
         payload.get("description", ""),
     )
+
     match = search_result["match"] or {}
 
     objective_text = format_objectives(objectives)
+
+    print("TRYING AI GENERATION...")
+    ai_parts = generate_dynamic_lesson_parts(
+        payload=payload,
+        objectives=objective_text,
+        strand=match.get("strand", "General Strand"),
+        resource_suggestions=[],
+    )
+
+    if not ai_parts:
+        print("AI FAILED ❌")
+        return {"error": "AI generation failed"}
+
+    lesson = {
+        "curriculum": payload["curriculum"],
+        "subject": payload["subject"],
+        "grade": payload["grade_level"],
+        "topic": payload["topic"],
+
+        "attainment_target": ai_parts.get("attainment_target"),
+        "theme": ai_parts.get("theme"),
+        "strand": ai_parts.get("strand"),
+
+        "class_profile": ai_parts.get("class_profile"),
+
+        "objectives": ai_parts.get("objectives"),
+
+        "prior_learning": ai_parts.get("prior_learning"),
+
+        "engage": ai_parts.get("engage"),
+        "explore": ai_parts.get("explore"),
+        "explain": ai_parts.get("explain"),
+        "elaborate": ai_parts.get("elaborate"),
+        "evaluate": ai_parts.get("evaluate"),
+
+        "assessment_criteria": ai_parts.get("assessment_criteria"),
+
+        "apse_pathways": ai_parts.get("apse_pathways"),
+
+        "stem_skills": ai_parts.get("stem_skills"),
+
+        "reflection": ai_parts.get("reflection"),
+    }
+
+    return {
+        "title": f"{payload['subject']} Lesson Plan - {payload['topic']}",
+        "curriculum_match": match,
+        "lesson": lesson,
+    }
 
     fallback_sections = _build_sections(
         payload["structure"],
