@@ -1,110 +1,32 @@
 from __future__ import annotations
-from typing import Dict, List
+
 import hashlib
 import json
+from typing import Dict, List
 
 from .ai_generator import generate_dynamic_lesson_parts
 from .engine_state import engine
 
-CACHE = {}
+FIVE_E_SECTIONS = ["Engagement", "Exploration", "Explanation", "Evaluation", "Extension"]
+FOUR_C_SECTIONS = ["Creativity", "Critical Thinking", "Communication", "Collaboration"]
+STEM_SUBJECTS = {
+    "agricultural science",
+    "mathematics",
+    "math",
+    "biology",
+    "chemistry",
+    "physics",
+    "integrated science",
+    "science",
+    "information technology",
+    "it",
+}
 
-def cache_key(payload):
+CACHE: Dict[str, dict] = {}
+
+
+def cache_key(payload: dict) -> str:
     return hashlib.md5(json.dumps(payload, sort_keys=True).encode()).hexdigest()
-
-
-def generate_lesson(payload: dict) -> dict:
-    key = cache_key(payload)
-    if key in CACHE:
-        return CACHE[key]
-
-    curriculum = payload.get("curriculum", "")
-    subject = payload.get("subject", "")
-    grade = payload.get("grade_level", "")
-    topic = payload.get("topic", "")
-    difficulty = payload.get("difficulty", "Intermediate")
-
-    # ---- OBJECTIVES ----
-    objectives = engine.build_objectives(
-        curriculum,
-        subject,
-        grade,
-        topic,
-        3,
-        difficulty,
-        payload.get("description", ""),
-    )
-    objective_text = [o["text"] for o in objectives]
-
-    # ---- BASE STRUCTURE ----
-    lesson = {
-        "curriculum": curriculum,
-        "subject": subject,
-        "grade_level": grade,
-        "topic": topic,
-        "difficulty": difficulty,
-        "structure": "5Es",
-        "generation_mode": "fallback",
-
-        "attainment_target": f"Students understand and apply concepts of {topic}.",
-        "theme": topic,
-        "strand": "General Strand",
-
-        "class_profile": {
-            "learning_styles": ["Visual", "Auditory", "Kinesthetic"],
-            "mixed_ability_support": "Differentiation, scaffolding, and extension tasks included.",
-        },
-
-        "objectives": objective_text,
-
-        "prior_learning": f"Students have basic familiarity with concepts related to {topic}.",
-
-        "sections": {
-            "Engagement": [f"Introduce {topic} using real-world example."],
-            "Exploration": [f"Students investigate {topic} through guided activity."],
-            "Explanation": [f"Teacher explains key concepts of {topic}."],
-            "Evaluation": ["Quick assessment or exit ticket."],
-            "Extension": ["Apply knowledge in real-world context."]
-        },
-
-        "assessment": ["Questioning", "Exit ticket"],
-        "assessment_criteria": "Accuracy, understanding, application",
-
-        "apse_pathways": ["Problem solving", "Collaboration"],
-        "stem_skills": ["Critical thinking", "Analysis"],
-
-        "reflection": [
-            "What worked well?",
-            "What needs improvement?"
-        ],
-    }
-
-    # ---- AI ENHANCEMENT ----
-    try:
-        ai = generate_dynamic_lesson_parts(
-            payload=payload,
-            objectives=objective_text,
-            strand="General Strand",
-            resource_suggestions=[]
-        )
-
-        if ai:
-            lesson["generation_mode"] = "ai-enhanced"
-
-            if ai.get("sections"):
-                lesson["sections"].update(ai["sections"])
-
-            lesson["reflection"] = ai.get("reflection", lesson["reflection"])
-
-    except Exception as e:
-        print("AI ERROR:", e)
-
-    result = {
-        "title": f"{subject} Lesson Plan - {topic}",
-        "lesson": lesson
-    }
-
-    CACHE[key] = result
-    return result
 
 
 def format_objectives(objectives: List[Dict[str, str]]) -> List[str]:
@@ -170,7 +92,7 @@ def _resources(match: Dict, user_resources: str, subject: str, topic: str, lesso
     fallback = [
         f"{subject} textbook section on {topic}",
         f"Teacher-made notes or slides on {topic}",
-        f"Board, projector, or chart paper for class discussion",
+        "Board, projector, chart paper, or notebook materials",
     ]
 
     if subject.strip().lower() == "agricultural science":
@@ -412,12 +334,27 @@ def _normalize_ai_sections(structure: str, ai_sections: Dict, fallback_sections:
 
 
 def generate_lesson(payload: dict) -> dict:
+    payload["curriculum"] = payload.get("curriculum") or ""
+    payload["subject"] = payload.get("subject") or ""
+    payload["topic"] = payload.get("topic") or ""
     payload["grade_level"] = payload.get("grade_level") or payload.get("grade") or ""
     payload["structure"] = payload.get("structure") or "5Es"
     payload["difficulty"] = payload.get("difficulty") or "Intermediate"
     payload["lesson_type"] = payload.get("lesson_type") or "Theory"
     payload["objective_count"] = payload.get("objective_count") or 3
     payload["duration_minutes"] = payload.get("duration_minutes") or 60
+    payload["subtopic"] = payload.get("subtopic") or ""
+    payload["resources"] = payload.get("resources") or ""
+    payload["description"] = payload.get("description") or ""
+
+    required = ["curriculum", "subject", "grade_level", "topic"]
+    missing = [key for key in required if not payload.get(key)]
+    if missing:
+        raise ValueError(f"Missing required lesson fields: {', '.join(missing)}")
+
+    key = cache_key(payload)
+    if key in CACHE:
+        return CACHE[key]
 
     objectives = engine.build_objectives(
         payload["curriculum"],
@@ -491,34 +428,40 @@ def generate_lesson(payload: dict) -> dict:
         "generation_mode": "fallback",
     }
 
-    ai_parts = generate_dynamic_lesson_parts(
-        payload=payload,
-        objectives=objective_text,
-        strand=match.get("strand", "General Strand"),
-        resource_suggestions=fallback_resources,
-    )
-
     lesson = dict(fallback_lesson)
 
-    if ai_parts:
-        lesson["attainment_target"] = ai_parts.get("attainment_target", lesson["attainment_target"])
-        lesson["theme"] = ai_parts.get("theme", lesson["theme"])
-        lesson["strand"] = ai_parts.get("strand", lesson["strand"])
-        lesson["class_profile"] = ai_parts.get("class_profile", lesson["class_profile"])
-        lesson["domain_objectives"] = ai_parts.get("domain_objectives", lesson["domain_objectives"])
-        lesson["prior_learning"] = ai_parts.get("prior_learning", lesson["prior_learning"])
-        lesson["prior_knowledge_questions"] = ai_parts.get("prior_knowledge_questions", lesson["prior_knowledge_questions"])
-        lesson["resources"] = ai_parts.get("resources", lesson["resources"])
-        lesson["sections"] = _normalize_ai_sections(payload["structure"], ai_parts.get("sections", {}), fallback_sections)
-        lesson["assessment"] = ai_parts.get("assessment", lesson["assessment"])
-        lesson["assessment_criteria"] = ai_parts.get("assessment_criteria", lesson["assessment_criteria"])
-        lesson["apse_pathways"] = ai_parts.get("apse_pathways", lesson["apse_pathways"])
-        lesson["stem_skills"] = ai_parts.get("stem_skills", lesson["stem_skills"])
-        lesson["reflection"] = ai_parts.get("reflection", lesson["reflection"])
-        lesson["generation_mode"] = "ai"
+    try:
+        ai_parts = generate_dynamic_lesson_parts(
+            payload=payload,
+            objectives=objective_text,
+            strand=match.get("strand", "General Strand"),
+            resource_suggestions=fallback_resources,
+        )
 
-    return {
+        if ai_parts:
+            lesson["attainment_target"] = ai_parts.get("attainment_target", lesson["attainment_target"])
+            lesson["theme"] = ai_parts.get("theme", lesson["theme"])
+            lesson["strand"] = ai_parts.get("strand", lesson["strand"])
+            lesson["class_profile"] = ai_parts.get("class_profile", lesson["class_profile"])
+            lesson["domain_objectives"] = ai_parts.get("domain_objectives", lesson["domain_objectives"])
+            lesson["prior_learning"] = ai_parts.get("prior_learning", lesson["prior_learning"])
+            lesson["prior_knowledge_questions"] = ai_parts.get("prior_knowledge_questions", lesson["prior_knowledge_questions"])
+            lesson["resources"] = ai_parts.get("resources", lesson["resources"])
+            lesson["sections"] = _normalize_ai_sections(payload["structure"], ai_parts.get("sections", {}), fallback_sections)
+            lesson["assessment"] = ai_parts.get("assessment", lesson["assessment"])
+            lesson["assessment_criteria"] = ai_parts.get("assessment_criteria", lesson["assessment_criteria"])
+            lesson["apse_pathways"] = ai_parts.get("apse_pathways", lesson["apse_pathways"])
+            lesson["stem_skills"] = ai_parts.get("stem_skills", lesson["stem_skills"])
+            lesson["reflection"] = ai_parts.get("reflection", lesson["reflection"])
+            lesson["generation_mode"] = "ai"
+    except Exception as exc:
+        print("LESSON AI ERROR:", type(exc).__name__, str(exc))
+
+    result = {
         "title": f"{payload.get('subject', '')} Lesson Plan - {payload.get('topic', '')}",
         "curriculum_match": match,
         "lesson": lesson,
     }
+
+    CACHE[key] = result
+    return result

@@ -190,6 +190,12 @@ def generate_dynamic_lesson_parts(
     strand: str,
     resource_suggestions: List[str],
 ) -> Optional[Dict[str, Any]]:
+    required = ["curriculum", "subject", "grade_level", "topic", "structure", "lesson_type", "difficulty"]
+    missing = [key for key in required if not payload.get(key)]
+    if missing:
+        print("AI DEBUG: Missing lesson payload keys:", missing)
+        return None
+
     if not OPENAI_API_KEY:
         print("AI DEBUG: No OPENAI_API_KEY found.")
         return None

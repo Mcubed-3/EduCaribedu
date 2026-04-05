@@ -29,12 +29,12 @@ from .auth_service import (
     increment_generation_count,
     init_auth_db,
     list_users,
+    save_user_profile,
     update_user_billing,
     update_user_plan,
     update_user_role_plan,
     update_user_stripe_subscription,
     verify_user,
-    save_user_profile,
 )
 from .curriculum_admin_service import (
     create_framework,
@@ -139,6 +139,7 @@ def robots_txt():
 @app.get("/sitemap.xml")
 def sitemap_xml():
     return FileResponse(BASE_DIR / "static" / "sitemap.xml", media_type="application/xml")
+
 
 @app.get("/ads.txt")
 def ads_txt():
@@ -544,9 +545,13 @@ def lesson_generate(request: Request, payload: LessonRequest):
     if profile.get("grade_levels") and not payload_data.get("grade_level"):
         payload_data["grade_level"] = profile["grade_levels"][0]
 
-    result = generate_lesson(payload_data)
-    increment_generation_count(user["id"])
-    return result
+    try:
+        result = generate_lesson(payload_data)
+        increment_generation_count(user["id"])
+        return result
+    except Exception as e:
+        print("LESSON GENERATE ERROR:", type(e).__name__, str(e))
+        raise HTTPException(status_code=500, detail=f"Lesson generation failed: {str(e)}")
 
 
 @app.post("/api/activity/generate")
@@ -582,6 +587,7 @@ def activity_generate(request: Request, payload: ActivityRequest):
     except HTTPException:
         raise
     except Exception as e:
+        print("ACTIVITY GENERATE ERROR:", type(e).__name__, str(e))
         raise HTTPException(status_code=500, detail=f"Activity generation failed: {str(e)}")
 
 
@@ -663,7 +669,6 @@ def export_pdf(request: Request, payload: dict):
         )
 
     html = payload.get("html")
-
     if not html:
         raise HTTPException(
             status_code=400,
@@ -672,15 +677,13 @@ def export_pdf(request: Request, payload: dict):
 
     try:
         path = export_to_pdf(html)
-
         return FileResponse(
             path,
             media_type="application/pdf",
             filename=path.name,
         )
-
     except Exception as e:
-        print("PDF EXPORT ERROR:", e)
+        print("PDF EXPORT ERROR:", type(e).__name__, str(e))
         raise HTTPException(
             status_code=500,
             detail="Failed to generate PDF.",
