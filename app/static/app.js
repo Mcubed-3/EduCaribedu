@@ -409,9 +409,25 @@ function escapeHtml(text) {
 
 function normalizeMathText(text) {
   if (!text) return "";
-  return String(text)
-    .replace(/÷/g, "/")
-    .replace(/×/g, "\\times ");
+
+  let out = String(text);
+
+  out = out.replace(/÷/g, "/");
+  out = out.replace(/×/g, "\\times ");
+
+  // Wrap simple powers like x^2, y^10
+  out = out.replace(
+    /(^|[\s(])([A-Za-z][A-Za-z0-9]*)\^([A-Za-z0-9]+)/g,
+    '$1\\\\($2^{$3}\\\\)'
+  );
+
+  // Wrap simple fractions like 3/4
+  out = out.replace(
+    /(^|[\s(])(\d+)\s*\/\s*(\d+)(?=$|[\s),.;:!?])/g,
+    '$1\\\\(\\\\frac{$2}{$3}\\\\)'
+  );
+
+  return out;
 }
 
 async function renderMathPreview(textareaId, previewId) {
