@@ -7,14 +7,23 @@ import secrets
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+import os
 
 BASE_DIR = Path(__file__).parent
 STORAGE_DIR = BASE_DIR / "storage"
-STORAGE_DIR.mkdir(exist_ok=True)
 
-DB_PATH = Path(os.getenv("AUTH_DB_PATH", str(STORAGE_DIR / "auth.db")))
-DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+auth_db_env = os.getenv("AUTH_DB_PATH", "").strip()
+
+if auth_db_env:
+    DB_PATH = Path(auth_db_env)
+else:
+    STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+    DB_PATH = STORAGE_DIR / "auth.db"
+
+# Only try to create the parent directory for local paths.
+# On Render, /var/data must already be mounted by the platform.
+if not auth_db_env:
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 SESSION_DAYS = 14
 
