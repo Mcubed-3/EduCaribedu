@@ -304,13 +304,21 @@ function lessonToText(data) {
 
   lines.push(`${data.title || "Lesson Plan"}`);
   lines.push("");
-  lines.push(`Curriculum: ${lesson.curriculum || ""}`);
-  lines.push(`Subject: ${lesson.subject || ""}`);
-  lines.push(`Grade/Level: ${lesson.grade_level || ""}`);
-  lines.push(`Topic: ${lesson.topic || ""}`);
-  lines.push(`Structure: ${lesson.structure || ""}`);
-  lines.push(`Difficulty: ${lesson.difficulty || ""}`);
-  lines.push(`Generation Mode: ${lesson.generation_mode || "unknown"}`);
+
+  const meta = [
+    ["Curriculum", lesson.curriculum],
+    ["Subject", lesson.subject],
+    ["Grade/Level", lesson.grade_level],
+    ["Topic", lesson.topic],
+    ["Structure", lesson.structure],
+    ["Difficulty", lesson.difficulty],
+    ["Generation Mode", lesson.generation_mode || "unknown"],
+  ];
+
+  meta.forEach(([label, value]) => {
+    if (value) lines.push(`${label}: ${value}`);
+  });
+
   lines.push("");
 
   if (lesson.attainment_target) {
@@ -320,14 +328,15 @@ function lessonToText(data) {
   }
 
   if (lesson.theme || lesson.strand) {
-    lines.push(`Theme: ${lesson.theme || ""}`);
-    lines.push(`Strand: ${lesson.strand || ""}`);
+    if (lesson.theme) lines.push(`Theme: ${lesson.theme}`);
+    if (lesson.strand) lines.push(`Strand: ${lesson.strand}`);
     lines.push("");
   }
 
   if (lesson.class_profile && Object.keys(lesson.class_profile).length) {
     lines.push("Class Profile:");
     Object.entries(lesson.class_profile).forEach(([key, value]) => {
+      if (value == null || value === "") return;
       const rendered = Array.isArray(value) ? value.join(", ") : value;
       lines.push(`- ${toTitle(key)}: ${rendered}`);
     });
@@ -336,9 +345,15 @@ function lessonToText(data) {
 
   if (lesson.domain_objectives && Object.keys(lesson.domain_objectives).length) {
     lines.push("Specific Objectives:");
-    lines.push(`- Cognitive: ${lesson.domain_objectives.cognitive || ""}`);
-    lines.push(`- Affective: ${lesson.domain_objectives.affective || ""}`);
-    lines.push(`- Psychomotor: ${lesson.domain_objectives.psychomotor || ""}`);
+    if (lesson.domain_objectives.cognitive) {
+      lines.push(`- Cognitive: ${lesson.domain_objectives.cognitive}`);
+    }
+    if (lesson.domain_objectives.affective) {
+      lines.push(`- Affective: ${lesson.domain_objectives.affective}`);
+    }
+    if (lesson.domain_objectives.psychomotor) {
+      lines.push(`- Psychomotor: ${lesson.domain_objectives.psychomotor}`);
+    }
     lines.push("");
   }
 
@@ -348,29 +363,46 @@ function lessonToText(data) {
     lines.push("");
   }
 
-  lines.push("Prior Knowledge:");
-  (lesson.prior_knowledge_questions || []).forEach((q) => lines.push(`- ${q}`));
-  lines.push("");
-
-  lines.push("Resources:");
-  (lesson.resources || []).forEach((r) => lines.push(`- ${r}`));
-  lines.push("");
-
-  Object.entries(lesson.sections || {}).forEach(([section, items]) => {
-    lines.push(`${section}:`);
-    (items || []).forEach((item) => lines.push(`- ${item}`));
+  if (Array.isArray(lesson.prior_knowledge_questions) && lesson.prior_knowledge_questions.length) {
+    lines.push("Prior Knowledge:");
+    lesson.prior_knowledge_questions.forEach((q) => {
+      lines.push(`- ${q}`);
+    });
     lines.push("");
-  });
+  }
+
+  if (Array.isArray(lesson.resources) && lesson.resources.length) {
+    lines.push("Resources:");
+    lesson.resources.forEach((r) => {
+      lines.push(`- ${r}`);
+    });
+    lines.push("");
+  }
+
+  if (lesson.sections && typeof lesson.sections === "object") {
+    Object.entries(lesson.sections).forEach(([section, items]) => {
+      if (!items || !items.length) return;
+      lines.push(`${section}:`);
+      items.forEach((item) => {
+        lines.push(`- ${item}`);
+      });
+      lines.push("");
+    });
+  }
 
   if (Array.isArray(lesson.apse_pathways) && lesson.apse_pathways.length) {
     lines.push("APSE Pathways:");
-    lesson.apse_pathways.forEach((item) => lines.push(`- ${item}`));
+    lesson.apse_pathways.forEach((item) => {
+      lines.push(`- ${item}`);
+    });
     lines.push("");
   }
 
   if (Array.isArray(lesson.stem_skills) && lesson.stem_skills.length) {
     lines.push("STEM / Skills:");
-    lesson.stem_skills.forEach((item) => lines.push(`- ${item}`));
+    lesson.stem_skills.forEach((item) => {
+      lines.push(`- ${item}`);
+    });
     lines.push("");
   }
 
@@ -380,14 +412,22 @@ function lessonToText(data) {
     lines.push("");
   }
 
-  lines.push("Assessment:");
-  (lesson.assessment || []).forEach((item) => lines.push(`- ${item}`));
-  lines.push("");
+  if (Array.isArray(lesson.assessment) && lesson.assessment.length) {
+    lines.push("Assessment:");
+    lesson.assessment.forEach((item) => {
+      lines.push(`- ${item}`);
+    });
+    lines.push("");
+  }
 
-  lines.push("Reflection:");
-  (lesson.reflection || []).forEach((item) => lines.push(`- ${item}`));
+  if (Array.isArray(lesson.reflection) && lesson.reflection.length) {
+    lines.push("Reflection:");
+    lesson.reflection.forEach((item) => {
+      lines.push(`- ${item}`);
+    });
+  }
 
-  return lines.join("\n");
+  return lines.join("\n").trim();
 }
 
 function renderLesson(data) {
@@ -410,35 +450,53 @@ function normalizeMathText(text) {
 
   let out = String(text);
 
-  // Convert double-escaped delimiters from AI/text output into real MathJax delimiters
+  // Convert double-escaped delimiters into real MathJax delimiters
   out = out.replace(/\\\\\(/g, "\\(").replace(/\\\\\)/g, "\\)");
   out = out.replace(/\\\\\[/g, "\\[").replace(/\\\\\]/g, "\\]");
+
+  // Remove stray inline delimiters around single plain letters in normal prose:
+  // "\(a\) short real-life scenario" -> "a short real-life scenario"
+  out = out.replace(/\\\(([A-Za-z])\\\)(?=\s+[A-Za-z])/g, "$1");
+
+  // Remove stray inline delimiters around simple unit symbols:
+  // "\(m\)" -> "m"
+  out = out.replace(/\\\(([A-Za-z])\\\)(?=[\s).,;:!?]|$)/g, "$1");
 
   // Common symbols
   out = out.replace(/÷/g, "/");
   out = out.replace(/×/g, "\\times ");
+  out = out.replace(/√\s*([A-Za-z0-9]+)/g, "\\\\(\\\\sqrt{$1}\\\\)");
 
-  // Wrap simple polynomial/power expressions if they are not already inside delimiters
+  // Wrap simple powers like x^2
   out = out.replace(
-    /(^|[\s:(-])([A-Za-z][A-Za-z0-9]*)\^([A-Za-z0-9]+)(?=$|[\s),.;:!?+\-])/g,
+    /(^|[\s:(=+-])([A-Za-z][A-Za-z0-9]*)\^([A-Za-z0-9]+)(?=$|[\s),.;:!?+\-])/g,
     '$1\\\\($2^{$3}\\\\)'
   );
 
-  // Wrap simple fractions
+  // Wrap simple fractions like 3/4
   out = out.replace(
-    /(^|[\s:(-])(\d+)\s*\/\s*(\d+)(?=$|[\s),.;:!?])/g,
+    /(^|[\s:(=+-])(\d+)\s*\/\s*(\d+)(?=$|[\s),.;:!?])/g,
     '$1\\\\(\\\\frac{$2}{$3}\\\\)'
   );
 
-  // Wrap simple linear/quadratic expressions like x^2 - 5x or 2x + 3
+  // Wrap simple coordinates like (2, -1)
   out = out.replace(
-    /(^|[\s:(-])((?:[+-]?\d*[A-Za-z](?:\^\d+)?)(?:\s*[+-]\s*\d*[A-Za-z](?:\^\d+)?)*(?:\s*[+-]\s*\d+)?)(?=$|[\s),.;:!?])/g,
+    /(^|[\s:=])\((-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)\)(?=$|[\s.,;:!?])/g,
+    '$1\\\\(($2, $3)\\\\)'
+  );
+
+  // Wrap simple expressions like x^2 - 5x, 2x + 3, 3a - 2b
+  out = out.replace(
+    /(^|[\s:(=])((?:[+-]?\d*[A-Za-z](?:\^\d+)?)(?:\s*[+\-]\s*\d*[A-Za-z](?:\^\d+)?)*(?:\s*[+\-]\s*\d+)?)(?=$|[\s),.;:!?])/g,
     (match, prefix, expr) => {
       if (expr.includes("\\(") || expr.includes("\\[")) return match;
       if (!/[A-Za-z]/.test(expr)) return match;
       return `${prefix}\\\\(${expr.replace(/\^(\d+)/g, '^{$1}')}\\\\)`;
     }
   );
+
+  // Clean accidental double wrapping like \(\(x^2\)\)
+  out = out.replace(/\\\(\s*\\\((.*?)\\\)\s*\\\)/g, "\\\\($1\\\\)");
 
   return out;
 }
@@ -693,35 +751,65 @@ function activityPayload() {
 
 function formatActivityContent(content) {
   if (content == null) return "";
-  if (typeof content === "string") return content;
+  if (typeof content === "string") return content.trim();
 
   if (Array.isArray(content)) {
     return content.map((item, index) => formatActivityItem(item, index)).join("\n\n").trim();
   }
 
   if (typeof content === "object") {
-    if (Array.isArray(content.items)) {
-      return content.items.map((item, index) => formatActivityItem(item, index)).join("\n\n").trim();
-    }
+    const orderedKeys = [
+      "title",
+      "student_instructions",
+      "worksheet_items",
+      "activity",
+      "questions",
+      "answer_key",
+      "mark_scheme",
+    ];
 
-    if (Array.isArray(content.questions)) {
-      return content.questions.map((item, index) => formatActivityItem(item, index)).join("\n\n").trim();
-    }
+    const lines = [];
 
-    return Object.entries(content)
-      .filter(([key]) => !["teacher_notes", "teachernotes"].includes(String(key).toLowerCase()))
-      .map(([key, value]) => `${toTitle(key)}:\n${formatActivityValue(value)}`)
-      .join("\n\n")
-      .trim();
+    orderedKeys.forEach((key) => {
+      if (!(key in content)) return;
+
+      const value = content[key];
+      if (!value || (Array.isArray(value) && !value.length)) return;
+
+      if (key === "title") {
+        lines.push(String(value).trim());
+        lines.push("");
+        return;
+      }
+
+      lines.push(`${toTitle(key)}:`);
+
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          if (["worksheet_items", "activity", "questions"].includes(key)) {
+            lines.push(formatActivityItem(item, index));
+          } else {
+            lines.push(`- ${formatActivityValue(item)}`);
+          }
+        });
+      } else {
+        lines.push(formatActivityValue(value));
+      }
+
+      lines.push("");
+    });
+
+    return lines.join("\n").trim();
   }
 
-  return String(content);
+  return String(content).trim();
 }
 
+
 function formatActivityItem(item, index = 0) {
-  if (typeof item === "string") return `${index + 1}. ${item}`;
+  if (typeof item === "string") return `${index + 1}. ${item.trim()}`;
   if (item == null) return `${index + 1}.`;
-  if (typeof item !== "object") return `${index + 1}. ${String(item)}`;
+  if (typeof item !== "object") return `${index + 1}. ${String(item).trim()}`;
 
   const lines = [];
   const prompt =
@@ -730,65 +818,48 @@ function formatActivityItem(item, index = 0) {
     item.text ||
     item.title ||
     item.clue ||
-    `Item ${index + 1}`;
+    `Question ${index + 1}`;
 
-  lines.push(`${index + 1}. ${prompt}`);
+  lines.push(`${index + 1}. ${String(prompt).trim()}`);
 
   if (Array.isArray(item.options) && item.options.length) {
     item.options.forEach((opt, i) => {
       const label = String.fromCharCode(65 + i);
-      lines.push(`   ${label}. ${typeof opt === "string" ? opt : formatActivityValue(opt)}`);
+      lines.push(`   ${label}. ${typeof opt === "string" ? opt.trim() : formatActivityValue(opt)}`);
     });
   }
 
-  if (item.answer) lines.push(`   Answer: ${formatActivityValue(item.answer)}`);
-  if (item.mark_scheme) lines.push(`   Mark Scheme: ${formatActivityValue(item.mark_scheme)}`);
-  if (item.explanation) lines.push(`   Explanation: ${formatActivityValue(item.explanation)}`);
+  if (item.answer) {
+    lines.push(`   Answer: ${formatActivityValue(item.answer).trim()}`);
+  }
+
+  if (item.explanation) {
+    lines.push(`   Explanation: ${formatActivityValue(item.explanation).trim()}`);
+  }
+
+  if (item.mark_scheme) {
+    lines.push(`   Mark Scheme: ${formatActivityValue(item.mark_scheme).trim()}`);
+  }
 
   return lines.join("\n");
 }
 
 function formatActivityValue(value) {
   if (value == null) return "";
-  if (typeof value === "string") return value;
-  if (Array.isArray(value)) return value.map((v) => formatActivityValue(v)).join(", ");
+  if (typeof value === "string") return value.trim();
+
+  if (Array.isArray(value)) {
+    return value.map((v) => formatActivityValue(v)).join(", ");
+  }
+
   if (typeof value === "object") {
     return Object.entries(value)
       .filter(([k]) => !["teacher_notes", "teachernotes"].includes(String(k).toLowerCase()))
       .map(([k, v]) => `${toTitle(k)}: ${formatActivityValue(v)}`)
       .join("; ");
   }
-  return String(value);
-}
 
-function toTitle(value) {
-  return String(value || "")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function updateActivityModeUI() {
-  const mode = getActivitySourceMode();
-  const standaloneIds = [
-    "activity_curriculum",
-    "activity_subject",
-    "activity_grade_level",
-    "activity_difficulty",
-    "activity_topic",
-  ];
-
-  standaloneIds.forEach((id) => {
-    const el = byId(id);
-    if (!el) return;
-    const wrapper = el.closest(".field");
-    if (!wrapper) return;
-    wrapper.style.display = mode === "standalone" ? "" : "none";
-  });
-
-  const insertBtn = byId("insertActivitySnippetBtn");
-  if (insertBtn) {
-    insertBtn.style.display = mode === "lesson" ? "" : "none";
-  }
+  return String(value).trim();
 }
 
 async function generateActivity() {
