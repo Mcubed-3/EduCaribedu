@@ -161,14 +161,18 @@ function formPayload() {
   const profile = currentUserContext?.profile || {};
 
   return {
-    curriculum: profile.curriculum || byId("curriculum")?.value,
-    subject: profile.subjects?.[0] || byId("subject")?.value,
-    grade_level: profile.grade_levels?.[0] || byId("grade_level")?.value,
-
+    curriculum: profile.curriculum || byId("curriculum")?.value || "",
+    subject: profile.subjects?.[0] || byId("subject")?.value || "",
+    grade_level: profile.grade_levels?.[0] || byId("grade_level")?.value || "",
+    structure: byId("structure")?.value || "5Es",
+    difficulty: byId("difficulty")?.value || "Intermediate",
+    lesson_type: byId("lesson_type")?.value || "Theory",
     topic: byId("topic")?.value || "",
-    objective_count: 3,
-    duration_minutes: 60,
+    subtopic: byId("subtopic")?.value || "",
+    objective_count: Number(byId("objective_count")?.value || 3),
+    duration_minutes: Number(byId("duration_minutes")?.value || 60),
     description: byId("description")?.value || "",
+    resources: byId("resources")?.value || "",
   };
 }
 
