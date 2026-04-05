@@ -1,10 +1,31 @@
-from playwright.sync_api import sync_playwright
+from __future__ import annotations
+
 from pathlib import Path
 import uuid
-import os
+
+from docx import Document
+from playwright.sync_api import sync_playwright
 
 EXPORT_DIR = Path("exports")
 EXPORT_DIR.mkdir(exist_ok=True)
+
+
+def export_to_docx(title: str, content: str):
+    file_name = f"{uuid.uuid4()}.docx"
+    file_path = EXPORT_DIR / file_name
+
+    doc = Document()
+    doc.add_heading(title or "Export", level=0)
+
+    for line in (content or "").splitlines():
+        stripped = line.strip()
+        if not stripped:
+            doc.add_paragraph("")
+            continue
+        doc.add_paragraph(stripped)
+
+    doc.save(file_path)
+    return file_path
 
 
 def export_to_pdf(html: str):
@@ -15,7 +36,16 @@ def export_to_pdf(html: str):
     <html>
     <head>
         <meta charset="utf-8" />
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>
+          window.MathJax = {{
+            tex: {{
+              inlineMath: [['\\\\(', '\\\\)'], ['$', '$']],
+              displayMath: [['\\\\[', '\\\\]'], ['$$', '$$']]
+            }},
+            svg: {{ fontCache: 'global' }}
+          }};
+        </script>
+        <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
         <style>
             body {{
                 font-family: Arial, sans-serif;
@@ -29,7 +59,7 @@ def export_to_pdf(html: str):
         </style>
     </head>
     <body>
-        {html}
+        {html or ""}
     </body>
     </html>
     """
@@ -37,19 +67,13 @@ def export_to_pdf(html: str):
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--no-sandbox"])
         page = browser.new_page()
-
         page.set_content(full_html, wait_until="networkidle")
-
-        # Ensure MathJax fully renders
-        page.wait_for_function("window.MathJax !== undefined")
         page.wait_for_timeout(1500)
-
         page.pdf(
             path=str(file_path),
             format="A4",
-            print_background=True
+            print_background=True,
         )
-
         browser.close()
 
     return file_path
