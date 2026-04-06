@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from typing import Dict, List
 
 from .ai_generator import generate_dynamic_lesson_parts
@@ -33,44 +34,65 @@ def format_objectives(objectives: List[Dict[str, str]]) -> List[str]:
     return [obj["text"] for obj in objectives]
 
 
-import re
+def _clean_math_text(text: str) -> str:
+    if not isinstance(text, str):
+        return text
 
-def _math_output_rules(subject: str, topic: str, structure: str) -> str:
-    return """
-CRITICAL MATH RULES (STRICT):
+    cleaned = text
 
-- NEVER use LaTeX.
-- NEVER use \\( \\), \\[, \\], \\frac, \\sqrt
-- NEVER use backslashes \\ anywhere
+    # remove latex wrappers
+    cleaned = re.sub(r"\\\(|\\\)", "", cleaned)
+    cleaned = re.sub(r"\\\[|\\\]", "", cleaned)
 
-Write ALL math as plain readable text:
+    # remove backslashes
+    cleaned = cleaned.replace("\\", "")
 
-Examples:
-x^2 - 5x + 6 = 0
-(x + 3)/4
-√(x/2)
-x = (-b ± √(b² - 4ac)) / 2a
+    # convert powers like x^{2} -> x^2
+    cleaned = re.sub(r"\^\{(\d+)\}", r"^\1", cleaned)
 
-Formatting rules:
-- Keep equations on ONE line
-- Do NOT split equations across brackets
-- Do NOT wrap variables like x, y in brackets
-- Use √ symbol instead of sqrt
-- Use ^ for powers
+    # convert sqrt text if it slips through
+    cleaned = cleaned.replace("sqrt", "√")
 
-BAD OUTPUT (DO NOT DO):
-\\(x^2 - 5x + 6\\)
-\\frac{x}{2}
-\\sqrt{x}
+    # remove json-like artifacts if they slip through
+    cleaned = cleaned.replace('"', "")
+    cleaned = cleaned.replace("{", "")
+    cleaned = cleaned.replace("}", "")
 
-Your output MUST be clean and readable in plain text.
-"""
+    # normalize whitespace
+    cleaned = re.sub(r"\s+", " ", cleaned)
+
+    return cleaned.strip()
 
 
 def _clean_math_list(items):
     if not isinstance(items, list):
         return items
     return [_clean_math_text(str(item)) for item in items if str(item).strip()]
+
+
+def _clean_domain_objectives(obj: Dict[str, str]) -> Dict[str, str]:
+    if not isinstance(obj, dict):
+        return obj
+    return {
+        "cognitive": _clean_math_text(obj.get("cognitive", "")),
+        "affective": _clean_math_text(obj.get("affective", "")),
+        "psychomotor": _clean_math_text(obj.get("psychomotor", "")),
+    }
+
+
+def _clean_class_profile(profile: Dict[str, object]) -> Dict[str, object]:
+    if not isinstance(profile, dict):
+        return profile
+
+    cleaned = {
+        "learner_profile": _clean_math_text(str(profile.get("learner_profile", ""))),
+        "learning_styles": profile.get("learning_styles", []),
+    }
+
+    if profile.get("mixed_ability_support"):
+        cleaned["mixed_ability_support"] = _clean_math_text(str(profile.get("mixed_ability_support", "")))
+
+    return cleaned
 
 
 def _prior_questions(topic: str, subject: str, difficulty: str) -> List[str]:
@@ -373,9 +395,9 @@ def _normalize_ai_sections(structure: str, ai_sections: Dict, fallback_sections:
     for section_name in expected:
         value = ai_sections.get(section_name)
         if isinstance(value, list) and value:
-            normalized[section_name] = [str(item).strip() for item in value if str(item).strip()]
+            normalized[section_name] = [_clean_math_text(str(item)) for item in value if str(item).strip()]
         elif isinstance(value, str) and value.strip():
-            normalized[section_name] = [value.strip()]
+            normalized[section_name] = [_clean_math_text(value.strip())]
         else:
             normalized[section_name] = fallback_sections.get(section_name, [])
 
@@ -497,8 +519,12 @@ def generate_lesson(payload: dict) -> dict:
             lesson["strand"] = _clean_math_text(
                 ai_parts.get("strand", lesson["strand"])
             )
-            lesson["class_profile"] = ai_parts.get("class_profile", lesson["class_profile"])
-            lesson["domain_objectives"] = ai_parts.get("domain_objectives", lesson["domain_objectives"])
+            lesson["class_profile"] = _clean_class_profile(
+                ai_parts.get("class_profile", lesson["class_profile"])
+            )
+            lesson["domain_objectives"] = _clean_domain_objectives(
+                ai_parts.get("domain_objectives", lesson["domain_objectives"])
+            )
             lesson["prior_learning"] = _clean_math_text(
                 ai_parts.get("prior_learning", lesson["prior_learning"])
             )
