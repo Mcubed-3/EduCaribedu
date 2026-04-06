@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5-mini").strip()
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini").strip()
 
 STEM_SUBJECTS = {
     "agricultural science",
@@ -120,62 +120,53 @@ def _teacher_profile_text(payload: dict) -> str:
 
 
 def _math_output_rules(subject: str, topic: str, structure: str) -> str:
-    return """
+    base_rules = """
 CRITICAL MATH RULES (STRICT):
 
 - NEVER use LaTeX.
 - NEVER use \\( \\), \\[, \\], \\frac, \\sqrt
 - NEVER use backslashes \\ anywhere
 
-Write ALL math as plain readable text:
+Write all math as clean readable plain text.
 
-Examples:
+Good examples:
 x^2 - 5x + 6 = 0
 (x + 3)/4
 √(x/2)
 x = (-b ± √(b² - 4ac)) / 2a
+(2, -1)
+y = 2x + 1
 
 Formatting rules:
-- Keep equations on ONE line
-- Do NOT split equations across brackets
-- Do NOT wrap variables like x, y in brackets
-- Use √ symbol instead of sqrt
+- Keep equations on one line
+- Do not split equations across brackets
+- Do not wrap variables like x, y, a, b in brackets
+- Use √ instead of sqrt
 - Use ^ for powers
+- Keep expressions readable in preview, PDF, and DOCX
 
-BAD OUTPUT (DO NOT DO):
+Bad output:
 \\(x^2 - 5x + 6\\)
 \\frac{x}{2}
 \\sqrt{x}
-
-Your output MUST be clean and readable in plain text.
+\\(y\\) = \\(2x + 1\\)
 """
+
+    if subject.strip().lower() not in MATH_HEAVY_SUBJECTS:
+        return (
+            base_rules
+            + "\nUse these rules only when the lesson naturally includes formulas, calculations, data, coordinates, measurements, ratios, or equations."
+        )
 
     extra_4c = ""
     if structure == "4Cs":
         extra_4c = """
 Additional 4Cs rule:
-- In 4Cs lessons, do NOT split mathematical expressions into fragments across bullets.
-- Write full equations and full expressions in one clean line.
-- Do NOT write things like \\(y\\) = \\(2x + 1\\); instead write \\(y = 2x + 1\\).
-- Do NOT wrap isolated variables such as x, y, a, b, m, or c unless they are part of a full equation or expression.
-""".strip()
+- In 4Cs lessons, do not split mathematical expressions across separate bullets.
+- Write full equations and expressions in one clean line.
+"""
 
-    return f"""
-CRITICAL MATH / FORMULA RULES:
-- This subject may include mathematical or symbolic notation.
-- Write clean, readable mathematical lines for expressions and formulas.
-- Inline maths must use \\( ... \\) only when proper math notation is needed.
-- Display maths may use \\[ ... \\] for larger expressions.
-- Fractions should be written clearly, for example \\(\\frac{{x+3}}{{4}}\\), and also remain understandable as a clean line.
-- Square roots should be written clearly, for example \\(\\sqrt{{x/2}}\\).
-- The quadratic formula should be written as a full line such as \\(x = \\frac{{-b \\pm \\sqrt{{b^2 - 4ac}}}}{{2a}}\\).
-- Coordinates should be written as \\((2, -1)\\).
-- Quadratic expressions should be written as full expressions like \\(x^2 - 5x + 6 = 0\\).
-- Do NOT output malformed delimiters, stray slashes, or broken math fragments.
-- Do NOT double-escape delimiters.
-- Keep the notation readable even when copied into DOCX as plain text lines.
-{extra_4c}
-""".strip()
+    return base_rules + extra_4c
 
 
 def _build_prompt(
@@ -249,24 +240,25 @@ Required quality rules:
 - Sections must use these names exactly: {section_names}
 - Reflection should sound like a teacher’s after-lesson review.
 - Resources must be plain text items, not clickable links.
-- Do NOT include a separate general 'Objectives' block. The lesson should use only specific objectives through domain_objectives.
+- Do not include a separate general Objectives block. Use only specific objectives through domain_objectives.
+- Make the subject match the topic naturally. Do not force Biology language into Mathematics topics or vice versa.
 
 Structure guidance:
-- attainment_target: one strong sentence.
-- theme and strand: concise and relevant.
-- class_profile.learner_profile: 1 concise paragraph about readiness/interests/needs.
-- class_profile.learning_styles: 2 to 4 items such as Visual, Auditory, Kinesthetic.
-- class_profile.mixed_ability_support: include ONLY when the selected difficulty is Mixed Ability.
-- domain_objectives: one sentence each for cognitive, affective, psychomotor.
-- prior_learning: one concise paragraph.
-- prior_knowledge_questions: 3 to 5 short, topic-specific questions.
-- resources: 3 to 6 realistic items.
-- section bullets: 2 to 4 bullets each, with teacher and student actions.
-- assessment: 2 to 4 concise bullets.
-- assessment_criteria: one concise paragraph.
-- apse_pathways: 2 to 4 concise items.
-- stem_skills: 0 to 5 concise items.
-- reflection: 3 to 5 concise bullets.
+- attainment_target: one strong sentence
+- theme and strand: concise and relevant
+- class_profile.learner_profile: 1 concise paragraph about readiness/interests/needs
+- class_profile.learning_styles: 2 to 4 items such as Visual, Auditory, Kinesthetic
+- class_profile.mixed_ability_support: include only when the selected difficulty is Mixed Ability
+- domain_objectives: one sentence each for cognitive, affective, psychomotor
+- prior_learning: one concise paragraph
+- prior_knowledge_questions: 3 to 5 short, topic-specific questions
+- resources: 3 to 6 realistic items
+- section bullets: 2 to 4 bullets each, with teacher and student actions
+- assessment: 2 to 4 concise bullets
+- assessment_criteria: one concise paragraph
+- apse_pathways: 2 to 4 concise items
+- stem_skills: 0 to 5 concise items
+- reflection: 3 to 5 concise bullets
 """.strip()
 
 
@@ -287,6 +279,10 @@ def generate_dynamic_lesson_parts(
         return None
 
     try:
+        print("AI DEBUG: Starting request...")
+        print("AI DEBUG: OPENAI_API_KEY present:", bool(OPENAI_API_KEY))
+        print("AI DEBUG: MODEL:", OPENAI_MODEL)
+
         client = OpenAI(api_key=OPENAI_API_KEY)
         prompt = _build_prompt(payload, objectives, strand, resource_suggestions)
         schema_model = LessonParts4C if payload["structure"] == "4Cs" else LessonParts5E
@@ -302,6 +298,8 @@ def generate_dynamic_lesson_parts(
             text_format=schema_model,
         )
 
+        print("AI DEBUG: Response received")
+
         parsed = response.output_parsed
         if not parsed:
             print("AI DEBUG: No parsed output returned.")
@@ -309,6 +307,7 @@ def generate_dynamic_lesson_parts(
             return None
 
         data = parsed.model_dump()
+        print("AI DEBUG SUCCESS:", data)
 
         if payload["difficulty"] != "Mixed Ability":
             data["class_profile"].pop("mixed_ability_support", None)
@@ -322,5 +321,5 @@ def generate_dynamic_lesson_parts(
         return data
 
     except Exception as exc:
-        print(f"AI DEBUG: Exception during API call: {type(exc).__name__}: {exc}")
+        print("AI DEBUG: Exception during API call:", type(exc).__name__, str(exc))
         return None
