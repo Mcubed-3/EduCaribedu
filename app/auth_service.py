@@ -267,59 +267,32 @@ def create_user(
     role: str = "user",
     plan: str = "free",
     subscription_status: str = "inactive",
-    payment_provider: str = "",
-    paypal_customer_id: str = "",
-    paypal_subscription_id: str = "",
-    stripe_customer_id: str = "",
-    stripe_subscription_id: str = "",
-    subscription_started_at: str = "",
-    subscription_renews_at: str = "",
-    billing_notes: str = "",
-) -> Dict[str, Any]:
+    **kwargs
+):
     email = email.strip().lower()
     salt = secrets.token_hex(16)
     password_hash = _hash_password(password, salt)
     created_at = datetime.utcnow().isoformat()
-    plan = _normalize_plan(role, plan)
-    subscription_status = _normalize_subscription_status(plan, subscription_status)
 
     conn = _get_conn()
     cur = conn.cursor()
+
     cur.execute(
         """
-        INSERT INTO users (
-            email, password_hash, salt, role, plan,
-            subscription_status, payment_provider,
-            paypal_customer_id, paypal_subscription_id,
-            stripe_customer_id, stripe_subscription_id,
-            subscription_started_at, subscription_renews_at,
-            billing_notes, created_at
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (email, password_hash, salt, role, plan, subscription_status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        (
-            email,
-            password_hash,
-            salt,
-            role,
-            plan,
-            subscription_status,
-            payment_provider,
-            paypal_customer_id,
-            paypal_subscription_id,
-            stripe_customer_id,
-            stripe_subscription_id,
-            subscription_started_at,
-            subscription_renews_at,
-            billing_notes,
-            created_at,
-        ),
+        (email, password_hash, salt, role, plan, subscription_status, created_at),
     )
+
     conn.commit()
     user_id = cur.lastrowid
     conn.close()
 
-    return get_user_by_id(user_id)  # type: ignore[return-value]
+    # ✅ LOG SIGNUPS
+    print(f"🔥 NEW USER SIGNUP: {email} at {created_at}")
+
+    return get_user_by_id(user_id)
 
 
 def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
