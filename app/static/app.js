@@ -13,6 +13,16 @@ function parseCommaList(value) {
     .filter(Boolean);
 }
 
+function toTitle(str) {
+  if (!str) return "";
+
+  return String(str)
+    .replace(/_/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 function showProfileModal() {
   const modal = byId("profileModal");
   if (modal) modal.classList.remove("hidden");
