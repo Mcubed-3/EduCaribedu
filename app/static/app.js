@@ -958,6 +958,33 @@ async function loadConfig() {
   applyProfileDefaultsToBuilder();
 }
 
+function updateActivityModeUI() {
+  const mode = getActivitySourceMode();
+
+  const standaloneIds = [
+    "activity_curriculum",
+    "activity_subject",
+    "activity_grade_level",
+    "activity_difficulty",
+    "activity_topic",
+  ];
+
+  standaloneIds.forEach((id) => {
+    const el = byId(id);
+    if (!el) return;
+
+    const wrapper = el.closest(".field");
+    if (!wrapper) return;
+
+    wrapper.style.display = mode === "standalone" ? "" : "none";
+  });
+
+  const insertBtn = byId("insertActivitySnippetBtn");
+  if (insertBtn) {
+    insertBtn.style.display = mode === "lesson" ? "" : "none";
+  }
+}
+
 async function init() {
   try {
     await loadCurrentUserContext();
