@@ -120,11 +120,35 @@ def _teacher_profile_text(payload: dict) -> str:
 
 
 def _math_output_rules(subject: str, topic: str, structure: str) -> str:
-    if subject.strip().lower() not in MATH_HEAVY_SUBJECTS:
-        return (
-            "If formulas, equations, ratios, measurements, coordinates, units, graphs, or expressions appear, "
-            "write them in a clean readable line format. Where true mathematical notation is needed, use MathJax-friendly LaTeX delimiters."
-        )
+    return """
+CRITICAL MATH RULES (STRICT):
+
+- NEVER use LaTeX.
+- NEVER use \\( \\), \\[, \\], \\frac, \\sqrt
+- NEVER use backslashes \\ anywhere
+
+Write ALL math as plain readable text:
+
+Examples:
+x^2 - 5x + 6 = 0
+(x + 3)/4
+√(x/2)
+x = (-b ± √(b² - 4ac)) / 2a
+
+Formatting rules:
+- Keep equations on ONE line
+- Do NOT split equations across brackets
+- Do NOT wrap variables like x, y in brackets
+- Use √ symbol instead of sqrt
+- Use ^ for powers
+
+BAD OUTPUT (DO NOT DO):
+\\(x^2 - 5x + 6\\)
+\\frac{x}{2}
+\\sqrt{x}
+
+Your output MUST be clean and readable in plain text.
+"""
 
     extra_4c = ""
     if structure == "4Cs":

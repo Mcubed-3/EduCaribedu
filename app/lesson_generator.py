@@ -35,27 +35,36 @@ def format_objectives(objectives: List[Dict[str, str]]) -> List[str]:
 
 import re
 
-def _clean_math_text(text: str) -> str:
-    if not isinstance(text, str):
-        return text
+def _math_output_rules(subject: str, topic: str, structure: str) -> str:
+    return """
+CRITICAL MATH RULES (STRICT):
 
-    # REMOVE ALL LATEX
-    text = re.sub(r"\\\(|\\\)", "", text)
-    text = re.sub(r"\\\[|\\\]", "", text)
+- NEVER use LaTeX.
+- NEVER use \\( \\), \\[, \\], \\frac, \\sqrt
+- NEVER use backslashes \\ anywhere
 
-    # REMOVE BACKSLASHES
-    text = text.replace("\\", "")
+Write ALL math as plain readable text:
 
-    # FIX POWER FORMATS
-    text = re.sub(r"\^\{(\d+)\}", r"\1", text)
+Examples:
+x^2 - 5x + 6 = 0
+(x + 3)/4
+√(x/2)
+x = (-b ± √(b² - 4ac)) / 2a
 
-    # CONVERT SQRT
-    text = text.replace("sqrt", "√")
+Formatting rules:
+- Keep equations on ONE line
+- Do NOT split equations across brackets
+- Do NOT wrap variables like x, y in brackets
+- Use √ symbol instead of sqrt
+- Use ^ for powers
 
-    # CLEAN SPACING
-    text = re.sub(r"\s+", " ", text)
+BAD OUTPUT (DO NOT DO):
+\\(x^2 - 5x + 6\\)
+\\frac{x}{2}
+\\sqrt{x}
 
-    return text.strip()
+Your output MUST be clean and readable in plain text.
+"""
 
 
 def _clean_math_list(items):
