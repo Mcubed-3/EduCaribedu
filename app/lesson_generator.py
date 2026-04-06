@@ -33,6 +33,43 @@ def format_objectives(objectives: List[Dict[str, str]]) -> List[str]:
     return [obj["text"] for obj in objectives]
 
 
+def _clean_math_text(text: str) -> str:
+    if not isinstance(text, str):
+        return text
+
+    cleaned = text
+
+    # remove doubled escaping
+    cleaned = cleaned.replace("\\\\(", "\\(").replace("\\\\)", "\\)")
+    cleaned = cleaned.replace("\\\\[", "\\[").replace("\\\\]", "\\]")
+
+    # remove isolated single-letter inline math in prose: \(x\) -> x
+    for var in ["x", "y", "a", "b", "c", "m", "w", "h", "p", "r"]:
+        cleaned = cleaned.replace(f"\\({var}\\)", var)
+
+    # remove malformed separated equation style: \(y\) = \(2x + 1\) -> \(y = 2x + 1\)
+    import re
+    cleaned = re.sub(
+        r"\\\(([A-Za-z])\\\)\s*=\s*\\\((.*?)\\\)",
+        r"\\(\1 = \2\\)",
+        cleaned,
+    )
+
+    # remove plain empty math fragments like "as ." leftovers
+    cleaned = cleaned.replace(" as .", ".")
+    cleaned = cleaned.replace(" given by .", ".")
+    cleaned = cleaned.replace(" equation ?", " equation?")
+    cleaned = cleaned.replace(" root of the equation ?", " root of the equation?")
+
+    return cleaned.strip()
+
+
+def _clean_math_list(items):
+    if not isinstance(items, list):
+        return items
+    return [_clean_math_text(str(item)) for item in items if str(item).strip()]
+
+
 def _prior_questions(topic: str, subject: str, difficulty: str) -> List[str]:
     questions = [
         f"What do you already know about {topic}?",
@@ -448,20 +485,46 @@ def generate_lesson(payload: dict) -> dict:
         )
 
         if ai_parts:
-            lesson["attainment_target"] = ai_parts.get("attainment_target", lesson["attainment_target"])
-            lesson["theme"] = ai_parts.get("theme", lesson["theme"])
-            lesson["strand"] = ai_parts.get("strand", lesson["strand"])
+            lesson["attainment_target"] = _clean_math_text(
+                ai_parts.get("attainment_target", lesson["attainment_target"])
+            )
+            lesson["theme"] = _clean_math_text(
+                ai_parts.get("theme", lesson["theme"])
+            )
+            lesson["strand"] = _clean_math_text(
+                ai_parts.get("strand", lesson["strand"])
+            )
             lesson["class_profile"] = ai_parts.get("class_profile", lesson["class_profile"])
             lesson["domain_objectives"] = ai_parts.get("domain_objectives", lesson["domain_objectives"])
-            lesson["prior_learning"] = ai_parts.get("prior_learning", lesson["prior_learning"])
-            lesson["prior_knowledge_questions"] = ai_parts.get("prior_knowledge_questions", lesson["prior_knowledge_questions"])
-            lesson["resources"] = ai_parts.get("resources", lesson["resources"])
-            lesson["sections"] = _normalize_ai_sections(payload["structure"], ai_parts.get("sections", {}), fallback_sections)
-            lesson["assessment"] = ai_parts.get("assessment", lesson["assessment"])
-            lesson["assessment_criteria"] = ai_parts.get("assessment_criteria", lesson["assessment_criteria"])
-            lesson["apse_pathways"] = ai_parts.get("apse_pathways", lesson["apse_pathways"])
-            lesson["stem_skills"] = ai_parts.get("stem_skills", lesson["stem_skills"])
-            lesson["reflection"] = ai_parts.get("reflection", lesson["reflection"])
+            lesson["prior_learning"] = _clean_math_text(
+                ai_parts.get("prior_learning", lesson["prior_learning"])
+            )
+            lesson["prior_knowledge_questions"] = _clean_math_list(
+                ai_parts.get("prior_knowledge_questions", lesson["prior_knowledge_questions"])
+            )
+            lesson["resources"] = _clean_math_list(
+                ai_parts.get("resources", lesson["resources"])
+            )
+            lesson["sections"] = _normalize_ai_sections(
+                payload["structure"],
+                ai_parts.get("sections", {}),
+                fallback_sections,
+            )
+            lesson["assessment"] = _clean_math_list(
+                ai_parts.get("assessment", lesson["assessment"])
+            )
+            lesson["assessment_criteria"] = _clean_math_text(
+                ai_parts.get("assessment_criteria", lesson["assessment_criteria"])
+            )
+            lesson["apse_pathways"] = _clean_math_list(
+                ai_parts.get("apse_pathways", lesson["apse_pathways"])
+            )
+            lesson["stem_skills"] = _clean_math_list(
+                ai_parts.get("stem_skills", lesson["stem_skills"])
+            )
+            lesson["reflection"] = _clean_math_list(
+                ai_parts.get("reflection", lesson["reflection"])
+            )
             lesson["generation_mode"] = "ai"
     except Exception as exc:
         print("LESSON AI ERROR:", type(exc).__name__, str(exc))
