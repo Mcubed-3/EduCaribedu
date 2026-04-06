@@ -669,8 +669,6 @@ def export_pdf(request: Request, payload: dict):
         )
 
     html = payload.get("html")
-    title = payload.get("title", "Export")
-
     if not html:
         raise HTTPException(
             status_code=400,
@@ -678,7 +676,7 @@ def export_pdf(request: Request, payload: dict):
         )
 
     try:
-        path = export_to_pdf(html, title=title)
+        path = export_to_pdf(html)
         return FileResponse(
             path,
             media_type="application/pdf",
