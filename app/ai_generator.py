@@ -14,6 +14,7 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini").strip()
 
 STEM_SUBJECTS = {
     "agricultural science",
+    "agriculture",
     "mathematics",
     "math",
     "biology",
@@ -23,10 +24,15 @@ STEM_SUBJECTS = {
     "science",
     "information technology",
     "it",
+    "resource and technology",
+    "engineering and mechanisms",
+    "industrial techniques",
+    "geography",
 }
 
 MATH_HEAVY_SUBJECTS = {
     "agricultural science",
+    "agriculture",
     "mathematics",
     "math",
     "chemistry",
@@ -40,19 +46,23 @@ MATH_HEAVY_SUBJECTS = {
     "technical drawing",
     "accounts",
     "accounting",
+    "resource and technology",
+    "engineering and mechanisms",
+    "industrial techniques",
+    "business basics",
 }
 
 
 class ClassProfile(BaseModel):
-    learner_profile: str = Field(min_length=20, max_length=320)
+    learner_profile: str = Field(min_length=20, max_length=420)
     learning_styles: List[str] = Field(min_length=2, max_length=4)
     mixed_ability_support: Optional[str] = None
 
 
 class DomainObjectives(BaseModel):
-    cognitive: str = Field(min_length=12, max_length=220)
-    affective: str = Field(min_length=12, max_length=220)
-    psychomotor: str = Field(min_length=12, max_length=220)
+    cognitive: str = Field(min_length=12, max_length=240)
+    affective: str = Field(min_length=12, max_length=240)
+    psychomotor: str = Field(min_length=12, max_length=240)
 
 
 class LessonSections5E(BaseModel):
@@ -71,34 +81,34 @@ class LessonSections4C(BaseModel):
 
 
 class LessonParts5E(BaseModel):
-    attainment_target: str = Field(min_length=20, max_length=320)
-    theme: str = Field(min_length=3, max_length=120)
-    strand: str = Field(min_length=3, max_length=120)
+    attainment_target: str = Field(min_length=20, max_length=420)
+    theme: str = Field(min_length=3, max_length=140)
+    strand: str = Field(min_length=3, max_length=140)
     class_profile: ClassProfile
     domain_objectives: DomainObjectives
-    prior_learning: str = Field(min_length=20, max_length=320)
+    prior_learning: str = Field(min_length=20, max_length=420)
     prior_knowledge_questions: List[str] = Field(min_length=3, max_length=5)
     resources: List[str] = Field(min_length=3, max_length=6)
     sections: LessonSections5E
     assessment: List[str] = Field(min_length=2, max_length=4)
-    assessment_criteria: str = Field(min_length=20, max_length=320)
+    assessment_criteria: str = Field(min_length=20, max_length=420)
     apse_pathways: List[str] = Field(min_length=2, max_length=4)
     stem_skills: List[str] = Field(default_factory=list, max_length=5)
     reflection: List[str] = Field(min_length=3, max_length=5)
 
 
 class LessonParts4C(BaseModel):
-    attainment_target: str = Field(min_length=20, max_length=320)
-    theme: str = Field(min_length=3, max_length=120)
-    strand: str = Field(min_length=3, max_length=120)
+    attainment_target: str = Field(min_length=20, max_length=420)
+    theme: str = Field(min_length=3, max_length=140)
+    strand: str = Field(min_length=3, max_length=140)
     class_profile: ClassProfile
     domain_objectives: DomainObjectives
-    prior_learning: str = Field(min_length=20, max_length=320)
+    prior_learning: str = Field(min_length=20, max_length=420)
     prior_knowledge_questions: List[str] = Field(min_length=3, max_length=5)
     resources: List[str] = Field(min_length=3, max_length=6)
     sections: LessonSections4C
     assessment: List[str] = Field(min_length=2, max_length=4)
-    assessment_criteria: str = Field(min_length=20, max_length=320)
+    assessment_criteria: str = Field(min_length=20, max_length=420)
     apse_pathways: List[str] = Field(min_length=2, max_length=4)
     stem_skills: List[str] = Field(default_factory=list, max_length=5)
     reflection: List[str] = Field(min_length=3, max_length=5)
@@ -120,53 +130,83 @@ def _teacher_profile_text(payload: dict) -> str:
 
 
 def _math_output_rules(subject: str, topic: str, structure: str) -> str:
-    base_rules = """
-CRITICAL MATH RULES (STRICT):
+    subject_key = (subject or "").strip().lower()
 
+    strict_rules = """
+CRITICAL MATH OUTPUT RULES (STRICT):
 - NEVER use LaTeX.
-- NEVER use \\( \\), \\[, \\], \\frac, \\sqrt
-- NEVER use backslashes \\ anywhere
+- NEVER use backslashes.
+- NEVER use \\( \\), \\[ \\], \\frac, \\sqrt, superscript braces, subscript braces, or escaped symbols.
+- Write ALL expressions in clean plain text only.
 
-Write all math as clean readable plain text.
-
-Good examples:
+Required plain-text math style examples:
 x^2 - 5x + 6 = 0
 (x + 3)/4
 √(x/2)
-x = (-b ± √(b² - 4ac)) / 2a
-(2, -1)
+x = (-b ± √(b^2 - 4ac)) / 2a
 y = 2x + 1
+(2, -1)
+3/4
+m^2
+cm^3
+12%
 
 Formatting rules:
-- Keep equations on one line
-- Do not split equations across brackets
-- Do not wrap variables like x, y, a, b in brackets
-- Use √ instead of sqrt
-- Use ^ for powers
-- Keep expressions readable in preview, PDF, and DOCX
-
-Bad output:
-\\(x^2 - 5x + 6\\)
-\\frac{x}{2}
-\\sqrt{x}
-\\(y\\) = \\(2x + 1\\)
+- Keep each equation on one line
+- Do not split expressions across bullets or sentences
+- Do not wrap variables in brackets
+- Do not output random quotation marks, braces, slashes, or code-like symbols
+- If a formula is needed, write it exactly as a readable line, not as markup
+- If units are needed, write them plainly, for example: m, m^2, cm^3, kg, N, °C
+- If a science or business calculation is needed, keep the numerical working readable in plain text
 """
 
-    if subject.strip().lower() not in MATH_HEAVY_SUBJECTS:
+    if subject_key not in MATH_HEAVY_SUBJECTS:
         return (
-            base_rules
-            + "\nUse these rules only when the lesson naturally includes formulas, calculations, data, coordinates, measurements, ratios, or equations."
+            strict_rules
+            + f"""
+
+Use these rules only when {subject} naturally requires calculations, formulas, measurement, coordinates, ratios, data handling, equations, graphs, or numerical reasoning in the topic '{topic}'.
+If no math is needed, do not force math into the lesson.
+"""
         )
 
     extra_4c = ""
     if structure == "4Cs":
         extra_4c = """
 Additional 4Cs rule:
-- In 4Cs lessons, do not split mathematical expressions across separate bullets.
-- Write full equations and expressions in one clean line.
+- In 4Cs lessons, do not split one calculation or equation into separate bullets.
+- Keep each full expression or worked example together in one bullet.
 """
 
-    return base_rules + extra_4c
+    return (
+        strict_rules
+        + f"""
+
+This lesson topic may naturally require mathematical or symbolic notation.
+Use only clean readable plain-text math for the topic '{topic}' in the subject '{subject}'.
+{extra_4c}
+"""
+    )
+
+
+def _quality_rules(subject: str, topic: str, structure: str, difficulty: str, lesson_type: str) -> str:
+    return f"""
+QUALITY RULES:
+- Make the lesson feel like it was written by a real Caribbean teacher.
+- Keep the subject and topic aligned naturally. Do not force another subject into the lesson.
+- Avoid generic filler.
+- Avoid repetition of the topic title in every line.
+- Use realistic classroom actions for teacher and students.
+- Keep all bullets actionable and classroom-ready.
+- Make examples, scenarios, and applications feel Caribbean where natural.
+- Keep the lesson appropriate for {difficulty} level.
+- Make the structure genuinely reflect {structure}, not just relabel generic bullets.
+- Make the lesson type genuinely reflect {lesson_type}.
+- If the topic is practical or skill-based, include practical handling, observation, demonstration, or performance where appropriate.
+- If the topic is discussion-based, include guided speaking, justification, and response opportunities.
+- Resources must be plain text items, not URLs.
+"""
 
 
 def _build_prompt(
@@ -200,12 +240,13 @@ def _build_prompt(
     )
 
     stem_text = (
-        "Include practical or skill-building STEM elements where natural: observation, classification, measuring, problem-solving, data use, or application."
+        "Include practical or skill-building STEM elements where natural: observation, classification, measuring, problem-solving, data use, experimentation, design, or application."
         if is_stem
-        else "Do not force STEM language if it does not fit the subject, but keep the lesson skill-based and practical where possible."
+        else "Do not force STEM language if it does not fit the subject, but keep the lesson skill-based and practical where appropriate."
     )
 
     math_rules = _math_output_rules(subject, topic, structure)
+    quality_rules = _quality_rules(subject, topic, structure, difficulty, lesson_type)
 
     return f"""
 Create a polished, curriculum-aligned Caribbean lesson plan that feels like a real teacher wrote it.
@@ -227,33 +268,28 @@ Context:
 - Suggested resources: {resource_suggestions}
 - {_teacher_profile_text(payload)}
 
-Required quality rules:
-- Keep the lesson classroom-ready, realistic, and teacher-friendly.
-- Use Caribbean-appropriate examples or contexts where natural.
+{quality_rules}
+
+Additional rules:
 - Include learning styles in the class profile.
 - {mixed_ability_text}
 - {stem_text}
 - {math_rules}
-- Do not write generic filler.
-- Do not repeat the topic unnecessarily.
-- Keep every bullet concrete and actionable.
 - Sections must use these names exactly: {section_names}
-- Reflection should sound like a teacher’s after-lesson review.
-- Resources must be plain text items, not clickable links.
+- Reflection should sound like a teacher's after-lesson review.
 - Do not include a separate general Objectives block. Use only specific objectives through domain_objectives.
-- Make the subject match the topic naturally. Do not force Biology language into Mathematics topics or vice versa.
 
 Structure guidance:
 - attainment_target: one strong sentence
 - theme and strand: concise and relevant
-- class_profile.learner_profile: 1 concise paragraph about readiness/interests/needs
+- class_profile.learner_profile: 1 concise paragraph about readiness, interests, and needs
 - class_profile.learning_styles: 2 to 4 items such as Visual, Auditory, Kinesthetic
 - class_profile.mixed_ability_support: include only when the selected difficulty is Mixed Ability
 - domain_objectives: one sentence each for cognitive, affective, psychomotor
 - prior_learning: one concise paragraph
 - prior_knowledge_questions: 3 to 5 short, topic-specific questions
 - resources: 3 to 6 realistic items
-- section bullets: 2 to 4 bullets each, with teacher and student actions
+- section bullets: 2 to 4 bullets each, with clear teacher and student actions
 - assessment: 2 to 4 concise bullets
 - assessment_criteria: one concise paragraph
 - apse_pathways: 2 to 4 concise items
@@ -292,7 +328,8 @@ def generate_dynamic_lesson_parts(
             instructions=(
                 "You are an expert Caribbean curriculum-aligned lesson planner. "
                 "Return only structured lesson content that fits the provided schema. "
-                "Do not add markdown, code fences, or commentary."
+                "Do not add markdown, code fences, commentary, JSON wrappers, or formatting markup. "
+                "All mathematical, scientific, financial, and technical expressions must be plain readable text, never LaTeX."
             ),
             input=prompt,
             text_format=schema_model,
