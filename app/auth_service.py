@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import json
 import os
 import secrets
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
-import os
+from typing import Any, Dict, List, Optional
 
 BASE_DIR = Path(__file__).parent
 STORAGE_DIR = BASE_DIR / "storage"
@@ -20,8 +21,6 @@ else:
     STORAGE_DIR.mkdir(parents=True, exist_ok=True)
     DB_PATH = STORAGE_DIR / "auth.db"
 
-# Only try to create the parent directory for local paths.
-# On Render, /var/data must already be mounted by the platform.
 if not auth_db_env:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
@@ -183,6 +182,19 @@ def init_auth_db() -> None:
         """
     )
 
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS signup_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            email TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            source TEXT NOT NULL DEFAULT 'signup',
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+        """
+    )
+
     existing_cols = {
         row["name"]
         for row in cur.execute("PRAGMA table_info(users)").fetchall()
@@ -261,38 +273,99 @@ def _ensure_default_admin() -> None:
     conn.close()
 
 
+def _record_signup_event(user_id: int, email: str, source: str = "signup") -> None:
+    conn = _get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO signup_events (user_id, email, created_at, source)
+        VALUES (?, ?, ?, ?)
+        """,
+        (user_id, email, datetime.utcnow().isoformat(), source),
+    )
+    conn.commit()
+    conn.close()
+
+
+def list_signup_events(limit: int = 50) -> List[Dict[str, Any]]:
+    conn = _get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT id, user_id, email, created_at, source
+        FROM signup_events
+        ORDER BY created_at DESC
+        LIMIT ?
+        """,
+        (limit,),
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
 def create_user(
     email: str,
     password: str,
     role: str = "user",
     plan: str = "free",
     subscription_status: str = "inactive",
-    **kwargs
-):
+    payment_provider: str = "",
+    paypal_customer_id: str = "",
+    paypal_subscription_id: str = "",
+    stripe_customer_id: str = "",
+    stripe_subscription_id: str = "",
+    subscription_started_at: str = "",
+    subscription_renews_at: str = "",
+    billing_notes: str = "",
+) -> Dict[str, Any]:
     email = email.strip().lower()
     salt = secrets.token_hex(16)
     password_hash = _hash_password(password, salt)
     created_at = datetime.utcnow().isoformat()
+    plan = _normalize_plan(role, plan)
+    subscription_status = _normalize_subscription_status(plan, subscription_status)
 
     conn = _get_conn()
     cur = conn.cursor()
-
     cur.execute(
         """
-        INSERT INTO users (email, password_hash, salt, role, plan, subscription_status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (
+            email, password_hash, salt, role, plan,
+            subscription_status, payment_provider,
+            paypal_customer_id, paypal_subscription_id,
+            stripe_customer_id, stripe_subscription_id,
+            subscription_started_at, subscription_renews_at,
+            billing_notes, created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (email, password_hash, salt, role, plan, subscription_status, created_at),
+        (
+            email,
+            password_hash,
+            salt,
+            role,
+            plan,
+            subscription_status,
+            payment_provider,
+            paypal_customer_id,
+            paypal_subscription_id,
+            stripe_customer_id,
+            stripe_subscription_id,
+            subscription_started_at,
+            subscription_renews_at,
+            billing_notes,
+            created_at,
+        ),
     )
-
     conn.commit()
     user_id = cur.lastrowid
     conn.close()
 
-    # ✅ LOG SIGNUPS
-    print(f"🔥 NEW USER SIGNUP: {email} at {created_at}")
+    _record_signup_event(user_id, email, source="signup")
+    print(f"NEW USER SIGNUP: {email} at {created_at}")
 
-    return get_user_by_id(user_id)
+    return get_user_by_id(user_id)  # type: ignore[return-value]
 
 
 def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
@@ -528,7 +601,6 @@ def increment_activity_generation_count(user_id: int, month_key: Optional[str] =
     return int(row["generation_count"]) if row else 0
 
 
-
 def get_user_profile(user_id: int) -> Dict[str, Any]:
     conn = _get_conn()
     cur = conn.cursor()
@@ -552,8 +624,6 @@ def get_user_profile(user_id: int) -> Dict[str, Any]:
             "updated_at": "",
         }
 
-    import json
-
     return {
         "subjects": json.loads(row["subjects"] or "[]"),
         "grade_levels": json.loads(row["grade_levels"] or "[]"),
@@ -564,8 +634,6 @@ def get_user_profile(user_id: int) -> Dict[str, Any]:
 
 
 def save_user_profile(user_id: int, subjects: List[str], grade_levels: List[str], curriculum: str) -> Dict[str, Any]:
-    import json
-
     clean_subjects = [str(item).strip() for item in (subjects or []) if str(item).strip()]
     clean_levels = [str(item).strip() for item in (grade_levels or []) if str(item).strip()]
     clean_curriculum = (curriculum or "").strip()
@@ -595,6 +663,7 @@ def save_user_profile(user_id: int, subjects: List[str], grade_levels: List[str]
     conn.commit()
     conn.close()
     return get_user_profile(user_id)
+
 
 def can_generate_lessons(user: Dict[str, Any]) -> Dict[str, Any]:
     limits = get_plan_limits(user["plan"])
