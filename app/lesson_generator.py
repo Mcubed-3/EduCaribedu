@@ -33,35 +33,29 @@ def format_objectives(objectives: List[Dict[str, str]]) -> List[str]:
     return [obj["text"] for obj in objectives]
 
 
+import re
+
 def _clean_math_text(text: str) -> str:
     if not isinstance(text, str):
         return text
 
-    cleaned = text
+    # REMOVE ALL LATEX
+    text = re.sub(r"\\\(|\\\)", "", text)
+    text = re.sub(r"\\\[|\\\]", "", text)
 
-    # remove doubled escaping
-    cleaned = cleaned.replace("\\\\(", "\\(").replace("\\\\)", "\\)")
-    cleaned = cleaned.replace("\\\\[", "\\[").replace("\\\\]", "\\]")
+    # REMOVE BACKSLASHES
+    text = text.replace("\\", "")
 
-    # remove isolated single-letter inline math in prose: \(x\) -> x
-    for var in ["x", "y", "a", "b", "c", "m", "w", "h", "p", "r"]:
-        cleaned = cleaned.replace(f"\\({var}\\)", var)
+    # FIX POWER FORMATS
+    text = re.sub(r"\^\{(\d+)\}", r"\1", text)
 
-    # remove malformed separated equation style: \(y\) = \(2x + 1\) -> \(y = 2x + 1\)
-    import re
-    cleaned = re.sub(
-        r"\\\(([A-Za-z])\\\)\s*=\s*\\\((.*?)\\\)",
-        r"\\(\1 = \2\\)",
-        cleaned,
-    )
+    # CONVERT SQRT
+    text = text.replace("sqrt", "√")
 
-    # remove plain empty math fragments like "as ." leftovers
-    cleaned = cleaned.replace(" as .", ".")
-    cleaned = cleaned.replace(" given by .", ".")
-    cleaned = cleaned.replace(" equation ?", " equation?")
-    cleaned = cleaned.replace(" root of the equation ?", " root of the equation?")
+    # CLEAN SPACING
+    text = re.sub(r"\s+", " ", text)
 
-    return cleaned.strip()
+    return text.strip()
 
 
 def _clean_math_list(items):
