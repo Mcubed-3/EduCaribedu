@@ -103,6 +103,8 @@ CRITICAL RULES:
 - Make answer keys structured, step-by-step where appropriate, and easy for teachers to use.
 - Do not produce strange slashes, broken delimiters, or random symbolic wrappers around normal words.
 - {math_rules}
+- Do NOT wrap isolated single letters such as x, y, a, b, m, or c in math delimiters unless they are part of a full equation or expression.
+- Write equations as full equations, for example \\(y = 2x + 1\\), not as separate fragments like y = \\(2x + 1\\).
 
 Return ONLY valid JSON in this exact structure:
 

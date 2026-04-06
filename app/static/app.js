@@ -464,48 +464,52 @@ function normalizeMathText(text) {
   out = out.replace(/\\\\\(/g, "\\(").replace(/\\\\\)/g, "\\)");
   out = out.replace(/\\\\\[/g, "\\[").replace(/\\\\\]/g, "\\]");
 
-  // Remove stray inline delimiters around single plain letters in normal prose:
-  // "\(a\) short real-life scenario" -> "a short real-life scenario"
-  out = out.replace(/\\\(([A-Za-z])\\\)(?=\s+[A-Za-z])/g, "$1");
+  // Remove math delimiters around isolated single-letter variables
+  // e.g. "\(x\)" -> "x"
+  out = out.replace(/\\\(([A-Za-z])\\\)/g, "$1");
 
-  // Remove stray inline delimiters around simple unit symbols:
-  // "\(m\)" -> "m"
-  out = out.replace(/\\\(([A-Za-z])\\\)(?=[\s).,;:!?]|$)/g, "$1");
-
-  // Common symbols
+  // Common symbol cleanup
   out = out.replace(/÷/g, "/");
   out = out.replace(/×/g, "\\times ");
+
+  // Square roots
   out = out.replace(/√\s*([A-Za-z0-9]+)/g, "\\\\(\\\\sqrt{$1}\\\\)");
 
-  // Wrap simple powers like x^2
-  out = out.replace(
-    /(^|[\s:(=+-])([A-Za-z][A-Za-z0-9]*)\^([A-Za-z0-9]+)(?=$|[\s),.;:!?+\-])/g,
-    '$1\\\\($2^{$3}\\\\)'
-  );
-
-  // Wrap simple fractions like 3/4
+  // Fractions like 3/4
   out = out.replace(
     /(^|[\s:(=+-])(\d+)\s*\/\s*(\d+)(?=$|[\s),.;:!?])/g,
     '$1\\\\(\\\\frac{$2}{$3}\\\\)'
   );
 
-  // Wrap simple coordinates like (2, -1)
+  // Powers like x^2
+  out = out.replace(
+    /(^|[\s:(=+-])([A-Za-z][A-Za-z0-9]*)\^([A-Za-z0-9]+)(?=$|[\s),.;:!?+\-])/g,
+    '$1\\\\($2^{$3}\\\\)'
+  );
+
+  // Full equations like y = 2x + 1  OR y = x^2 - 2
+  out = out.replace(
+    /(^|[\s:])([A-Za-z])\s*=\s*([A-Za-z0-9+\-*/^(). ]+)(?=$|[.,;:!?])/g,
+    (match, prefix, lhs, rhs) => {
+      const cleanedRhs = rhs.trim().replace(/\^(\d+)/g, "^{$1}");
+      if (!/[A-Za-z0-9]/.test(cleanedRhs)) return match;
+      return `${prefix}\\\\(${lhs} = ${cleanedRhs}\\\\)`;
+    }
+  );
+
+  // Coordinates like (2, -1)
   out = out.replace(
     /(^|[\s:=])\((-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)\)(?=$|[\s.,;:!?])/g,
     '$1\\\\(($2, $3)\\\\)'
   );
 
-  // Wrap simple expressions like x^2 - 5x, 2x + 3, 3a - 2b
+  // Simultaneous equations joined by "and"
   out = out.replace(
-    /(^|[\s:(=])((?:[+-]?\d*[A-Za-z](?:\^\d+)?)(?:\s*[+\-]\s*\d*[A-Za-z](?:\^\d+)?)*(?:\s*[+\-]\s*\d+)?)(?=$|[\s),.;:!?])/g,
-    (match, prefix, expr) => {
-      if (expr.includes("\\(") || expr.includes("\\[")) return match;
-      if (!/[A-Za-z]/.test(expr)) return match;
-      return `${prefix}\\\\(${expr.replace(/\^(\d+)/g, '^{$1}')}\\\\)`;
-    }
+    /([A-Za-z0-9+\-*/^() ]+=\s*[A-Za-z0-9+\-*/^() .]+)\s+and\s+([A-Za-z0-9+\-*/^() ]+=\s*[A-Za-z0-9+\-*/^() .]+)/g,
+    (match, eq1, eq2) => `\\\\(${eq1.trim()}\\\\) and \\\\(${eq2.trim()}\\\\)`
   );
 
-  // Clean accidental double wrapping like \(\(x^2\)\)
+  // Clean accidental double wrapping
   out = out.replace(/\\\(\s*\\\((.*?)\\\)\s*\\\)/g, "\\\\($1\\\\)");
 
   return out;
