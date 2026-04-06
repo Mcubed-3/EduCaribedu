@@ -61,12 +61,10 @@ function applyProfileSummaryOnly() {
     if (banner) banner.classList.add("hidden");
   }
 
-  // Keep dashboard lesson fields visible.
   document.querySelectorAll(".profile-driven-field").forEach((field) => {
     field.style.display = "";
   });
 
-  // Optional defaults only: only fill blank fields.
   if (!byId("curriculum")?.value && profile.curriculum && byId("curriculum")) {
     byId("curriculum").value = profile.curriculum;
   }
@@ -348,15 +346,9 @@ function lessonToText(data) {
 
   if (lesson.domain_objectives && Object.keys(lesson.domain_objectives).length) {
     lines.push("Specific Objectives:");
-    if (lesson.domain_objectives.cognitive) {
-      lines.push(`- Cognitive: ${lesson.domain_objectives.cognitive}`);
-    }
-    if (lesson.domain_objectives.affective) {
-      lines.push(`- Affective: ${lesson.domain_objectives.affective}`);
-    }
-    if (lesson.domain_objectives.psychomotor) {
-      lines.push(`- Psychomotor: ${lesson.domain_objectives.psychomotor}`);
-    }
+    if (lesson.domain_objectives.cognitive) lines.push(`- Cognitive: ${lesson.domain_objectives.cognitive}`);
+    if (lesson.domain_objectives.affective) lines.push(`- Affective: ${lesson.domain_objectives.affective}`);
+    if (lesson.domain_objectives.psychomotor) lines.push(`- Psychomotor: ${lesson.domain_objectives.psychomotor}`);
     lines.push("");
   }
 
@@ -368,17 +360,13 @@ function lessonToText(data) {
 
   if (Array.isArray(lesson.prior_knowledge_questions) && lesson.prior_knowledge_questions.length) {
     lines.push("Prior Knowledge:");
-    lesson.prior_knowledge_questions.forEach((q) => {
-      lines.push(`- ${q}`);
-    });
+    lesson.prior_knowledge_questions.forEach((q) => lines.push(`- ${q}`));
     lines.push("");
   }
 
   if (Array.isArray(lesson.resources) && lesson.resources.length) {
     lines.push("Resources:");
-    lesson.resources.forEach((r) => {
-      lines.push(`- ${r}`);
-    });
+    lesson.resources.forEach((r) => lines.push(`- ${r}`));
     lines.push("");
   }
 
@@ -386,26 +374,20 @@ function lessonToText(data) {
     Object.entries(lesson.sections).forEach(([section, items]) => {
       if (!items || !items.length) return;
       lines.push(`${section}:`);
-      items.forEach((item) => {
-        lines.push(`- ${item}`);
-      });
+      items.forEach((item) => lines.push(`- ${item}`));
       lines.push("");
     });
   }
 
   if (Array.isArray(lesson.apse_pathways) && lesson.apse_pathways.length) {
     lines.push("APSE Pathways:");
-    lesson.apse_pathways.forEach((item) => {
-      lines.push(`- ${item}`);
-    });
+    lesson.apse_pathways.forEach((item) => lines.push(`- ${item}`));
     lines.push("");
   }
 
   if (Array.isArray(lesson.stem_skills) && lesson.stem_skills.length) {
     lines.push("STEM / Skills:");
-    lesson.stem_skills.forEach((item) => {
-      lines.push(`- ${item}`);
-    });
+    lesson.stem_skills.forEach((item) => lines.push(`- ${item}`));
     lines.push("");
   }
 
@@ -417,17 +399,13 @@ function lessonToText(data) {
 
   if (Array.isArray(lesson.assessment) && lesson.assessment.length) {
     lines.push("Assessment:");
-    lesson.assessment.forEach((item) => {
-      lines.push(`- ${item}`);
-    });
+    lesson.assessment.forEach((item) => lines.push(`- ${item}`));
     lines.push("");
   }
 
   if (Array.isArray(lesson.reflection) && lesson.reflection.length) {
     lines.push("Reflection:");
-    lesson.reflection.forEach((item) => {
-      lines.push(`- ${item}`);
-    });
+    lesson.reflection.forEach((item) => lines.push(`- ${item}`));
   }
 
   return lines.join("\n").trim();
@@ -438,7 +416,7 @@ function renderLesson(data) {
   const raw = lessonToText(data);
   const output = byId("output");
   if (output) output.value = raw;
-  renderMathPreview("output", "outputPreview");
+  renderLessonPreview();
 }
 
 function escapeHtml(text) {
@@ -448,20 +426,57 @@ function escapeHtml(text) {
     .replace(/>/g, "&gt;");
 }
 
-function normalizeMathText(text) {
+function cleanupBasicMathArtifacts(text) {
   if (!text) return "";
 
   let out = String(text);
 
   out = out.replace(/\\\\\(/g, "\\(").replace(/\\\\\)/g, "\\)");
   out = out.replace(/\\\\\[/g, "\\[").replace(/\\\\\]/g, "\\]");
-
   out = out.replace(/\\\(([A-Za-z])\\\)/g, "$1");
+
+  // Remove obvious accidental repeated slashes from plain text
+  out = out.replace(/([^\\])\/\/+/g, "$1/");
+  out = out.replace(/\s+\/\s+\/+/g, " / ");
+  out = out.replace(/\\times/g, "×");
+
+  return out;
+}
+
+// Conservative lesson normalization:
+// mostly preserve what AI/backend already wrote
+function normalizeLessonMathText(text) {
+  let out = cleanupBasicMathArtifacts(text);
+
+  // Only convert clear standalone fractions like 3/4
+  out = out.replace(
+    /(^|[\s:(=+-])(\d+)\s*\/\s*(\d+)(?=$|[\s),.;:!?])/g,
+    '$1\\\\(\\\\frac{$2}{$3}\\\\)'
+  );
+
+  // Only convert clear exponents like x^2 or m^2
+  out = out.replace(
+    /(^|[\s:(=+-])([A-Za-z][A-Za-z0-9]*)\^([0-9]+)(?=$|[\s),.;:!?+\-])/g,
+    '$1\\\\($2^{$3}\\\\)'
+  );
+
+  // Convert simple square roots only
+  out = out.replace(/√\(([^)\n]+)\)/g, '\\\\(\\\\sqrt{$1}\\\\)');
+  out = out.replace(/√([A-Za-z0-9]+)/g, '\\\\(\\\\sqrt{$1}\\\\)');
+
+  return out;
+}
+
+// Stronger activity normalization:
+// activities benefit more from rendered preview
+function normalizeActivityMathText(text) {
+  let out = cleanupBasicMathArtifacts(text);
 
   out = out.replace(/÷/g, "/");
   out = out.replace(/×/g, "\\times ");
 
-  out = out.replace(/√\s*([A-Za-z0-9]+)/g, "\\\\(\\\\sqrt{$1}\\\\)");
+  out = out.replace(/√\(([^)\n]+)\)/g, '\\\\(\\\\sqrt{$1}\\\\)');
+  out = out.replace(/√([A-Za-z0-9]+)/g, '\\\\(\\\\sqrt{$1}\\\\)');
 
   out = out.replace(
     /(^|[\s:(=+-])(\d+)\s*\/\s*(\d+)(?=$|[\s),.;:!?])/g,
@@ -497,12 +512,17 @@ function normalizeMathText(text) {
   return out;
 }
 
-async function renderMathPreview(textareaId, previewId) {
+async function renderPreview(textareaId, previewId, mode = "lesson") {
   const src = byId(textareaId);
   const dest = byId(previewId);
   if (!src || !dest) return;
 
-  const normalized = normalizeMathText(src.value || "");
+  const sourceText = src.value || "";
+  const normalized =
+    mode === "activity"
+      ? normalizeActivityMathText(sourceText)
+      : normalizeLessonMathText(sourceText);
+
   const html = escapeHtml(normalized).replace(/\n/g, "<br>");
   dest.innerHTML = html;
 
@@ -519,6 +539,14 @@ async function renderMathPreview(textareaId, previewId) {
       console.error("MathJax render failed", e);
     }
   }
+}
+
+async function renderLessonPreview() {
+  await renderPreview("output", "outputPreview", "lesson");
+}
+
+async function renderActivityPreview() {
+  await renderPreview("activityOutput", "activityPreview", "activity");
 }
 
 async function saveCurrentLesson() {
@@ -691,7 +719,6 @@ function scrollToBuilder() {
 
 function clearBuilderForm() {
   byId("lessonForm")?.reset();
-
   applyProfileSummaryOnly();
 
   const currentLessonId = byId("currentLessonId");
@@ -711,8 +738,8 @@ function clearBuilderForm() {
     activityOutput.value = "Generated activity content will appear here.";
   }
 
-  renderMathPreview("output", "outputPreview");
-  renderMathPreview("activityOutput", "activityPreview");
+  renderLessonPreview();
+  renderActivityPreview();
   setStatus("Ready for a new lesson.", "success");
 }
 
@@ -905,7 +932,7 @@ async function generateActivity() {
     const activityOutput = byId("activityOutput");
     if (activityOutput) activityOutput.value = currentActivityText || "No activity content returned.";
 
-    await renderMathPreview("activityOutput", "activityPreview");
+    await renderActivityPreview();
     await loadCurrentUserContext();
     setStatus("Activity generated.", "success");
   } catch (e) {
@@ -933,7 +960,7 @@ async function insertActivitySnippetIntoLesson() {
 
   const snippet = `\n\nClassroom Activity:\n${cleaned}\n`;
   output.value = `${output.value}${snippet}`;
-  await renderMathPreview("output", "outputPreview");
+  await renderLessonPreview();
   setStatus("Activity inserted into lesson.", "success");
 }
 
@@ -1022,8 +1049,8 @@ async function init() {
     byId("updateLessonBtn")?.addEventListener("click", updateCurrentLesson);
     byId("toggleEditBtn")?.addEventListener("click", toggleEditMode);
 
-    byId("output")?.addEventListener("input", () => renderMathPreview("output", "outputPreview"));
-    byId("activityOutput")?.addEventListener("input", () => renderMathPreview("activityOutput", "activityPreview"));
+    byId("output")?.addEventListener("input", () => renderLessonPreview());
+    byId("activityOutput")?.addEventListener("input", () => renderActivityPreview());
 
     byId("refreshLessonsBtn")?.addEventListener("click", async () => {
       try {
@@ -1101,8 +1128,8 @@ async function init() {
     if (output) output.readOnly = true;
 
     updateActivityModeUI();
-    await renderMathPreview("output", "outputPreview");
-    await renderMathPreview("activityOutput", "activityPreview");
+    await renderLessonPreview();
+    await renderActivityPreview();
     setStatus("Ready.");
   } catch (e) {
     console.error("Init failed:", e);
