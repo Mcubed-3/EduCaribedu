@@ -35,6 +35,7 @@ def export_to_docx(title: str, content: str):
     doc.save(file_path)
     return file_path
 
+
 def export_to_pdf(html: str, title: str | None = None):
     file_name = f"{uuid.uuid4()}.pdf"
     file_path = EXPORT_DIR / file_name
@@ -44,16 +45,23 @@ def export_to_pdf(html: str, title: str | None = None):
     <head>
         <meta charset="utf-8" />
         <title>{title or "Export"}</title>
+
         <script>
           window.MathJax = {{
             tex: {{
               inlineMath: [['\\\\(', '\\\\)'], ['$', '$']],
               displayMath: [['\\\\[', '\\\\]'], ['$$', '$$']]
             }},
-            svg: {{ fontCache: 'global' }}
+            chtml: {{
+              scale: 1.0
+            }},
+            startup: {{
+              typeset: true
+            }}
           }};
         </script>
-        <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
         <style>
             body {{
                 font-family: Arial, sans-serif;
@@ -62,32 +70,44 @@ def export_to_pdf(html: str, title: str | None = None):
                 margin: 0;
                 padding: 0;
             }}
+
             .wrapper {{
                 max-width: 1000px;
                 margin: 0 auto;
                 padding: 30px;
             }}
+
             .preview-container {{
                 background: #f4efe8;
                 border: 1px solid #d7cfc3;
                 border-radius: 12px;
                 padding: 24px;
+                box-sizing: border-box;
             }}
+
             h1, h2, h3, h4 {{
                 color: #14324a;
                 margin-top: 0;
             }}
+
             p, div, span, li {{
                 font-size: 16px;
                 line-height: 1.7;
             }}
+
             ul, ol {{
                 padding-left: 1.4rem;
             }}
+
             strong {{
                 color: #14324a;
             }}
+
             mjx-container {{
+                font-size: 1.05em !important;
+            }}
+
+            .MathJax, .mjx-chtml {{
                 font-size: 1.05em !important;
             }}
         </style>
@@ -105,8 +125,29 @@ def export_to_pdf(html: str, title: str | None = None):
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--no-sandbox"])
         page = browser.new_page()
-        page.set_content(full_html, wait_until="networkidle")
-        page.wait_for_timeout(2000)
+
+        page.set_content(full_html, wait_until="domcontentloaded")
+
+        # Wait for MathJax script to load
+        page.wait_for_function("window.MathJax !== undefined")
+
+        # Force typesetting and wait for completion
+        page.evaluate(
+            """
+            async () => {
+              if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+                await window.MathJax.startup.promise;
+              }
+              if (window.MathJax && window.MathJax.typesetPromise) {
+                await window.MathJax.typesetPromise();
+              }
+            }
+            """
+        )
+
+        # Small extra wait for layout stabilization
+        page.wait_for_timeout(500)
+
         page.pdf(
             path=str(file_path),
             format="A4",
@@ -118,6 +159,7 @@ def export_to_pdf(html: str, title: str | None = None):
                 "right": "12mm",
             },
         )
+
         browser.close()
 
     return file_path
