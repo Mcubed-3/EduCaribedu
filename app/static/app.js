@@ -299,6 +299,52 @@ async function loadSavedLessons() {
   await loadDashboardSummary();
 }
 
+function cleanupMathForEditMode(text) {
+  if (!text) return "";
+
+  let out = String(text);
+
+  // remove latex-style wrappers
+  out = out.replace(/\\\\\(/g, "");
+  out = out.replace(/\\\\\)/g, "");
+  out = out.replace(/\\\\\[/g, "");
+  out = out.replace(/\\\\\]/g, "");
+  out = out.replace(/\\\(/g, "");
+  out = out.replace(/\\\)/g, "");
+  out = out.replace(/\\\[/g, "");
+  out = out.replace(/\\\]/g, "");
+
+  // remove stray backslashes
+  out = out.replace(/\\/g, "");
+
+  // normalize powers
+  out = out.replace(/\^\{(\d+)\}/g, "^$1");
+  out = out.replace(/\^\{([A-Za-z0-9]+)\}/g, "^$1");
+
+  // common math functions
+  out = out.replace(/\bfrac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g, "($1)/($2)");
+  out = out.replace(/\bsqrt\s*\{([^{}]+)\}/g, "√($1)");
+  out = out.replace(/\bsqrt\s*\(([^()]+)\)/g, "√($1)");
+
+  // plain symbol cleanup
+  out = out.replace(/\\times/g, "×");
+  out = out.replace(/\\pm/g, "±");
+  out = out.replace(/\\div/g, "÷");
+
+  // clean repeated slashes without breaking normal fractions
+  out = out.replace(/([^:])\/\/+/g, "$1/");
+  out = out.replace(/\s+\/\s+\/+/g, " / ");
+
+  // common unicode tidy
+  out = out.replace(/−/g, "-");
+
+  // collapse spaces
+  out = out.replace(/[ \t]+/g, " ");
+  out = out.replace(/\n{3,}/g, "\n\n");
+
+  return out.trim();
+}
+
 function lessonToText(data) {
   const lesson = data.lesson || {};
   const lines = [];
@@ -317,20 +363,20 @@ function lessonToText(data) {
   ];
 
   meta.forEach(([label, value]) => {
-    if (value) lines.push(`${label}: ${value}`);
+    if (value) lines.push(`${label}: ${cleanupMathForEditMode(value)}`);
   });
 
   lines.push("");
 
   if (lesson.attainment_target) {
     lines.push("Attainment Target:");
-    lines.push(lesson.attainment_target);
+    lines.push(cleanupMathForEditMode(lesson.attainment_target));
     lines.push("");
   }
 
   if (lesson.theme || lesson.strand) {
-    if (lesson.theme) lines.push(`Theme: ${lesson.theme}`);
-    if (lesson.strand) lines.push(`Strand: ${lesson.strand}`);
+    if (lesson.theme) lines.push(`Theme: ${cleanupMathForEditMode(lesson.theme)}`);
+    if (lesson.strand) lines.push(`Strand: ${cleanupMathForEditMode(lesson.strand)}`);
     lines.push("");
   }
 
@@ -338,7 +384,9 @@ function lessonToText(data) {
     lines.push("Class Profile:");
     Object.entries(lesson.class_profile).forEach(([key, value]) => {
       if (value == null || value === "") return;
-      const rendered = Array.isArray(value) ? value.join(", ") : value;
+      const rendered = Array.isArray(value)
+        ? value.map((v) => cleanupMathForEditMode(v)).join(", ")
+        : cleanupMathForEditMode(value);
       lines.push(`- ${toTitle(key)}: ${rendered}`);
     });
     lines.push("");
@@ -346,27 +394,37 @@ function lessonToText(data) {
 
   if (lesson.domain_objectives && Object.keys(lesson.domain_objectives).length) {
     lines.push("Specific Objectives:");
-    if (lesson.domain_objectives.cognitive) lines.push(`- Cognitive: ${lesson.domain_objectives.cognitive}`);
-    if (lesson.domain_objectives.affective) lines.push(`- Affective: ${lesson.domain_objectives.affective}`);
-    if (lesson.domain_objectives.psychomotor) lines.push(`- Psychomotor: ${lesson.domain_objectives.psychomotor}`);
+    if (lesson.domain_objectives.cognitive) {
+      lines.push(`- Cognitive: ${cleanupMathForEditMode(lesson.domain_objectives.cognitive)}`);
+    }
+    if (lesson.domain_objectives.affective) {
+      lines.push(`- Affective: ${cleanupMathForEditMode(lesson.domain_objectives.affective)}`);
+    }
+    if (lesson.domain_objectives.psychomotor) {
+      lines.push(`- Psychomotor: ${cleanupMathForEditMode(lesson.domain_objectives.psychomotor)}`);
+    }
     lines.push("");
   }
 
   if (lesson.prior_learning) {
     lines.push("Prior Learning:");
-    lines.push(lesson.prior_learning);
+    lines.push(cleanupMathForEditMode(lesson.prior_learning));
     lines.push("");
   }
 
   if (Array.isArray(lesson.prior_knowledge_questions) && lesson.prior_knowledge_questions.length) {
     lines.push("Prior Knowledge:");
-    lesson.prior_knowledge_questions.forEach((q) => lines.push(`- ${q}`));
+    lesson.prior_knowledge_questions.forEach((q) => {
+      lines.push(`- ${cleanupMathForEditMode(q)}`);
+    });
     lines.push("");
   }
 
   if (Array.isArray(lesson.resources) && lesson.resources.length) {
     lines.push("Resources:");
-    lesson.resources.forEach((r) => lines.push(`- ${r}`));
+    lesson.resources.forEach((r) => {
+      lines.push(`- ${cleanupMathForEditMode(r)}`);
+    });
     lines.push("");
   }
 
@@ -374,38 +432,48 @@ function lessonToText(data) {
     Object.entries(lesson.sections).forEach(([section, items]) => {
       if (!items || !items.length) return;
       lines.push(`${section}:`);
-      items.forEach((item) => lines.push(`- ${item}`));
+      items.forEach((item) => {
+        lines.push(`- ${cleanupMathForEditMode(item)}`);
+      });
       lines.push("");
     });
   }
 
   if (Array.isArray(lesson.apse_pathways) && lesson.apse_pathways.length) {
     lines.push("APSE Pathways:");
-    lesson.apse_pathways.forEach((item) => lines.push(`- ${item}`));
+    lesson.apse_pathways.forEach((item) => {
+      lines.push(`- ${cleanupMathForEditMode(item)}`);
+    });
     lines.push("");
   }
 
   if (Array.isArray(lesson.stem_skills) && lesson.stem_skills.length) {
     lines.push("STEM / Skills:");
-    lesson.stem_skills.forEach((item) => lines.push(`- ${item}`));
+    lesson.stem_skills.forEach((item) => {
+      lines.push(`- ${cleanupMathForEditMode(item)}`);
+    });
     lines.push("");
   }
 
   if (lesson.assessment_criteria) {
     lines.push("Assessment Criteria:");
-    lines.push(lesson.assessment_criteria);
+    lines.push(cleanupMathForEditMode(lesson.assessment_criteria));
     lines.push("");
   }
 
   if (Array.isArray(lesson.assessment) && lesson.assessment.length) {
     lines.push("Assessment:");
-    lesson.assessment.forEach((item) => lines.push(`- ${item}`));
+    lesson.assessment.forEach((item) => {
+      lines.push(`- ${cleanupMathForEditMode(item)}`);
+    });
     lines.push("");
   }
 
   if (Array.isArray(lesson.reflection) && lesson.reflection.length) {
     lines.push("Reflection:");
-    lesson.reflection.forEach((item) => lines.push(`- ${item}`));
+    lesson.reflection.forEach((item) => {
+      lines.push(`- ${cleanupMathForEditMode(item)}`);
+    });
   }
 
   return lines.join("\n").trim();
@@ -416,137 +484,23 @@ function renderLesson(data) {
   const raw = lessonToText(data);
   const output = byId("output");
   if (output) output.value = raw;
-  renderLessonPreview();
+  syncLessonPreviewToText();
 }
 
-function escapeHtml(text) {
-  return String(text || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+function syncLessonPreviewToText() {
+  const output = byId("output");
+  const preview = byId("outputPreview");
+  if (preview) preview.innerHTML = "";
+  if (preview && preview.parentElement) preview.parentElement.style.display = "none";
+  if (output && output.parentElement) output.parentElement.style.display = "";
 }
 
-function cleanupBasicMathArtifacts(text) {
-  if (!text) return "";
-
-  let out = String(text);
-
-  out = out.replace(/\\\\\(/g, "\\(").replace(/\\\\\)/g, "\\)");
-  out = out.replace(/\\\\\[/g, "\\[").replace(/\\\\\]/g, "\\]");
-  out = out.replace(/\\\(([A-Za-z])\\\)/g, "$1");
-
-  // Remove obvious accidental repeated slashes from plain text
-  out = out.replace(/([^\\])\/\/+/g, "$1/");
-  out = out.replace(/\s+\/\s+\/+/g, " / ");
-  out = out.replace(/\\times/g, "×");
-
-  return out;
-}
-
-// Conservative lesson normalization:
-// mostly preserve what AI/backend already wrote
-function normalizeLessonMathText(text) {
-  let out = cleanupBasicMathArtifacts(text);
-
-  // Only convert clear standalone fractions like 3/4
-  out = out.replace(
-    /(^|[\s:(=+-])(\d+)\s*\/\s*(\d+)(?=$|[\s),.;:!?])/g,
-    '$1\\\\(\\\\frac{$2}{$3}\\\\)'
-  );
-
-  // Only convert clear exponents like x^2 or m^2
-  out = out.replace(
-    /(^|[\s:(=+-])([A-Za-z][A-Za-z0-9]*)\^([0-9]+)(?=$|[\s),.;:!?+\-])/g,
-    '$1\\\\($2^{$3}\\\\)'
-  );
-
-  // Convert simple square roots only
-  out = out.replace(/√\(([^)\n]+)\)/g, '\\\\(\\\\sqrt{$1}\\\\)');
-  out = out.replace(/√([A-Za-z0-9]+)/g, '\\\\(\\\\sqrt{$1}\\\\)');
-
-  return out;
-}
-
-// Stronger activity normalization:
-// activities benefit more from rendered preview
-function normalizeActivityMathText(text) {
-  let out = cleanupBasicMathArtifacts(text);
-
-  out = out.replace(/÷/g, "/");
-  out = out.replace(/×/g, "\\times ");
-
-  out = out.replace(/√\(([^)\n]+)\)/g, '\\\\(\\\\sqrt{$1}\\\\)');
-  out = out.replace(/√([A-Za-z0-9]+)/g, '\\\\(\\\\sqrt{$1}\\\\)');
-
-  out = out.replace(
-    /(^|[\s:(=+-])(\d+)\s*\/\s*(\d+)(?=$|[\s),.;:!?])/g,
-    '$1\\\\(\\\\frac{$2}{$3}\\\\)'
-  );
-
-  out = out.replace(
-    /(^|[\s:(=+-])([A-Za-z][A-Za-z0-9]*)\^([A-Za-z0-9]+)(?=$|[\s),.;:!?+\-])/g,
-    '$1\\\\($2^{$3}\\\\)'
-  );
-
-  out = out.replace(
-    /(^|[\s:])([A-Za-z])\s*=\s*([A-Za-z0-9+\-*/^(). ]+)(?=$|[.,;:!?])/g,
-    (match, prefix, lhs, rhs) => {
-      const cleanedRhs = rhs.trim().replace(/\^(\d+)/g, "^{$1}");
-      if (!/[A-Za-z0-9]/.test(cleanedRhs)) return match;
-      return `${prefix}\\\\(${lhs} = ${cleanedRhs}\\\\)`;
-    }
-  );
-
-  out = out.replace(
-    /(^|[\s:=])\((-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)\)(?=$|[\s.,;:!?])/g,
-    '$1\\\\(($2, $3)\\\\)'
-  );
-
-  out = out.replace(
-    /([A-Za-z0-9+\-*/^() ]+=\s*[A-Za-z0-9+\-*/^() .]+)\s+and\s+([A-Za-z0-9+\-*/^() ]+=\s*[A-Za-z0-9+\-*/^() .]+)/g,
-    (match, eq1, eq2) => `\\\\(${eq1.trim()}\\\\) and \\\\(${eq2.trim()}\\\\)`
-  );
-
-  out = out.replace(/\\\(\s*\\\((.*?)\\\)\s*\\\)/g, "\\\\($1\\\\)");
-
-  return out;
-}
-
-async function renderPreview(textareaId, previewId, mode = "lesson") {
-  const src = byId(textareaId);
-  const dest = byId(previewId);
-  if (!src || !dest) return;
-
-  const sourceText = src.value || "";
-  const normalized =
-    mode === "activity"
-      ? normalizeActivityMathText(sourceText)
-      : normalizeLessonMathText(sourceText);
-
-  const html = escapeHtml(normalized).replace(/\n/g, "<br>");
-  dest.innerHTML = html;
-
-  if (window.MathJax && window.MathJax.typesetClear) {
-    try {
-      window.MathJax.typesetClear([dest]);
-    } catch (_) {}
-  }
-
-  if (window.MathJax && window.MathJax.typesetPromise) {
-    try {
-      await window.MathJax.typesetPromise([dest]);
-    } catch (e) {
-      console.error("MathJax render failed", e);
-    }
-  }
-}
-
-async function renderLessonPreview() {
-  await renderPreview("output", "outputPreview", "lesson");
-}
-
-async function renderActivityPreview() {
-  await renderPreview("activityOutput", "activityPreview", "activity");
+function syncActivityPreviewToText() {
+  const output = byId("activityOutput");
+  const preview = byId("activityPreview");
+  if (preview) preview.innerHTML = "";
+  if (preview && preview.parentElement) preview.parentElement.style.display = "none";
+  if (output && output.parentElement) output.parentElement.style.display = "";
 }
 
 async function saveCurrentLesson() {
@@ -607,7 +561,7 @@ function toggleEditMode() {
   const output = byId("output");
   if (!output) return;
   output.readOnly = !output.readOnly;
-  setStatus(output.readOnly ? "Edit mode off." : "Edit mode on. Edit the raw text, preview updates below.", "success");
+  setStatus(output.readOnly ? "Edit mode off." : "Edit mode on.", "success");
 }
 
 async function triggerFileDownloadFromResponse(res, fallbackName) {
@@ -633,8 +587,7 @@ async function triggerFileDownloadFromResponse(res, fallbackName) {
 
 async function downloadLessonExport(format) {
   const title = currentLessonData?.title || "Lesson Plan";
-  const textContent = byId("output")?.value || "";
-  const htmlContent = byId("outputPreview")?.innerHTML || "";
+  const textContent = cleanupMathForEditMode(byId("output")?.value || "");
 
   if (format === "docx") {
     if (isDocxLocked()) {
@@ -649,7 +602,7 @@ async function downloadLessonExport(format) {
       body: JSON.stringify({
         title,
         content: textContent,
-        html: htmlContent,
+        html: textContent.replace(/\n/g, "<br>"),
       }),
     });
 
@@ -664,7 +617,7 @@ async function downloadLessonExport(format) {
     credentials: "include",
     body: JSON.stringify({
       title,
-      html: htmlContent,
+      html: textContent.replace(/\n/g, "<br>"),
     }),
   });
 
@@ -674,8 +627,7 @@ async function downloadLessonExport(format) {
 
 async function downloadActivityExport(format) {
   const title = "Classroom Activity";
-  const textContent = byId("activityOutput")?.value || "";
-  const htmlContent = byId("activityPreview")?.innerHTML || "";
+  const textContent = cleanupMathForEditMode(byId("activityOutput")?.value || "");
 
   if (format === "docx") {
     if (isDocxLocked()) {
@@ -704,7 +656,7 @@ async function downloadActivityExport(format) {
     credentials: "include",
     body: JSON.stringify({
       title,
-      html: htmlContent,
+      html: textContent.replace(/\n/g, "<br>"),
     }),
   });
 
@@ -738,8 +690,8 @@ function clearBuilderForm() {
     activityOutput.value = "Generated activity content will appear here.";
   }
 
-  renderLessonPreview();
-  renderActivityPreview();
+  syncLessonPreviewToText();
+  syncActivityPreviewToText();
   setStatus("Ready for a new lesson.", "success");
 }
 
@@ -775,9 +727,65 @@ function activityPayload() {
   };
 }
 
+function formatActivityValue(value) {
+  if (value == null) return "";
+  if (typeof value === "string") return cleanupMathForEditMode(value).trim();
+
+  if (Array.isArray(value)) {
+    return value.map((v) => formatActivityValue(v)).join(", ");
+  }
+
+  if (typeof value === "object") {
+    return Object.entries(value)
+      .filter(([k]) => !["teacher_notes", "teachernotes"].includes(String(k).toLowerCase()))
+      .map(([k, v]) => `${toTitle(k)}: ${formatActivityValue(v)}`)
+      .join("; ");
+  }
+
+  return String(value).trim();
+}
+
+function formatActivityItem(item, index = 0) {
+  if (typeof item === "string") return `${index + 1}. ${cleanupMathForEditMode(item.trim())}`;
+  if (item == null) return `${index + 1}.`;
+  if (typeof item !== "object") return `${index + 1}. ${cleanupMathForEditMode(String(item).trim())}`;
+
+  const lines = [];
+  const prompt =
+    item.question ||
+    item.prompt ||
+    item.text ||
+    item.title ||
+    item.clue ||
+    `Question ${index + 1}`;
+
+  lines.push(`${index + 1}. ${cleanupMathForEditMode(String(prompt).trim())}`);
+
+  if (Array.isArray(item.options) && item.options.length) {
+    item.options.forEach((opt, i) => {
+      const label = String.fromCharCode(65 + i);
+      lines.push(`   ${label}. ${formatActivityValue(opt)}`);
+    });
+  }
+
+  if (item.answer) {
+    lines.push(`   Answer: ${formatActivityValue(item.answer).trim()}`);
+  }
+
+  if (item.explanation) {
+    lines.push(`   Explanation: ${formatActivityValue(item.explanation).trim()}`);
+  }
+
+  if (item.mark_scheme) {
+    lines.push(`   Mark Scheme: ${formatActivityValue(item.mark_scheme).trim()}`);
+  }
+
+  return lines.join("\n");
+}
+
 function formatActivityContent(content) {
   if (content == null) return "";
-  if (typeof content === "string") return content.trim();
+  if (typeof content === "string") return cleanupMathForEditMode(content.trim());
 
   if (Array.isArray(content)) {
     return content.map((item, index) => formatActivityItem(item, index)).join("\n\n").trim();
@@ -803,7 +811,7 @@ function formatActivityContent(content) {
       if (!value || (Array.isArray(value) && !value.length)) return;
 
       if (key === "title") {
-        lines.push(String(value).trim());
+        lines.push(cleanupMathForEditMode(String(value).trim()));
         lines.push("");
         return;
       }
@@ -828,63 +836,7 @@ function formatActivityContent(content) {
     return lines.join("\n").trim();
   }
 
-  return String(content).trim();
-}
-
-function formatActivityItem(item, index = 0) {
-  if (typeof item === "string") return `${index + 1}. ${item.trim()}`;
-  if (item == null) return `${index + 1}.`;
-  if (typeof item !== "object") return `${index + 1}. ${String(item).trim()}`;
-
-  const lines = [];
-  const prompt =
-    item.question ||
-    item.prompt ||
-    item.text ||
-    item.title ||
-    item.clue ||
-    `Question ${index + 1}`;
-
-  lines.push(`${index + 1}. ${String(prompt).trim()}`);
-
-  if (Array.isArray(item.options) && item.options.length) {
-    item.options.forEach((opt, i) => {
-      const label = String.fromCharCode(65 + i);
-      lines.push(`   ${label}. ${typeof opt === "string" ? opt.trim() : formatActivityValue(opt)}`);
-    });
-  }
-
-  if (item.answer) {
-    lines.push(`   Answer: ${formatActivityValue(item.answer).trim()}`);
-  }
-
-  if (item.explanation) {
-    lines.push(`   Explanation: ${formatActivityValue(item.explanation).trim()}`);
-  }
-
-  if (item.mark_scheme) {
-    lines.push(`   Mark Scheme: ${formatActivityValue(item.mark_scheme).trim()}`);
-  }
-
-  return lines.join("\n");
-}
-
-function formatActivityValue(value) {
-  if (value == null) return "";
-  if (typeof value === "string") return value.trim();
-
-  if (Array.isArray(value)) {
-    return value.map((v) => formatActivityValue(v)).join(", ");
-  }
-
-  if (typeof value === "object") {
-    return Object.entries(value)
-      .filter(([k]) => !["teacher_notes", "teachernotes"].includes(String(k).toLowerCase()))
-      .map(([k, v]) => `${toTitle(k)}: ${formatActivityValue(v)}`)
-      .join("; ");
-  }
-
-  return String(value).trim();
+  return cleanupMathForEditMode(String(content).trim());
 }
 
 async function generateActivity() {
@@ -932,7 +884,7 @@ async function generateActivity() {
     const activityOutput = byId("activityOutput");
     if (activityOutput) activityOutput.value = currentActivityText || "No activity content returned.";
 
-    await renderActivityPreview();
+    syncActivityPreviewToText();
     await loadCurrentUserContext();
     setStatus("Activity generated.", "success");
   } catch (e) {
@@ -960,7 +912,7 @@ async function insertActivitySnippetIntoLesson() {
 
   const snippet = `\n\nClassroom Activity:\n${cleaned}\n`;
   output.value = `${output.value}${snippet}`;
-  await renderLessonPreview();
+  syncLessonPreviewToText();
   setStatus("Activity inserted into lesson.", "success");
 }
 
@@ -1010,6 +962,17 @@ function updateActivityModeUI() {
   }
 }
 
+function hidePreviewBlocks() {
+  const ids = ["outputPreview", "activityPreview"];
+  ids.forEach((id) => {
+    const el = byId(id);
+    if (el) {
+      el.innerHTML = "";
+      if (el.parentElement) el.parentElement.style.display = "none";
+    }
+  });
+}
+
 async function init() {
   try {
     await loadCurrentUserContext();
@@ -1049,8 +1012,15 @@ async function init() {
     byId("updateLessonBtn")?.addEventListener("click", updateCurrentLesson);
     byId("toggleEditBtn")?.addEventListener("click", toggleEditMode);
 
-    byId("output")?.addEventListener("input", () => renderLessonPreview());
-    byId("activityOutput")?.addEventListener("input", () => renderActivityPreview());
+    byId("output")?.addEventListener("input", () => {
+      const output = byId("output");
+      if (output) output.value = cleanupMathForEditMode(output.value);
+    });
+
+    byId("activityOutput")?.addEventListener("input", () => {
+      const output = byId("activityOutput");
+      if (output) output.value = cleanupMathForEditMode(output.value);
+    });
 
     byId("refreshLessonsBtn")?.addEventListener("click", async () => {
       try {
@@ -1128,8 +1098,9 @@ async function init() {
     if (output) output.readOnly = true;
 
     updateActivityModeUI();
-    await renderLessonPreview();
-    await renderActivityPreview();
+    hidePreviewBlocks();
+    syncLessonPreviewToText();
+    syncActivityPreviewToText();
     setStatus("Ready.");
   } catch (e) {
     console.error("Init failed:", e);
