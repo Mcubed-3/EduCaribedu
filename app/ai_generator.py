@@ -26,15 +26,20 @@ STEM_SUBJECTS = {
 }
 
 MATH_HEAVY_SUBJECTS = {
+    "agricultural science",
     "mathematics",
     "math",
-    "physics",
     "chemistry",
+    "physics",
     "integrated science",
     "science",
-    "agricultural science",
     "information technology",
     "it",
+    "economics",
+    "geography",
+    "technical drawing",
+    "accounts",
+    "accounting",
 }
 
 
@@ -51,52 +56,52 @@ class DomainObjectives(BaseModel):
 
 
 class LessonSections5E(BaseModel):
-    Engagement: List[str]
-    Exploration: List[str]
-    Explanation: List[str]
-    Evaluation: List[str]
-    Extension: List[str]
+    Engagement: List[str] = Field(min_length=2, max_length=4)
+    Exploration: List[str] = Field(min_length=2, max_length=4)
+    Explanation: List[str] = Field(min_length=2, max_length=4)
+    Evaluation: List[str] = Field(min_length=2, max_length=4)
+    Extension: List[str] = Field(min_length=1, max_length=3)
 
 
 class LessonSections4C(BaseModel):
-    Creativity: List[str]
-    Critical_Thinking: List[str]
-    Communication: List[str]
-    Collaboration: List[str]
+    Creativity: List[str] = Field(min_length=2, max_length=4)
+    Critical_Thinking: List[str] = Field(min_length=2, max_length=4)
+    Communication: List[str] = Field(min_length=2, max_length=4)
+    Collaboration: List[str] = Field(min_length=2, max_length=4)
 
 
 class LessonParts5E(BaseModel):
-    attainment_target: str
-    theme: str
-    strand: str
+    attainment_target: str = Field(min_length=20, max_length=320)
+    theme: str = Field(min_length=3, max_length=120)
+    strand: str = Field(min_length=3, max_length=120)
     class_profile: ClassProfile
     domain_objectives: DomainObjectives
-    prior_learning: str
-    prior_knowledge_questions: List[str]
-    resources: List[str]
+    prior_learning: str = Field(min_length=20, max_length=320)
+    prior_knowledge_questions: List[str] = Field(min_length=3, max_length=5)
+    resources: List[str] = Field(min_length=3, max_length=6)
     sections: LessonSections5E
-    assessment: List[str]
-    assessment_criteria: str
-    apse_pathways: List[str]
-    stem_skills: List[str] = []
-    reflection: List[str]
+    assessment: List[str] = Field(min_length=2, max_length=4)
+    assessment_criteria: str = Field(min_length=20, max_length=320)
+    apse_pathways: List[str] = Field(min_length=2, max_length=4)
+    stem_skills: List[str] = Field(default_factory=list, max_length=5)
+    reflection: List[str] = Field(min_length=3, max_length=5)
 
 
 class LessonParts4C(BaseModel):
-    attainment_target: str
-    theme: str
-    strand: str
+    attainment_target: str = Field(min_length=20, max_length=320)
+    theme: str = Field(min_length=3, max_length=120)
+    strand: str = Field(min_length=3, max_length=120)
     class_profile: ClassProfile
     domain_objectives: DomainObjectives
-    prior_learning: str
-    prior_knowledge_questions: List[str]
-    resources: List[str]
+    prior_learning: str = Field(min_length=20, max_length=320)
+    prior_knowledge_questions: List[str] = Field(min_length=3, max_length=5)
+    resources: List[str] = Field(min_length=3, max_length=6)
     sections: LessonSections4C
-    assessment: List[str]
-    assessment_criteria: str
-    apse_pathways: List[str]
-    stem_skills: List[str] = []
-    reflection: List[str]
+    assessment: List[str] = Field(min_length=2, max_length=4)
+    assessment_criteria: str = Field(min_length=20, max_length=320)
+    apse_pathways: List[str] = Field(min_length=2, max_length=4)
+    stem_skills: List[str] = Field(default_factory=list, max_length=5)
+    reflection: List[str] = Field(min_length=3, max_length=5)
 
 
 def _teacher_profile_text(payload: dict) -> str:
@@ -114,28 +119,38 @@ def _teacher_profile_text(payload: dict) -> str:
     )
 
 
-def _math_output_rules(subject: str, topic: str) -> str:
+def _math_output_rules(subject: str, topic: str, structure: str) -> str:
     if subject.strip().lower() not in MATH_HEAVY_SUBJECTS:
         return (
-            "If any formulas, equations, units, symbols, ratios, graphs, measurements, or expressions appear, "
-            "format them using LaTeX delimiters so MathJax can render them correctly."
+            "If formulas, equations, ratios, measurements, coordinates, units, graphs, or expressions appear, "
+            "write them in a clean readable line format. Where true mathematical notation is needed, use MathJax-friendly LaTeX delimiters."
         )
 
+    extra_4c = ""
+    if structure == "4Cs":
+        extra_4c = """
+Additional 4Cs rule:
+- In 4Cs lessons, do NOT split mathematical expressions into fragments across bullets.
+- Write full equations and full expressions in one clean line.
+- Do NOT write things like \\(y\\) = \\(2x + 1\\); instead write \\(y = 2x + 1\\).
+- Do NOT wrap isolated variables such as x, y, a, b, m, or c unless they are part of a full equation or expression.
+""".strip()
+
     return f"""
-This lesson may contain mathematical or formula-based content for {topic}.
-CRITICAL MATH FORMATTING RULES:
-- Any equation, algebraic expression, formula, graph notation, coordinate, fraction, exponent, root, ratio, or symbolic expression MUST be written in LaTeX-friendly format.
-- Inline maths must use \\( ... \\)
-- Display maths must use \\[ ... \\]
-- Fractions must use \\frac{{a}}{{b}}
-- Powers must use x^2 or x^{{10}} inside math delimiters
-- Square roots must use \\sqrt{{x}}
-- Coordinates must be formatted like \\((2, -1)\\)
-- Quadratics should appear like \\(ax^2 + bx + c = 0\\)
-- Do NOT output raw escaped strings like \\\\(x^2\\\\); output proper MathJax-ready text like \\(x^2\\)
-- Do NOT leave expressions as plain text if they are mathematical
-- If you mention examples such as x^2 - 5x, write them as \\(x^2 - 5x\\)
-- If you mention expanded forms, roots, plotting points, parabola equations, statistics formulas, measurements, or calculations, they must be wrapped in proper math delimiters
+CRITICAL MATH / FORMULA RULES:
+- This subject may include mathematical or symbolic notation.
+- Write clean, readable mathematical lines for expressions and formulas.
+- Inline maths must use \\( ... \\) only when proper math notation is needed.
+- Display maths may use \\[ ... \\] for larger expressions.
+- Fractions should be written clearly, for example \\(\\frac{{x+3}}{{4}}\\), and also remain understandable as a clean line.
+- Square roots should be written clearly, for example \\(\\sqrt{{x/2}}\\).
+- The quadratic formula should be written as a full line such as \\(x = \\frac{{-b \\pm \\sqrt{{b^2 - 4ac}}}}{{2a}}\\).
+- Coordinates should be written as \\((2, -1)\\).
+- Quadratic expressions should be written as full expressions like \\(x^2 - 5x + 6 = 0\\).
+- Do NOT output malformed delimiters, stray slashes, or broken math fragments.
+- Do NOT double-escape delimiters.
+- Keep the notation readable even when copied into DOCX as plain text lines.
+{extra_4c}
 """.strip()
 
 
@@ -155,7 +170,6 @@ def _build_prompt(
     description = payload.get("description", "")
     user_resources = payload.get("resources", "")
     curriculum = payload["curriculum"]
-
     is_stem = subject.strip().lower() in STEM_SUBJECTS
 
     mixed_ability_text = (
@@ -176,7 +190,7 @@ def _build_prompt(
         else "Do not force STEM language if it does not fit the subject, but keep the lesson skill-based and practical where possible."
     )
 
-    math_rules = _math_output_rules(subject, topic)
+    math_rules = _math_output_rules(subject, topic, structure)
 
     return f"""
 Create a polished, curriculum-aligned Caribbean lesson plan that feels like a real teacher wrote it.
@@ -205,7 +219,7 @@ Required quality rules:
 - {mixed_ability_text}
 - {stem_text}
 - {math_rules}
-- Do not write generic filler like “students will learn many things.”
+- Do not write generic filler.
 - Do not repeat the topic unnecessarily.
 - Keep every bullet concrete and actionable.
 - Sections must use these names exactly: {section_names}

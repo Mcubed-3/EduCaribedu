@@ -5,7 +5,6 @@ import uuid
 from pathlib import Path
 
 from docx import Document
-from docx.shared import Inches
 from playwright.sync_api import sync_playwright
 
 EXPORT_DIR = Path("exports")
@@ -38,29 +37,13 @@ def export_to_docx(title: str, content: str):
     return file_path
 
 
-def export_to_docx_from_snapshot(title: str, html: str):
-    file_name = f"{uuid.uuid4()}.docx"
-    file_path = EXPORT_DIR / file_name
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        image_path = Path(tmpdir) / "preview.png"
-        _capture_preview_snapshot(html=html, image_path=image_path)
-
-        doc = Document()
-        doc.add_heading(title or "Export", level=0)
-        doc.add_picture(str(image_path), width=Inches(6.5))
-        doc.save(file_path)
-
-    return file_path
-
-
 def export_to_pdf(html: str, title: str | None = None):
     file_name = f"{uuid.uuid4()}.pdf"
     file_path = EXPORT_DIR / file_name
 
     with tempfile.TemporaryDirectory() as tmpdir:
         image_path = Path(tmpdir) / "preview.png"
-        _capture_preview_snapshot(html=html, image_path=image_path)
+        _capture_preview_snapshot(html=html, image_path=image_path, title=title or "Export")
 
         with sync_playwright() as p:
             browser = p.chromium.launch(args=["--no-sandbox"])
@@ -120,11 +103,12 @@ def export_to_pdf(html: str, title: str | None = None):
     return file_path
 
 
-def _capture_preview_snapshot(html: str, image_path: Path):
+def _capture_preview_snapshot(html: str, image_path: Path, title: str):
     full_html = f"""
     <html>
     <head>
         <meta charset="utf-8" />
+        <title>{title}</title>
 
         <script>
           window.MathJax = {{
