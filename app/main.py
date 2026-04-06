@@ -44,7 +44,7 @@ from .curriculum_admin_service import (
     update_framework,
 )
 from .engine_state import engine
-from .export_service import export_to_docx, export_to_docx_from_snapshot, export_to_pdf
+from .export_service import export_to_docx, export_to_pdf
 from .feedback_service import (
     create_feedback,
     init_feedback_db,
@@ -650,13 +650,7 @@ def export_docx(request: Request, payload: ExportRequest):
             detail="DOCX export is available on the Pro plan only.",
         )
 
-    html = getattr(payload, "html", None)
-
-    if html:
-        path = export_to_docx_from_snapshot(payload.title, html)
-    else:
-        path = export_to_docx(payload.title, payload.content)
-
+    path = export_to_docx(payload.title, payload.content)
     return FileResponse(
         path,
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
