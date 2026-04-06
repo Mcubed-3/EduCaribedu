@@ -639,6 +639,7 @@ async function downloadLessonExport(format) {
       body: JSON.stringify({
         title,
         content: textContent,
+        html: htmlContent,
       }),
     });
 
