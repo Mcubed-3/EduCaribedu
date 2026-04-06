@@ -28,6 +28,7 @@ from .auth_service import (
     increment_activity_generation_count,
     increment_generation_count,
     init_auth_db,
+    list_signup_events,
     list_users,
     save_user_profile,
     update_user_billing,
@@ -538,11 +539,15 @@ def lesson_generate(request: Request, payload: LessonRequest):
     payload_data = payload.model_dump()
     payload_data["teacher_profile"] = profile
 
-    if profile.get("curriculum") and not payload_data.get("curriculum"):
+    # Explicit builder values always win.
+    # Profile is only a fallback if user leaves a field blank.
+    if not payload_data.get("curriculum") and profile.get("curriculum"):
         payload_data["curriculum"] = profile["curriculum"]
-    if profile.get("subjects") and not payload_data.get("subject"):
+
+    if not payload_data.get("subject") and profile.get("subjects"):
         payload_data["subject"] = profile["subjects"][0]
-    if profile.get("grade_levels") and not payload_data.get("grade_level"):
+
+    if not payload_data.get("grade_level") and profile.get("grade_levels"):
         payload_data["grade_level"] = profile["grade_levels"][0]
 
     try:
@@ -880,7 +885,7 @@ def admin_delete_framework(request: Request, framework_id: str):
 @app.get("/api/admin/users")
 def admin_list_users(request: Request):
     require_admin(request)
-    return {"users": list_users()}
+    return {"users": list_users(), "signup_events": list_signup_events()}
 
 
 @app.put("/api/admin/users/{user_id}")

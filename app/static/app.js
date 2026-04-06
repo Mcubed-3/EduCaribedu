@@ -46,46 +46,46 @@ function populateProfileModal(profile) {
   if (byId("profile_curriculum")) byId("profile_curriculum").value = profile?.curriculum || "";
 }
 
-function applyProfileDefaultsToBuilder() {
+function applyProfileSummaryOnly() {
   const profile = currentUserContext?.profile || {};
-  const completed = !!profile.profile_completed;
   const banner = byId("profileSummaryBanner");
   const summaryText = byId("profileSummaryText");
-  const drivenFields = document.querySelectorAll(".profile-driven-field");
 
   if (summaryText) {
     summaryText.textContent = profileSummaryText(profile);
   }
 
-  if (completed) {
+  if (profile?.profile_completed) {
     if (banner) banner.classList.remove("hidden");
-
-    if (profile.curriculum && byId("curriculum")) byId("curriculum").value = profile.curriculum;
-    if (profile.curriculum && byId("activity_curriculum")) byId("activity_curriculum").value = profile.curriculum;
-
-    if (Array.isArray(profile.subjects) && profile.subjects.length && byId("subject")) {
-      byId("subject").value = profile.subjects[0];
-    }
-    if (Array.isArray(profile.subjects) && profile.subjects.length && byId("activity_subject")) {
-      byId("activity_subject").value = profile.subjects[0];
-    }
-
-    if (Array.isArray(profile.grade_levels) && profile.grade_levels.length && byId("grade_level")) {
-      byId("grade_level").value = profile.grade_levels[0];
-    }
-    if (Array.isArray(profile.grade_levels) && profile.grade_levels.length && byId("activity_grade_level")) {
-      byId("activity_grade_level").value = profile.grade_levels[0];
-    }
-
-    drivenFields.forEach((field) => {
-      field.style.display = "none";
-    });
   } else {
     if (banner) banner.classList.add("hidden");
-    drivenFields.forEach((field) => {
-      field.style.display = "";
-    });
-    showProfileModal();
+  }
+
+  // Keep dashboard lesson fields visible.
+  document.querySelectorAll(".profile-driven-field").forEach((field) => {
+    field.style.display = "";
+  });
+
+  // Optional defaults only: only fill blank fields.
+  if (!byId("curriculum")?.value && profile.curriculum && byId("curriculum")) {
+    byId("curriculum").value = profile.curriculum;
+  }
+  if (!byId("activity_curriculum")?.value && profile.curriculum && byId("activity_curriculum")) {
+    byId("activity_curriculum").value = profile.curriculum;
+  }
+
+  if (!byId("subject")?.value && Array.isArray(profile.subjects) && profile.subjects.length && byId("subject")) {
+    byId("subject").value = profile.subjects[0];
+  }
+  if (!byId("activity_subject")?.value && Array.isArray(profile.subjects) && profile.subjects.length && byId("activity_subject")) {
+    byId("activity_subject").value = profile.subjects[0];
+  }
+
+  if (!byId("grade_level")?.value && Array.isArray(profile.grade_levels) && profile.grade_levels.length && byId("grade_level")) {
+    byId("grade_level").value = profile.grade_levels[0];
+  }
+  if (!byId("activity_grade_level")?.value && Array.isArray(profile.grade_levels) && profile.grade_levels.length && byId("activity_grade_level")) {
+    byId("activity_grade_level").value = profile.grade_levels[0];
   }
 }
 
@@ -93,11 +93,6 @@ async function saveProfileFromModal() {
   const subjects = parseCommaList(byId("profile_subjects")?.value || "");
   const gradeLevels = parseCommaList(byId("profile_grade_levels")?.value || "");
   const curriculum = byId("profile_curriculum")?.value || "";
-
-  if (!subjects.length || !gradeLevels.length || !curriculum) {
-    setStatus("Complete subject, grade level, and curriculum before saving your profile.", "error");
-    return;
-  }
 
   await fetchJSON("/api/profile", {
     method: "POST",
@@ -110,9 +105,9 @@ async function saveProfileFromModal() {
 
   await loadCurrentUserContext();
   populateProfileModal(currentUserContext?.profile || {});
-  applyProfileDefaultsToBuilder();
+  applyProfileSummaryOnly();
   hideProfileModal();
-  setStatus("Profile saved. Your dashboard will now use those defaults.", "success");
+  setStatus("Profile defaults saved.", "success");
 }
 
 function showUpgradeModal() {
@@ -176,12 +171,10 @@ function canGenerateActivities() {
 }
 
 function formPayload() {
-  const profile = currentUserContext?.profile || {};
-
   return {
-    curriculum: profile.curriculum || byId("curriculum")?.value || "",
-    subject: profile.subjects?.[0] || byId("subject")?.value || "",
-    grade_level: profile.grade_levels?.[0] || byId("grade_level")?.value || "",
+    curriculum: byId("curriculum")?.value || "",
+    subject: byId("subject")?.value || "",
+    grade_level: byId("grade_level")?.value || "",
     structure: byId("structure")?.value || "5Es",
     difficulty: byId("difficulty")?.value || "Intermediate",
     lesson_type: byId("lesson_type")?.value || "Theory",
@@ -460,34 +453,26 @@ function normalizeMathText(text) {
 
   let out = String(text);
 
-  // Convert double-escaped delimiters into real MathJax delimiters
   out = out.replace(/\\\\\(/g, "\\(").replace(/\\\\\)/g, "\\)");
   out = out.replace(/\\\\\[/g, "\\[").replace(/\\\\\]/g, "\\]");
 
-  // Remove math delimiters around isolated single-letter variables
-  // e.g. "\(x\)" -> "x"
   out = out.replace(/\\\(([A-Za-z])\\\)/g, "$1");
 
-  // Common symbol cleanup
   out = out.replace(/÷/g, "/");
   out = out.replace(/×/g, "\\times ");
 
-  // Square roots
   out = out.replace(/√\s*([A-Za-z0-9]+)/g, "\\\\(\\\\sqrt{$1}\\\\)");
 
-  // Fractions like 3/4
   out = out.replace(
     /(^|[\s:(=+-])(\d+)\s*\/\s*(\d+)(?=$|[\s),.;:!?])/g,
     '$1\\\\(\\\\frac{$2}{$3}\\\\)'
   );
 
-  // Powers like x^2
   out = out.replace(
     /(^|[\s:(=+-])([A-Za-z][A-Za-z0-9]*)\^([A-Za-z0-9]+)(?=$|[\s),.;:!?+\-])/g,
     '$1\\\\($2^{$3}\\\\)'
   );
 
-  // Full equations like y = 2x + 1  OR y = x^2 - 2
   out = out.replace(
     /(^|[\s:])([A-Za-z])\s*=\s*([A-Za-z0-9+\-*/^(). ]+)(?=$|[.,;:!?])/g,
     (match, prefix, lhs, rhs) => {
@@ -497,19 +482,16 @@ function normalizeMathText(text) {
     }
   );
 
-  // Coordinates like (2, -1)
   out = out.replace(
     /(^|[\s:=])\((-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)\)(?=$|[\s.,;:!?])/g,
     '$1\\\\(($2, $3)\\\\)'
   );
 
-  // Simultaneous equations joined by "and"
   out = out.replace(
     /([A-Za-z0-9+\-*/^() ]+=\s*[A-Za-z0-9+\-*/^() .]+)\s+and\s+([A-Za-z0-9+\-*/^() ]+=\s*[A-Za-z0-9+\-*/^() .]+)/g,
     (match, eq1, eq2) => `\\\\(${eq1.trim()}\\\\) and \\\\(${eq2.trim()}\\\\)`
   );
 
-  // Clean accidental double wrapping
   out = out.replace(/\\\(\s*\\\((.*?)\\\)\s*\\\)/g, "\\\\($1\\\\)");
 
   return out;
@@ -710,6 +692,8 @@ function scrollToBuilder() {
 function clearBuilderForm() {
   byId("lessonForm")?.reset();
 
+  applyProfileSummaryOnly();
+
   const currentLessonId = byId("currentLessonId");
   if (currentLessonId) currentLessonId.value = "";
 
@@ -819,7 +803,6 @@ function formatActivityContent(content) {
 
   return String(content).trim();
 }
-
 
 function formatActivityItem(item, index = 0) {
   if (typeof item === "string") return `${index + 1}. ${item.trim()}`;
@@ -970,7 +953,7 @@ async function loadConfig() {
   populateSelect("activity_difficulty", config.difficulties, "Select difficulty...");
 
   populateProfileModal(config.profile || currentUserContext?.profile || {});
-  applyProfileDefaultsToBuilder();
+  applyProfileSummaryOnly();
 }
 
 function updateActivityModeUI() {
