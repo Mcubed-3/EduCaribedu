@@ -124,8 +124,6 @@ Do NOT use LaTeX.
 Do NOT use backslashes.
 Do NOT use dfrac, tfrac, pm, sqrt{{}}, mathrm{{}}, Delta, Rightarrow, bigl, bigr, cdot, or similar notation.
 
-If numerical structure is needed, write it plainly.
-
 Math bank examples:
 {bank_text}
 """.strip()
@@ -143,8 +141,7 @@ CRITICAL MATH RULES:
   profit % = (profit / cost price) × 100
   area = 18 m^2
   scale = 1 : 50 000
-
-- If a table is needed for business/accounts/family consumer management, use a clean text-table style.
+- If a table is needed, use a clean text-table style.
 - Keep each worked step on its own readable line.
 
 Math bank examples:
@@ -190,7 +187,12 @@ Formatting rules for output:
 - keep answer_key concise and readable
 - if worked solutions are needed, use short clear step lines
 - for mixed ability worksheets, include a sensible progression from accessible to standard to challenge items
-- if activity_type is MCQ, include options inside worksheet_items
+- if activity_type is mcq, each question must place answer options on separate lines labeled A, B, C, D
+- if activity_type is short_answer, questions should be brief and clearly phrased
+- if activity_type is essay, prompts should be open-ended and suitable for paragraph responses
+- if activity_type is case_study, include a short scenario followed by clear questions
+- if activity_type is exit_ticket, keep the items short and quick to complete
+- if activity_type is homework_sheet, include a varied progression of items
 - if activity_type is math_problem_solving, use plain-text mathematical notation only
 - do not output markdown
 - do not output code fences
@@ -226,16 +228,84 @@ def _fallback_activity(
 ) -> Dict[str, Any]:
     topic = ctx.get("topic", "the topic")
     subject = ctx.get("subject", "the subject")
-    grade_level = ctx.get("grade_level", "the selected grade")
     title = f"{ACTIVITY_LABELS.get(activity_type, 'Activity')} - {topic}"
 
     items: List[str] = []
     answers: List[str] = []
     mark_scheme: List[str] = []
 
-    group = _subject_group(subject)
+    if activity_type == "mcq":
+        for i in range(1, count + 1):
+            items.append(
+                f"{i}. Which statement best relates to {topic}?\n"
+                f"   A. Unrelated idea\n"
+                f"   B. Correct idea about {topic}\n"
+                f"   C. Incorrect detail\n"
+                f"   D. Random option"
+            )
+            if include_answer_key:
+                answers.append(f"{i}. B")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. 1 mark for selecting the correct option.")
 
-    if activity_type == "math_problem_solving":
+    elif activity_type == "short_answer":
+        for i in range(1, count + 1):
+            items.append(f"{i}. Give a short response about {topic}.")
+            if include_answer_key:
+                answers.append(f"{i}. Accept any relevant and accurate response connected to {topic}.")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. 1 mark for a relevant response.")
+
+    elif activity_type == "essay":
+        for i in range(1, count + 1):
+            items.append(f"{i}. Write a paragraph response about {topic}, using clear examples.")
+            if include_answer_key:
+                answers.append(f"{i}. Accept any well-developed and accurate response connected to {topic}.")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. Award marks for relevance, development, accuracy, and clarity.")
+
+    elif activity_type == "case_study":
+        items = [
+            f"Case Study: Read the scenario below about {topic} and answer the questions that follow.",
+            f"1. Explain the main issue shown in the case study about {topic}.",
+            f"2. Identify two important details from the case study.",
+            f"3. Suggest one practical response or solution.",
+        ][:count]
+        if include_answer_key:
+            answers = [
+                "1. Accept a clear explanation of the main issue in the scenario.",
+                "2. Accept any two relevant and accurate details.",
+                "3. Accept any practical and relevant response.",
+            ][: len(items)]
+        if include_mark_scheme:
+            mark_scheme = [
+                "1. Award marks for a clear and relevant explanation.",
+                "2. Award marks for two accurate details.",
+                "3. Award marks for a practical and relevant suggestion.",
+            ][: len(items)]
+
+    elif activity_type == "exit_ticket":
+        for i in range(1, count + 1):
+            items.append(f"{i}. Give a brief answer related to {topic}.")
+            if include_answer_key:
+                answers.append(f"{i}. Accept a brief correct response related to {topic}.")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. 1 mark for a correct response.")
+
+    elif activity_type == "homework_sheet":
+        for i in range(1, count + 1):
+            label = ""
+            if i <= max(2, count // 4):
+                label = "Starter: "
+            elif i == count:
+                label = "Challenge: "
+            items.append(f"{i}. {label}Complete a homework task related to {topic}.")
+            if include_answer_key:
+                answers.append(f"{i}. Accept any correct and relevant response or working.")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. Award marks for accuracy, method, and completeness where relevant.")
+
+    else:
         for i in range(1, count + 1):
             label = ""
             if i <= max(2, count // 4):
@@ -248,41 +318,11 @@ def _fallback_activity(
             if include_mark_scheme:
                 mark_scheme.append(f"{i}. Award marks for correct method, accurate working, and correct final answer.")
 
-    elif activity_type == "mcq":
-        for i in range(1, count + 1):
-            items.append(
-                f"{i}. Which statement best relates to {topic} in {subject} for {grade_level}?\n"
-                f"   A. Unrelated idea\n"
-                f"   B. Core idea about {topic}\n"
-                f"   C. Incorrect detail\n"
-                f"   D. Random option"
-            )
-            if include_answer_key:
-                answers.append(f"{i}. B")
-            if include_mark_scheme:
-                mark_scheme.append(f"{i}. 1 mark for selecting the correct option.")
-
-    elif group == "enterprise":
-        for i in range(1, count + 1):
-            items.append(f"{i}. Complete a short business/accounts task related to {topic}.")
-            if include_answer_key:
-                answers.append(f"{i}. Accept any accurate response or calculation linked to {topic}.")
-            if include_mark_scheme:
-                mark_scheme.append(f"{i}. Award marks for accuracy, relevance, and correct working where needed.")
-
-    else:
-        for i in range(1, count + 1):
-            items.append(f"{i}. Write a short response about {topic} in {subject}.")
-            if include_answer_key:
-                answers.append(f"{i}. Accept any relevant and accurate response connected to {topic}.")
-            if include_mark_scheme:
-                mark_scheme.append(f"{i}. Award 1 mark for a relevant and accurate response.")
-
     data: Dict[str, Any] = {
         "title": title,
         "student_instructions": [
             f"Complete this {ACTIVITY_LABELS.get(activity_type, 'activity').lower()} on {topic}.",
-            "Write clearly and show full working where needed.",
+            "Write clearly and follow the instructions for each question.",
         ],
         "worksheet_items": items,
         "answer_key": answers if include_answer_key else [],
@@ -367,17 +407,46 @@ def _clean_student_instructions(items: List[str]) -> List[str]:
     return result[:4]
 
 
-def _normalize_question_spacing(text: str) -> str:
-    clean = _clean_string(text)
-    clean = re.sub(r"\s*\n\s*", "\n", clean)
-    clean = re.sub(r"\n{3,}", "\n\n", clean)
-    return clean.strip()
-
-
-def _normalize_answer_key_item(text: str, number: int) -> str:
+def _normalize_mcq_item(text: str, number: int) -> str:
     clean = _clean_string(text)
 
     clean = re.sub(r"^(\d+)\.\s*", "", clean).strip()
+
+    option_patterns = [
+        r"\s+A\.\s+",
+        r"\s+B\.\s+",
+        r"\s+C\.\s+",
+        r"\s+D\.\s+",
+    ]
+    markers = ["A.", "B.", "C.", "D."]
+
+    for pattern, marker in zip(option_patterns, markers):
+        clean = re.sub(pattern, f"\n   {marker} ", clean)
+
+    return f"{number}. {clean.strip()}"
+
+
+def _normalize_question_spacing(text: str, activity_type: str, number: int) -> str:
+    clean = _clean_string(text)
+    clean = re.sub(r"\s*\n\s*", "\n", clean)
+    clean = re.sub(r"\n{3,}", "\n\n", clean)
+
+    if activity_type == "mcq":
+        return _normalize_mcq_item(clean, number)
+
+    if re.match(rf"^{number}\.\s", clean):
+        return clean
+
+    return f"{number}. {clean}"
+
+
+def _normalize_answer_key_item(text: str, number: int, activity_type: str) -> str:
+    clean = _clean_string(text)
+    clean = re.sub(r"^(\d+)\.\s*", "", clean).strip()
+
+    if activity_type == "mcq":
+        clean = clean.replace(" - ", "\n   - ")
+        return f"{number}. {clean}"
 
     step_markers = [
         "Step 1:",
@@ -402,13 +471,16 @@ def _normalize_answer_key_item(text: str, number: int) -> str:
     return f"{number}. {clean}"
 
 
-def _normalize_activity_json(data: Dict[str, Any], include_answer_key: bool, include_mark_scheme: bool) -> Dict[str, Any]:
-    worksheet_items = [_normalize_question_spacing(x) for x in data.get("worksheet_items", []) if _clean_string(x)]
-    worksheet_items = _ensure_numbered_items(worksheet_items)
+def _normalize_activity_json(data: Dict[str, Any], include_answer_key: bool, include_mark_scheme: bool, activity_type: str) -> Dict[str, Any]:
+    worksheet_items = [
+        _normalize_question_spacing(x, activity_type, idx)
+        for idx, x in enumerate(data.get("worksheet_items", []), start=1)
+        if _clean_string(x)
+    ]
 
     answer_key_raw = data.get("answer_key", []) if include_answer_key else []
     normalized_answers = [
-        _normalize_answer_key_item(item, idx)
+        _normalize_answer_key_item(item, idx, activity_type)
         for idx, item in enumerate(answer_key_raw, start=1)
         if _clean_string(item)
     ]
@@ -567,6 +639,7 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
         data,
         include_answer_key=include_answer_key,
         include_mark_scheme=include_mark_scheme,
+        activity_type=activity_type,
     )
 
     return {
