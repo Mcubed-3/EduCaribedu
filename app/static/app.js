@@ -304,7 +304,6 @@ function cleanupMathForEditMode(text) {
 
   let out = String(text);
 
-  // remove latex-style wrappers
   out = out.replace(/\\\\\(/g, "");
   out = out.replace(/\\\\\)/g, "");
   out = out.replace(/\\\\\[/g, "");
@@ -313,32 +312,19 @@ function cleanupMathForEditMode(text) {
   out = out.replace(/\\\)/g, "");
   out = out.replace(/\\\[/g, "");
   out = out.replace(/\\\]/g, "");
-
-  // remove stray backslashes
   out = out.replace(/\\/g, "");
 
-  // normalize powers
   out = out.replace(/\^\{(\d+)\}/g, "^$1");
   out = out.replace(/\^\{([A-Za-z0-9]+)\}/g, "^$1");
-
-  // common math functions
   out = out.replace(/\bfrac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g, "($1)/($2)");
   out = out.replace(/\bsqrt\s*\{([^{}]+)\}/g, "√($1)");
   out = out.replace(/\bsqrt\s*\(([^()]+)\)/g, "√($1)");
-
-  // plain symbol cleanup
   out = out.replace(/\\times/g, "×");
   out = out.replace(/\\pm/g, "±");
   out = out.replace(/\\div/g, "÷");
-
-  // clean repeated slashes without breaking normal fractions
   out = out.replace(/([^:])\/\/+/g, "$1/");
   out = out.replace(/\s+\/\s+\/+/g, " / ");
-
-  // common unicode tidy
   out = out.replace(/−/g, "-");
-
-  // collapse spaces
   out = out.replace(/[ \t]+/g, " ");
   out = out.replace(/\n{3,}/g, "\n\n");
 
@@ -394,15 +380,9 @@ function lessonToText(data) {
 
   if (lesson.domain_objectives && Object.keys(lesson.domain_objectives).length) {
     lines.push("Specific Objectives:");
-    if (lesson.domain_objectives.cognitive) {
-      lines.push(`- Cognitive: ${cleanupMathForEditMode(lesson.domain_objectives.cognitive)}`);
-    }
-    if (lesson.domain_objectives.affective) {
-      lines.push(`- Affective: ${cleanupMathForEditMode(lesson.domain_objectives.affective)}`);
-    }
-    if (lesson.domain_objectives.psychomotor) {
-      lines.push(`- Psychomotor: ${cleanupMathForEditMode(lesson.domain_objectives.psychomotor)}`);
-    }
+    if (lesson.domain_objectives.cognitive) lines.push(`- Cognitive: ${cleanupMathForEditMode(lesson.domain_objectives.cognitive)}`);
+    if (lesson.domain_objectives.affective) lines.push(`- Affective: ${cleanupMathForEditMode(lesson.domain_objectives.affective)}`);
+    if (lesson.domain_objectives.psychomotor) lines.push(`- Psychomotor: ${cleanupMathForEditMode(lesson.domain_objectives.psychomotor)}`);
     lines.push("");
   }
 
@@ -414,17 +394,13 @@ function lessonToText(data) {
 
   if (Array.isArray(lesson.prior_knowledge_questions) && lesson.prior_knowledge_questions.length) {
     lines.push("Prior Knowledge:");
-    lesson.prior_knowledge_questions.forEach((q) => {
-      lines.push(`- ${cleanupMathForEditMode(q)}`);
-    });
+    lesson.prior_knowledge_questions.forEach((q) => lines.push(`- ${cleanupMathForEditMode(q)}`));
     lines.push("");
   }
 
   if (Array.isArray(lesson.resources) && lesson.resources.length) {
     lines.push("Resources:");
-    lesson.resources.forEach((r) => {
-      lines.push(`- ${cleanupMathForEditMode(r)}`);
-    });
+    lesson.resources.forEach((r) => lines.push(`- ${cleanupMathForEditMode(r)}`));
     lines.push("");
   }
 
@@ -432,26 +408,20 @@ function lessonToText(data) {
     Object.entries(lesson.sections).forEach(([section, items]) => {
       if (!items || !items.length) return;
       lines.push(`${section}:`);
-      items.forEach((item) => {
-        lines.push(`- ${cleanupMathForEditMode(item)}`);
-      });
+      items.forEach((item) => lines.push(`- ${cleanupMathForEditMode(item)}`));
       lines.push("");
     });
   }
 
   if (Array.isArray(lesson.apse_pathways) && lesson.apse_pathways.length) {
     lines.push("APSE Pathways:");
-    lesson.apse_pathways.forEach((item) => {
-      lines.push(`- ${cleanupMathForEditMode(item)}`);
-    });
+    lesson.apse_pathways.forEach((item) => lines.push(`- ${cleanupMathForEditMode(item)}`));
     lines.push("");
   }
 
   if (Array.isArray(lesson.stem_skills) && lesson.stem_skills.length) {
     lines.push("STEM / Skills:");
-    lesson.stem_skills.forEach((item) => {
-      lines.push(`- ${cleanupMathForEditMode(item)}`);
-    });
+    lesson.stem_skills.forEach((item) => lines.push(`- ${cleanupMathForEditMode(item)}`));
     lines.push("");
   }
 
@@ -463,17 +433,13 @@ function lessonToText(data) {
 
   if (Array.isArray(lesson.assessment) && lesson.assessment.length) {
     lines.push("Assessment:");
-    lesson.assessment.forEach((item) => {
-      lines.push(`- ${cleanupMathForEditMode(item)}`);
-    });
+    lesson.assessment.forEach((item) => lines.push(`- ${cleanupMathForEditMode(item)}`));
     lines.push("");
   }
 
   if (Array.isArray(lesson.reflection) && lesson.reflection.length) {
     lines.push("Reflection:");
-    lesson.reflection.forEach((item) => {
-      lines.push(`- ${cleanupMathForEditMode(item)}`);
-    });
+    lesson.reflection.forEach((item) => lines.push(`- ${cleanupMathForEditMode(item)}`));
   }
 
   return lines.join("\n").trim();
@@ -602,7 +568,6 @@ async function downloadLessonExport(format) {
       body: JSON.stringify({
         title,
         content: textContent,
-        html: textContent.replace(/\n/g, "<br>"),
       }),
     });
 
@@ -617,7 +582,7 @@ async function downloadLessonExport(format) {
     credentials: "include",
     body: JSON.stringify({
       title,
-      html: textContent.replace(/\n/g, "<br>"),
+      content: textContent,
     }),
   });
 
@@ -656,7 +621,7 @@ async function downloadActivityExport(format) {
     credentials: "include",
     body: JSON.stringify({
       title,
-      html: textContent.replace(/\n/g, "<br>"),
+      content: textContent,
     }),
   });
 
