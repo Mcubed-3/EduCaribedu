@@ -49,10 +49,19 @@ def _clean_math_text(text: str) -> str:
     cleaned = re.sub(r"\\\[|\\\]", "", cleaned)
     cleaned = cleaned.replace("\\", "")
     cleaned = re.sub(r"\^\{(\d+)\}", r"^\1", cleaned)
+    cleaned = re.sub(r"\^\{([A-Za-z0-9]+)\}", r"^\1", cleaned)
     cleaned = cleaned.replace("sqrt", "√")
     cleaned = cleaned.replace('"', "")
     cleaned = cleaned.replace("{", "")
     cleaned = cleaned.replace("}", "")
+    cleaned = cleaned.replace("dfrac", "")
+    cleaned = cleaned.replace("tfrac", "")
+    cleaned = cleaned.replace("pm", "±")
+    cleaned = cleaned.replace("Rightarrow", "=>")
+    cleaned = cleaned.replace("Delta", "discriminant")
+    cleaned = cleaned.replace("cdot", "*")
+    cleaned = cleaned.replace("bigl", "")
+    cleaned = cleaned.replace("bigr", "")
     cleaned = re.sub(r"\s+", " ", cleaned)
     return cleaned.strip()
 
@@ -128,12 +137,110 @@ def _subject_group(subject: str) -> str:
         return "agriculture"
     if s in {"health and family life education", "physical education", "family and consumer management"}:
         return "wellness_life"
-    if s in {"business basics", "jace"}:
+    if s in {"business basics", "jace", "accounts", "accounting"}:
         return "enterprise"
     if s in {"drama", "music", "visual arts"}:
         return "creative_arts"
 
     return "general"
+
+
+def _looks_like_math_working(text: str) -> bool:
+    t = (text or "").lower()
+    triggers = [
+        "formula:",
+        "substitute",
+        "simplify",
+        "answer:",
+        "solve",
+        "factor",
+        "complete the square",
+        "discriminant",
+        "vertex",
+        "roots",
+        "intercepts",
+        "x =",
+        "y =",
+        "^2",
+        "√",
+        "area =",
+        "moles =",
+        "speed =",
+        "density =",
+    ]
+    return any(token in t for token in triggers)
+
+
+def _format_math_steps(text: str) -> str:
+    if not isinstance(text, str):
+        return text
+
+    text = _clean_math_text(text)
+    if not text:
+        return text
+
+    if not _looks_like_math_working(text):
+        return text
+
+    # Prepare breakpoints for common working lines
+    working = text
+    working = working.replace("=>", "\n")
+    working = re.sub(r"\bthen\b", "\nThen ", working, flags=re.IGNORECASE)
+    working = re.sub(r"\bso\b", "\nSo ", working, flags=re.IGNORECASE)
+    working = re.sub(r"\btherefore\b", "\nTherefore ", working, flags=re.IGNORECASE)
+    working = re.sub(r"\bformula:\b", "\nFormula:", working, flags=re.IGNORECASE)
+    working = re.sub(r"\bsubstitute:\b", "\nSubstitute:", working, flags=re.IGNORECASE)
+    working = re.sub(r"\bsimplify:\b", "\nSimplify:", working, flags=re.IGNORECASE)
+    working = re.sub(r"\banswer:\b", "\nAnswer:", working, flags=re.IGNORECASE)
+    working = re.sub(r"\bstep\s*(\d+)\s*:\b", r"\nStep \1:", working, flags=re.IGNORECASE)
+
+    parts = []
+    for part in re.split(r"\n|(?<=\.)\s+(?=[A-Z])", working):
+        piece = _clean_math_text(part.strip())
+        if piece:
+            parts.append(piece)
+
+    if len(parts) <= 1:
+        return text
+
+    formatted = []
+    step = 1
+    for part in parts:
+        lower = part.lower()
+
+        if lower.startswith("formula:"):
+            formatted.append(f"{step}. Formula: {part[len('Formula:'):].strip()}")
+        elif lower.startswith("substitute:"):
+            formatted.append(f"{step}. Substitute: {part[len('Substitute:'):].strip()}")
+        elif lower.startswith("simplify:"):
+            formatted.append(f"{step}. Simplify: {part[len('Simplify:'):].strip()}")
+        elif lower.startswith("answer:"):
+            formatted.append(f"{step}. Answer: {part[len('Answer:'):].strip()}")
+        elif lower.startswith("then "):
+            formatted.append(f"{step}. {part}")
+        elif lower.startswith("so "):
+            formatted.append(f"{step}. {part}")
+        elif lower.startswith("therefore "):
+            formatted.append(f"{step}. {part}")
+        elif lower.startswith("step "):
+            formatted.append(f"{step}. {part}")
+        elif "=" in part or "±" in part or "√" in part or "^2" in part:
+            formatted.append(f"{step}. {part}")
+        else:
+            formatted.append(f"{step}. {part}")
+
+        step += 1
+
+    return "\n".join(formatted)
+
+
+def _format_math_list(items: List[str]) -> List[str]:
+    formatted: List[str] = []
+    for item in items:
+        clean = _clean_math_text(str(item))
+        if clean:
+            formatted.append(_format_math_steps(clean))
+    return formatted
 
 
 def _prior_questions(topic: str, subject: str, difficulty: str) -> List[str]:
@@ -680,12 +787,12 @@ def generate_lesson(payload: dict) -> dict:
         "class_profile": _fallback_class_profile(payload["subject"], payload["difficulty"]),
         "domain_objectives": _fallback_domain_objectives(payload["topic"], payload["subject"]),
         "prior_learning": _fallback_prior_learning(payload["topic"], payload["subject"]),
-        "objectives": objective_text,
+        "objectives": _format_math_list(objective_text),
         "suggested_standards": [match.get("strand", "General Strand")],
         "prior_knowledge_questions": fallback_prior,
         "resources": fallback_resources,
-        "sections": fallback_sections,
-        "assessment": fallback_assessment,
+        "sections": {k: _format_math_list(v) for k, v in fallback_sections.items()},
+        "assessment": _format_math_list(fallback_assessment),
         "assessment_criteria": _fallback_assessment_criteria(payload["topic"]),
         "apse_pathways": _fallback_apse_pathways(payload["topic"], payload["subject"]),
         "stem_skills": _fallback_stem_skills(payload["subject"], payload["topic"]),
@@ -733,7 +840,10 @@ def generate_lesson(payload: dict) -> dict:
                 ai_parts.get("sections", {}),
                 fallback_sections,
             )
-            lesson["assessment"] = _clean_math_list(
+            for section, items in lesson["sections"].items():
+                lesson["sections"][section] = _format_math_list(items)
+
+            lesson["assessment"] = _format_math_list(
                 ai_parts.get("assessment", lesson["assessment"])
             )
             lesson["assessment_criteria"] = _clean_math_text(
@@ -748,6 +858,7 @@ def generate_lesson(payload: dict) -> dict:
             lesson["reflection"] = _clean_math_list(
                 ai_parts.get("reflection", lesson["reflection"])
             )
+            lesson["objectives"] = _format_math_list(lesson["objectives"])
             lesson["generation_mode"] = "ai"
     except Exception as exc:
         print("LESSON AI ERROR:", type(exc).__name__, str(exc))

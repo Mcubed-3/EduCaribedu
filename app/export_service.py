@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import re
 import uuid
 from pathlib import Path
 
@@ -10,6 +11,8 @@ from playwright.sync_api import sync_playwright
 
 EXPORT_DIR = Path("exports")
 EXPORT_DIR.mkdir(exist_ok=True)
+
+BOLD_LABELS = ("Formula:", "Substitute:", "Simplify:", "Answer:", "Method:", "Worked Example:")
 
 
 def _clean_text(value: str) -> str:
@@ -21,7 +24,7 @@ def _is_heading(line: str) -> bool:
     stripped = line.strip()
     if not stripped:
         return False
-    return stripped.endswith(":") and len(stripped) <= 80
+    return stripped.endswith(":") and len(stripped) <= 80 and not _is_numbered_item(stripped)
 
 
 def _is_list_item(line: str) -> bool:
@@ -33,8 +36,20 @@ def _is_numbered_item(line: str) -> bool:
     stripped = line.strip()
     if not stripped:
         return False
-    parts = stripped.split(".", 1)
-    return len(parts) == 2 and parts[0].isdigit()
+    return re.match(r"^\d+\.\s", stripped) is not None
+
+
+def _starts_with_bold_label(line: str) -> bool:
+    stripped = line.strip()
+    return any(stripped.startswith(label) for label in BOLD_LABELS)
+
+
+def _split_label_line(line: str):
+    stripped = line.strip()
+    for label in BOLD_LABELS:
+        if stripped.startswith(label):
+            return label, stripped[len(label):].strip()
+    return None, stripped
 
 
 def _build_html_from_text(title: str, content: str) -> str:
@@ -54,6 +69,7 @@ def _build_html_from_text(title: str, content: str) -> str:
         "p { margin: 0 0 10px 0; white-space: pre-wrap; }",
         ".list-item { margin: 0 0 8px 0; white-space: pre-wrap; }",
         ".number-item { margin: 0 0 10px 0; white-space: pre-wrap; }",
+        ".label-line { margin: 0 0 10px 0; white-space: pre-wrap; }",
         ".spacer { height: 10px; }",
         "</style>",
         "</head>",
@@ -69,6 +85,13 @@ def _build_html_from_text(title: str, content: str) -> str:
 
         if not stripped:
             html_lines.append('<div class="spacer"></div>')
+            continue
+
+        if _starts_with_bold_label(stripped):
+            label, rest = _split_label_line(stripped)
+            html_lines.append(
+                f'<p class="label-line"><strong>{html.escape(label)}</strong> {html.escape(rest)}</p>'
+            )
             continue
 
         escaped = html.escape(line)
@@ -113,6 +136,15 @@ def export_to_docx(title: str, content: str):
             p = doc.add_paragraph()
             run = p.add_run(stripped)
             run.bold = True
+            continue
+
+        if _starts_with_bold_label(stripped):
+            label, rest = _split_label_line(stripped)
+            p = doc.add_paragraph()
+            label_run = p.add_run(label)
+            label_run.bold = True
+            if rest:
+                p.add_run(f" {rest}")
             continue
 
         if _is_list_item(stripped):

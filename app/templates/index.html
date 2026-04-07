@@ -103,13 +103,13 @@
           <button type="button" id="newLessonBtn" class="btn btn-primary">New lesson</button>
           <button type="button" id="refreshLessonsBtn" class="btn btn-secondary">Refresh workspace</button>
           <button type="button" id="editProfileSidebarBtn" class="btn btn-secondary">Edit profile</button>
-          <a href="/about">About</a>
           <a href="/pricing" class="btn btn-secondary btn-link">Pricing</a>
           <a href="/feedback" class="btn btn-secondary btn-link">Feedback</a>
           {% if current_user.role == "admin" %}
             <a href="/admin" class="btn btn-secondary btn-link">Curriculum admin</a>
           {% endif %}
           <a href="/logout" class="btn btn-secondary btn-link">Log out</a>
+          <a href="/about" class="btn btn-secondary btn-link">About</a>
         </div>
       </section>
 
