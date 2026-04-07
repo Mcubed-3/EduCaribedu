@@ -1568,3 +1568,93 @@ table {
     font-size: 22px;
   }
 }
+/* ---------- STATS REFINEMENT (REMOVE EMPTY FEEL) ---------- */
+
+.stats-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat-card {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(198, 215, 232, 0.85);
+  box-shadow: 0 8px 18px rgba(17, 44, 73, 0.04);
+}
+
+.stat-card strong {
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+
+.stat-card small {
+  font-size: 12px;
+}
+
+/* ---------- BUILDER AREA (MAIN WORKSPACE CLEANUP) ---------- */
+
+.builder-section {
+  gap: 10px;
+}
+
+.builder-grid {
+  gap: 12px;
+}
+
+.form-grid,
+.activity-grid {
+  gap: 10px;
+}
+
+.action-row {
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ---------- OUTPUT PANEL (LESS EMPTY SPACE) ---------- */
+
+.output-panel {
+  gap: 10px;
+}
+
+.output-textarea {
+  min-height: 300px;
+}
+
+/* ---------- INPUT FIELDS (MORE COMPACT, CLEANER) ---------- */
+
+input,
+select {
+  min-height: 40px;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+textarea {
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+/* ---------- BUTTON TIGHTENING ---------- */
+
+.small-btn {
+  min-height: 32px;
+  font-size: 12px;
+}
+
+/* ---------- GLOBAL SPACING BALANCE ---------- */
+
+.panel {
+  gap: 10px;
+}
+
+/* ---------- REMOVE "FLOATY" FEEL ---------- */
+
+.brand-card,
+.sidebar-card,
+.panel,
+.stat-card,
+.upgrade-banner {
+  box-shadow: 0 10px 24px rgba(17, 44, 73, 0.06);
+}
