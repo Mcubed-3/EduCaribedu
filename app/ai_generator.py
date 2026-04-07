@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
+from .math_bank_service import format_math_bank_for_prompt
+
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
@@ -129,19 +131,31 @@ def _teacher_profile_text(payload: dict) -> str:
     )
 
 
-def _math_output_rules(subject: str, topic: str, structure: str) -> str:
+def _math_output_rules(subject: str, topic: str, structure: str, grade_level: str, curriculum: str) -> str:
     subject_key = (subject or "").strip().lower()
 
-    strict_rules = """
+    math_bank_snippets = format_math_bank_for_prompt(
+        subject=subject,
+        grade_level=grade_level,
+        curriculum=curriculum,
+        topic=topic,
+        limit=6,
+    )
+
+    strict_rules = f"""
 CRITICAL MATH OUTPUT RULES (STRICT):
 - NEVER use LaTeX.
 - NEVER use backslashes.
 - NEVER use \\( \\), \\[ \\], \\frac, \\sqrt, superscript braces, subscript braces, or escaped symbols.
 - Write ALL expressions in clean plain text only.
+- Use the math bank examples below whenever they fit the lesson naturally.
 
-Required plain-text math style examples:
+Math bank examples:
+{math_bank_snippets}
+
+Required plain-text style examples:
 x^2 - 5x + 6 = 0
-(x + 3)/4
+(x + 3) / 4
 √(x/2)
 x = (-b ± √(b^2 - 4ac)) / 2a
 y = 2x + 1
@@ -155,10 +169,8 @@ Formatting rules:
 - Keep each equation on one line
 - Do not split expressions across bullets or sentences
 - Do not wrap variables in brackets
-- Do not output random quotation marks, braces, slashes, or code-like symbols
 - If a formula is needed, write it exactly as a readable line, not as markup
-- If units are needed, write them plainly, for example: m, m^2, cm^3, kg, N, °C
-- If a science or business calculation is needed, keep the numerical working readable in plain text
+- If a table is needed for business/accounts/family consumer management, use a clean text-table style
 """
 
     if subject_key not in MATH_HEAVY_SUBJECTS:
@@ -203,9 +215,7 @@ QUALITY RULES:
 - Keep the lesson appropriate for {difficulty} level.
 - Make the structure genuinely reflect {structure}, not just relabel generic bullets.
 - Make the lesson type genuinely reflect {lesson_type}.
-- If the topic is practical or skill-based, include practical handling, observation, demonstration, or performance where appropriate.
-- If the topic is discussion-based, include guided speaking, justification, and response opportunities.
-- Resources must be plain text items, not URLs.
+- If the topic is practical or skill-based, include practical handling, observation, demonstration, performance, or worked examples where appropriate.
 """
 
 
@@ -245,7 +255,7 @@ def _build_prompt(
         else "Do not force STEM language if it does not fit the subject, but keep the lesson skill-based and practical where appropriate."
     )
 
-    math_rules = _math_output_rules(subject, topic, structure)
+    math_rules = _math_output_rules(subject, topic, structure, grade_level, curriculum)
     quality_rules = _quality_rules(subject, topic, structure, difficulty, lesson_type)
 
     return f"""
