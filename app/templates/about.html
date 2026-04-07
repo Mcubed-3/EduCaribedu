@@ -1,44 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About EduCarib AI</title>
+  <meta name="description" content="Learn more about EduCarib AI, the lesson planning platform built for Caribbean educators." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="{{ site_url }}/about" />
+  <meta property="og:title" content="About EduCarib AI" />
+  <meta property="og:description" content="A lesson planning platform built for Caribbean educators." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="{{ site_url }}/about" />
+  <meta property="og:image" content="{{ site_url }}/static/logo.png" />
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
-<body>
+<body class="pricing-body">
+  <div class="pricing-shell">
+    <section class="pricing-topbar">
+      <a href="/" class="pricing-brand-lockup">
+        <div class="pricing-brand-icon-wrap">
+          <img src="/static/logo.png" alt="EduCarib AI logo" class="pricing-brand-icon" />
+        </div>
+        <div>
+          <div class="pricing-brand-name">EduCarib AI</div>
+          <div class="pricing-brand-subtitle">Built for Caribbean classrooms</div>
+        </div>
+      </a>
 
-<div class="container" style="max-width:900px;margin:auto;padding:40px;">
+      <div class="pricing-topbar-actions">
+        <a href="/" class="btn btn-secondary btn-link">Dashboard</a>
+        <a href="/pricing" class="btn btn-secondary btn-link">Pricing</a>
+        <a href="/feedback" class="btn btn-secondary btn-link">Feedback</a>
+      </div>
+    </section>
 
-  <h1>About EduCarib AI</h1>
+    <section class="pricing-hero">
+      <div class="section-kicker">About the platform</div>
+      <h1>Helping teachers plan faster without sacrificing quality</h1>
+      <p>
+        EduCarib AI is a lesson planning platform created to support Caribbean educators with
+        structured, curriculum-aligned lesson plans and classroom-ready activities. It is designed
+        to reduce planning time while keeping lessons practical, editable, and useful in real classrooms.
+      </p>
+    </section>
 
-  <p>
-    EduCarib AI is a lesson planning platform designed specifically for Caribbean educators.
-    It helps teachers quickly generate structured, curriculum-aligned lesson plans and classroom activities.
-  </p>
+    <section class="pricing-lower-grid">
+      <article class="pricing-info-card">
+        <div class="section-kicker">What EduCarib AI does</div>
+        <h2>Built for real teaching workflow</h2>
+        <ul class="plan-features plan-features-spaced">
+          <li>Generate structured lesson plans using formats such as 5Es and 4Cs</li>
+          <li>Create classroom-ready activities including quizzes, worksheets, exit tickets, and homework sheets</li>
+          <li>Support multiple subjects, grade levels, and curriculum needs</li>
+          <li>Allow teachers to edit generated lesson plans and activities before exporting</li>
+          <li>Provide export-ready PDF and DOCX outputs for classroom use</li>
+        </ul>
+      </article>
 
-  <h2>What We Do</h2>
-  <ul>
-    <li>Generate structured lesson plans (5E, 4C formats)</li>
-    <li>Create clean classroom-ready activities</li>
-    <li>Support multiple subjects and grade levels</li>
-    <li>Provide export-ready DOCX and PDF outputs</li>
-  </ul>
+      <article class="pricing-info-card">
+        <div class="section-kicker">Why it matters</div>
+        <h2>Less time formatting. More time teaching.</h2>
+        <p class="plan-copy">
+          Teachers already carry a heavy workload. EduCarib AI helps reduce the time spent building
+          lesson plans from scratch, while still giving teachers control to edit, adjust, and personalise
+          the final output for their students.
+        </p>
+        <br />
+        <p class="plan-copy">
+          The goal is not to replace teacher judgment. The goal is to make planning faster, cleaner,
+          and more manageable.
+        </p>
+      </article>
+    </section>
 
-  <h2>Why EduCarib?</h2>
-  <p>
-    Teachers spend hours planning. EduCarib reduces that time to minutes while still keeping
-    quality, structure, and curriculum alignment.
-  </p>
+    <section class="pricing-info-card">
+      <div class="section-kicker">Our mission</div>
+      <h2>Modern tools for Caribbean educators</h2>
+      <p class="plan-copy">
+        EduCarib AI exists to give teachers in the Caribbean access to modern planning tools that feel
+        practical, polished, and relevant. The platform is focused on helping educators save time,
+        improve consistency, and produce stronger teaching materials with less friction.
+      </p>
 
-  <h2>Our Goal</h2>
-  <p>
-    To empower Caribbean educators with modern tools that improve teaching efficiency and student outcomes.
-  </p>
-
-  <br>
-  <a href="/" class="btn">Back to Dashboard</a>
-
-</div>
-
+      <div class="action-row">
+        <a href="/" class="btn btn-primary btn-link">Back to Dashboard</a>
+      </div>
+    </section>
+  </div>
 </body>
 </html>
