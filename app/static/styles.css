@@ -244,11 +244,11 @@ textarea:focus {
 .brand-mark-wrap {
   width: 62px;
   height: 62px;
-  background: linear-gradient(145deg, var(--navy), var(--navy-deep));
+  background: linear-gradient(145deg, #e6f0ff, #dbeafe); /* 👈 light blue */
   border-radius: 18px;
   display: grid;
   place-items: center;
-  box-shadow: 0 12px 24px rgba(18, 55, 85, 0.18);
+  box-shadow: 0 10px 20px rgba(24, 53, 79, 0.08);
   padding: 8px;
 }
 
