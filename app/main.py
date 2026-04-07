@@ -718,12 +718,18 @@ def stripe_config(request: Request):
 
 
 @app.post("/api/stripe/create-checkout-session")
-def stripe_create_checkout_session(current_user=Depends(require_user)):
+async def stripe_create_checkout_session(request: Request, current_user=Depends(require_user)):
     if current_user["plan"] in {"pro", "plus", "admin"}:
         raise HTTPException(status_code=400, detail="You already have paid access.")
 
+    payload = await request.json()
+    target_plan = (payload.get("target_plan") or "pro").strip().lower()
+
+    if target_plan not in {"pro", "plus"}:
+        raise HTTPException(status_code=400, detail="Invalid target plan.")
+
     try:
-        session = create_checkout_session(user=current_user)
+        session = create_checkout_session(user=current_user, target_plan=target_plan)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Stripe checkout setup failed: {exc}")
 
