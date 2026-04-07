@@ -829,6 +829,17 @@ async def stripe_webhook(request: Request):
     return JSONResponse({"received": True})
 
 
+@app.get("/about", response_class=HTMLResponse)
+def about_page(request: Request):
+    return templates.TemplateResponse(
+        "about.html",
+        {
+            "request": request,
+            "site_url": "https://educaribedu.org",
+        },
+    )
+
+
 @app.get("/api/admin/frameworks")
 def admin_list_frameworks(
     request: Request,

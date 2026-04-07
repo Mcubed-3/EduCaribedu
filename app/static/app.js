@@ -476,9 +476,16 @@ async function saveCurrentLesson() {
   }
 
   try {
+    const editedText = cleanupMathForEditMode(byId("output")?.value || "");
+
+    const updatedPayload = {
+      ...currentLessonData,
+      edited_text: editedText
+    };
+
     const res = await fetchJSON("/api/lessons", {
       method: "POST",
-      body: JSON.stringify({ lesson_payload: currentLessonData }),
+      body: JSON.stringify({ lesson_payload: updatedPayload }),
     });
 
     const currentLessonId = byId("currentLessonId");
@@ -487,6 +494,7 @@ async function saveCurrentLesson() {
     await loadSavedLessons();
     await loadDashboardSummary();
     await loadCurrentUserContext();
+
     setStatus("Lesson saved.", "success");
   } catch (e) {
     if ((e.message || "").toLowerCase().includes("saved lesson limit")) {
@@ -500,23 +508,33 @@ async function saveCurrentLesson() {
 
 async function updateCurrentLesson() {
   const lessonId = byId("currentLessonId")?.value || "";
+
   if (!lessonId) {
     setStatus("Load or save a lesson first before updating.", "error");
     return;
   }
+
   if (!currentLessonData) {
     setStatus("No current lesson loaded.", "error");
     return;
   }
 
   try {
+    const editedText = cleanupMathForEditMode(byId("output")?.value || "");
+
+    const updatedPayload = {
+      ...currentLessonData,
+      edited_text: editedText
+    };
+
     await fetchJSON(`/api/lessons/${lessonId}`, {
       method: "PUT",
-      body: JSON.stringify({ lesson_payload: currentLessonData }),
+      body: JSON.stringify({ lesson_payload: updatedPayload }),
     });
 
     await loadSavedLessons();
     await loadDashboardSummary();
+
     setStatus("Saved lesson updated.", "success");
   } catch (e) {
     setStatus(e.message, "error");
@@ -526,8 +544,15 @@ async function updateCurrentLesson() {
 function toggleEditMode() {
   const output = byId("output");
   if (!output) return;
+
   output.readOnly = !output.readOnly;
-  setStatus(output.readOnly ? "Edit mode off." : "Edit mode on.", "success");
+
+  setStatus(
+    output.readOnly
+      ? "Edit mode OFF (locked)"
+      : "Edit mode ON (you can now edit)",
+    "success"
+  );
 }
 
 async function triggerFileDownloadFromResponse(res, fallbackName) {
