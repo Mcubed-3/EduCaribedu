@@ -52,6 +52,34 @@ def _split_label_line(line: str):
     return None, stripped
 
 
+def _is_table_title(line: str) -> bool:
+    return line.strip().startswith("Table:")
+
+
+def _is_table_row(line: str) -> bool:
+    stripped = line.strip()
+    return "|" in stripped and len([c for c in stripped.split("|")]) >= 2
+
+
+def _parse_table_block(lines, start_index):
+    table_title = lines[start_index].strip().replace("Table:", "").strip()
+    rows = []
+    i = start_index + 1
+
+    while i < len(lines):
+        line = lines[i].strip()
+        if _is_table_row(line):
+            rows.append([cell.strip() for cell in line.split("|")])
+            i += 1
+        else:
+            break
+
+    max_cols = max((len(r) for r in rows), default=0)
+    padded_rows = [r + [""] * (max_cols - len(r)) for r in rows]
+
+    return table_title, padded_rows, i
+
+
 def _build_html_from_text(title: str, content: str) -> str:
     safe_title = html.escape(title or "Export")
     lines = _clean_text(content).splitlines()
@@ -71,6 +99,9 @@ def _build_html_from_text(title: str, content: str) -> str:
         ".number-item { margin: 0 0 10px 0; white-space: pre-wrap; }",
         ".label-line { margin: 0 0 10px 0; white-space: pre-wrap; }",
         ".spacer { height: 10px; }",
+        "table { border-collapse: collapse; width: 100%; margin: 0 0 14px 0; }",
+        "th, td { border: 1px solid #d7e4f1; padding: 8px 10px; text-align: left; font-size: 13px; }",
+        "th { background: #eef5ff; font-weight: 700; }",
         "</style>",
         "</head>",
         "<body>",
@@ -80,11 +111,29 @@ def _build_html_from_text(title: str, content: str) -> str:
     if title:
         html_lines.append(f"<h1>{safe_title}</h1>")
 
-    for line in lines:
+    i = 0
+    while i < len(lines):
+        line = lines[i]
         stripped = line.strip()
 
         if not stripped:
             html_lines.append('<div class="spacer"></div>')
+            i += 1
+            continue
+
+        if _is_table_title(stripped):
+            table_title, rows, new_i = _parse_table_block(lines, i)
+            if table_title:
+                html_lines.append(f"<h2>{html.escape(table_title)}</h2>")
+            if rows:
+                html_lines.append("<table>")
+                for row_idx, row in enumerate(rows):
+                    tag = "th" if row_idx == 0 else "td"
+                    html_lines.append(
+                        "<tr>" + "".join(f"<{tag}>{html.escape(cell)}</{tag}>" for cell in row) + "</tr>"
+                    )
+                html_lines.append("</table>")
+            i = new_i
             continue
 
         if _starts_with_bold_label(stripped):
@@ -92,6 +141,7 @@ def _build_html_from_text(title: str, content: str) -> str:
             html_lines.append(
                 f'<p class="label-line"><strong>{html.escape(label)}</strong> {html.escape(rest)}</p>'
             )
+            i += 1
             continue
 
         escaped = html.escape(line)
@@ -104,6 +154,8 @@ def _build_html_from_text(title: str, content: str) -> str:
             html_lines.append(f'<p class="list-item">{escaped}</p>')
         else:
             html_lines.append(f"<p>{escaped}</p>")
+
+        i += 1
 
     html_lines.extend([
         "</div>",
@@ -125,17 +177,47 @@ def export_to_docx(title: str, content: str):
     normal_style.font.name = "Arial"
     normal_style.font.size = Pt(11)
 
-    for line in _clean_text(content).splitlines():
-        stripped = line.strip()
+    lines = _clean_text(content).splitlines()
+    i = 0
+
+    while i < len(lines):
+        stripped = lines[i].strip()
 
         if not stripped:
             doc.add_paragraph("")
+            i += 1
+            continue
+
+        if _is_table_title(stripped):
+            table_title, rows, new_i = _parse_table_block(lines, i)
+
+            if table_title:
+                p = doc.add_paragraph()
+                run = p.add_run(table_title)
+                run.bold = True
+
+            if rows:
+                cols = len(rows[0])
+                table = doc.add_table(rows=1, cols=cols)
+                table.style = "Table Grid"
+
+                for j, cell in enumerate(rows[0]):
+                    run = table.rows[0].cells[j].paragraphs[0].add_run(cell)
+                    run.bold = True
+
+                for row in rows[1:]:
+                    cells = table.add_row().cells
+                    for j, cell in enumerate(row):
+                        cells[j].text = cell
+
+            i = new_i
             continue
 
         if _is_heading(stripped):
             p = doc.add_paragraph()
             run = p.add_run(stripped)
             run.bold = True
+            i += 1
             continue
 
         if _starts_with_bold_label(stripped):
@@ -145,13 +227,16 @@ def export_to_docx(title: str, content: str):
             label_run.bold = True
             if rest:
                 p.add_run(f" {rest}")
+            i += 1
             continue
 
         if _is_list_item(stripped):
             doc.add_paragraph(stripped, style="List Bullet")
+            i += 1
             continue
 
         doc.add_paragraph(stripped)
+        i += 1
 
     doc.save(file_path)
     return file_path

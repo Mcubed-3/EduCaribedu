@@ -66,6 +66,22 @@ def _clean_math_text(text: str) -> str:
     return cleaned.strip()
 
 
+def _inject_table_examples(subject: str, topic: str) -> str:
+    s = (subject or "").lower()
+
+    if s in {"business basics", "accounts", "accounting", "agriculture"}:
+        return f"""
+If including calculations, budgets, or cost breakdowns for {topic}, format like:
+
+Table: Example
+Item | Qty | Unit price | Cost
+Example item | 2 | $5 | $10
+
+Then show calculations below clearly.
+"""
+    return ""
+
+
 def _clean_math_list(items):
     if not isinstance(items, list):
         return items

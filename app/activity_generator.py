@@ -149,6 +149,27 @@ Math bank examples:
 """.strip()
 
 
+def _force_table_instruction(subject: str, topic: str) -> str:
+    s = (subject or "").strip().lower()
+    if s in {"business basics", "accounts", "accounting", "agricultural science", "agriculture"}:
+        return f"""
+TABLE RULE:
+If the activity for {topic} includes budgets, costing, revenue, profit, farm inputs, resource lists, or financial comparisons, you MUST format the data as:
+
+Table: Sample budget
+Item | Qty | Unit price | Cost
+Seed | 10 kg | $20/kg | $200
+Fertiliser | 5 bags | $50/bag | $250
+
+Rules:
+- Use "Table:" on its own line before the table.
+- Use "|" to separate columns.
+- Do NOT use markdown tables.
+- Keep calculation lines below the table as normal lines.
+"""
+    return ""
+
+
 PROMPT_TEMPLATE = """
 You are generating a classroom activity strictly aligned to the teaching context provided.
 
@@ -165,6 +186,7 @@ CRITICAL RULES:
 - Avoid generic filler.
 - Use Caribbean context where natural.
 - {math_rules}
+- {table_rules}
 
 Return ONLY valid JSON in this exact structure:
 
@@ -234,7 +256,26 @@ def _fallback_activity(
     answers: List[str] = []
     mark_scheme: List[str] = []
 
-    if activity_type == "mcq":
+    if _subject_group(subject) == "enterprise":
+        items = [
+            "Table: Sample budget",
+            "Item | Qty | Unit price | Cost",
+            "Seed | 10 kg | $20/kg | $200",
+            "Fertiliser | 5 bags | $50/bag | $250",
+            "Labour | 20 hours | $10/hour | $200",
+            "Total Variable Cost | | | $650",
+            "Fixed Cost | | | $150",
+            "Total Cost | | | $800",
+            f"{count}. Calculate revenue and profit using the budget above."
+        ][:max(8, count)]
+
+        if include_answer_key:
+            answers = [
+                "1. Use the table values provided.",
+                "2. Revenue = Price per unit × Quantity sold.",
+                "3. Profit = Revenue - Total Cost.",
+            ]
+    elif activity_type == "mcq":
         for i in range(1, count + 1):
             items.append(
                 f"{i}. Which statement best relates to {topic}?\n"
@@ -247,76 +288,13 @@ def _fallback_activity(
                 answers.append(f"{i}. B")
             if include_mark_scheme:
                 mark_scheme.append(f"{i}. 1 mark for selecting the correct option.")
-
-    elif activity_type == "short_answer":
-        for i in range(1, count + 1):
-            items.append(f"{i}. Give a short response about {topic}.")
-            if include_answer_key:
-                answers.append(f"{i}. Accept any relevant and accurate response connected to {topic}.")
-            if include_mark_scheme:
-                mark_scheme.append(f"{i}. 1 mark for a relevant response.")
-
-    elif activity_type == "essay":
-        for i in range(1, count + 1):
-            items.append(f"{i}. Write a paragraph response about {topic}, using clear examples.")
-            if include_answer_key:
-                answers.append(f"{i}. Accept any well-developed and accurate response connected to {topic}.")
-            if include_mark_scheme:
-                mark_scheme.append(f"{i}. Award marks for relevance, development, accuracy, and clarity.")
-
-    elif activity_type == "case_study":
-        items = [
-            f"Case Study: Read the scenario below about {topic} and answer the questions that follow.",
-            f"1. Explain the main issue shown in the case study about {topic}.",
-            f"2. Identify two important details from the case study.",
-            f"3. Suggest one practical response or solution.",
-        ][:count]
-        if include_answer_key:
-            answers = [
-                "1. Accept a clear explanation of the main issue in the scenario.",
-                "2. Accept any two relevant and accurate details.",
-                "3. Accept any practical and relevant response.",
-            ][: len(items)]
-        if include_mark_scheme:
-            mark_scheme = [
-                "1. Award marks for a clear and relevant explanation.",
-                "2. Award marks for two accurate details.",
-                "3. Award marks for a practical and relevant suggestion.",
-            ][: len(items)]
-
-    elif activity_type == "exit_ticket":
-        for i in range(1, count + 1):
-            items.append(f"{i}. Give a brief answer related to {topic}.")
-            if include_answer_key:
-                answers.append(f"{i}. Accept a brief correct response related to {topic}.")
-            if include_mark_scheme:
-                mark_scheme.append(f"{i}. 1 mark for a correct response.")
-
-    elif activity_type == "homework_sheet":
-        for i in range(1, count + 1):
-            label = ""
-            if i <= max(2, count // 4):
-                label = "Starter: "
-            elif i == count:
-                label = "Challenge: "
-            items.append(f"{i}. {label}Complete a homework task related to {topic}.")
-            if include_answer_key:
-                answers.append(f"{i}. Accept any correct and relevant response or working.")
-            if include_mark_scheme:
-                mark_scheme.append(f"{i}. Award marks for accuracy, method, and completeness where relevant.")
-
     else:
         for i in range(1, count + 1):
-            label = ""
-            if i <= max(2, count // 4):
-                label = "Starter: "
-            elif i == count:
-                label = "Challenge: "
-            items.append(f"{i}. {label}Solve a problem related to {topic}. Show all working clearly.")
+            items.append(f"{i}. Complete a task related to {topic}.")
             if include_answer_key:
-                answers.append(f"{i}. Accept any correct worked solution related to {topic}, with clear method and correct final answer.")
+                answers.append(f"{i}. Accept any correct and relevant response related to {topic}.")
             if include_mark_scheme:
-                mark_scheme.append(f"{i}. Award marks for correct method, accurate working, and correct final answer.")
+                mark_scheme.append(f"{i}. Award marks for accuracy and relevance.")
 
     data: Dict[str, Any] = {
         "title": title,
@@ -377,62 +355,19 @@ def _clean_string(value: Any) -> str:
     return text.strip()
 
 
-def _ensure_numbered_items(items: List[str]) -> List[str]:
-    numbered: List[str] = []
-    for idx, item in enumerate(items, start=1):
-        clean = _clean_string(item)
-        if not clean:
-            continue
-        if re.match(rf"^{idx}\.\s", clean):
-            numbered.append(clean)
-        else:
-            numbered.append(f"{idx}. {clean}")
-    return numbered
-
-
-def _clean_student_instructions(items: List[str]) -> List[str]:
-    cleaned = [_clean_string(x) for x in items if _clean_string(x)]
-    result: List[str] = []
-
-    for item in cleaned:
-        if len(item) > 260 and ". " in item:
-            parts = [p.strip() for p in item.split(". ") if p.strip()]
-            for part in parts:
-                if not part.endswith("."):
-                    part = f"{part}."
-                result.append(part)
-        else:
-            result.append(item)
-
-    return result[:4]
-
-
-def _normalize_mcq_item(text: str, number: int) -> str:
-    clean = _clean_string(text)
-
-    clean = re.sub(r"^(\d+)\.\s*", "", clean).strip()
-
-    option_patterns = [
-        r"\s+A\.\s+",
-        r"\s+B\.\s+",
-        r"\s+C\.\s+",
-        r"\s+D\.\s+",
-    ]
-    markers = ["A.", "B.", "C.", "D."]
-
-    for pattern, marker in zip(option_patterns, markers):
-        clean = re.sub(pattern, f"\n   {marker} ", clean)
-
-    return f"{number}. {clean.strip()}"
-
-
 def _normalize_question_spacing(text: str, activity_type: str, number: int) -> str:
     clean = _clean_string(text)
     clean = re.sub(r"\s*\n\s*", "\n", clean)
     clean = re.sub(r"\n{3,}", "\n\n", clean)
 
+    if clean.startswith("Table:") or "|" in clean:
+        return clean
+
     if activity_type == "mcq":
-        return _normalize_mcq_item(clean, number)
+        clean = re.sub(r"^(\d+)\.\s*", "", clean).strip()
+        for marker in ["A.", "B.", "C.", "D."]:
+            clean = re.sub(rf"\s+{re.escape(marker)}\s+", f"\n   {marker} ", clean)
+        return f"{number}. {clean}"
 
     if re.match(rf"^{number}\.\s", clean):
         return clean
@@ -440,88 +375,10 @@ def _normalize_question_spacing(text: str, activity_type: str, number: int) -> s
     return f"{number}. {clean}"
 
 
-def _normalize_answer_key_item(text: str, number: int, activity_type: str) -> str:
+def _normalize_answer_key_item(text: str, number: int) -> str:
     clean = _clean_string(text)
     clean = re.sub(r"^(\d+)\.\s*", "", clean).strip()
-
-    if activity_type == "mcq":
-        clean = clean.replace(" - ", "\n   - ")
-        return f"{number}. {clean}"
-
-    step_markers = [
-        "Step 1:",
-        "Step 2:",
-        "Step 3:",
-        "Step 4:",
-        "Step 5:",
-    ]
-    for marker in step_markers:
-        clean = clean.replace(marker, f"\n{marker}")
-
-    clean = clean.replace(" Method:", "\nMethod:")
-    clean = clean.replace(" Steps:", "\nSteps:")
-    clean = clean.replace(" Final:", "\nFinal:")
-    clean = clean.replace(" Answer:", "\nAnswer:")
-
-    clean = re.sub(r"\n{3,}", "\n\n", clean).strip()
-
-    if not clean:
-        return f"{number}."
-
-    return f"{number}. {clean}"
-
-
-def _normalize_activity_json(data: Dict[str, Any], include_answer_key: bool, include_mark_scheme: bool, activity_type: str) -> Dict[str, Any]:
-    worksheet_items = [
-        _normalize_question_spacing(x, activity_type, idx)
-        for idx, x in enumerate(data.get("worksheet_items", []), start=1)
-        if _clean_string(x)
-    ]
-
-    answer_key_raw = data.get("answer_key", []) if include_answer_key else []
-    normalized_answers = [
-        _normalize_answer_key_item(item, idx, activity_type)
-        for idx, item in enumerate(answer_key_raw, start=1)
-        if _clean_string(item)
-    ]
-
-    normalized = {
-        "title": _clean_string(data.get("title", "Activity")),
-        "student_instructions": _clean_student_instructions(data.get("student_instructions", [])),
-        "worksheet_items": worksheet_items,
-        "answer_key": normalized_answers,
-    }
-
-    if include_mark_scheme:
-        normalized["mark_scheme"] = _ensure_numbered_items(data.get("mark_scheme", []))
-
-    if not include_answer_key:
-        normalized["answer_key"] = []
-
-    return normalized
-
-
-def _format_answer_key_item(text: str) -> str:
-    clean = _clean_string(text)
-
-    if "\n" not in clean:
-        return clean
-
-    parts = [part.strip() for part in clean.split("\n") if part.strip()]
-    if not parts:
-        return clean
-
-    first = parts[0]
-    rest = parts[1:]
-
-    if not rest:
-        return first
-
-    indented = [first]
-    for part in rest:
-        indented.append(f"   {part}")
-
-    return "\n".join(indented)
+    return f"{number}. {clean}" if clean else f"{number}."
 
 
 def _to_text(data: Dict[str, Any], include_mark_scheme: bool) -> str:
@@ -533,33 +390,34 @@ def _to_text(data: Dict[str, Any], include_mark_scheme: bool) -> str:
     if data.get("student_instructions"):
         lines.append("Student Instructions:")
         for item in data["student_instructions"]:
-            lines.append(f"- {item}")
+            lines.append(f"- {_clean_string(item)}")
         lines.append("")
 
     if data.get("worksheet_items"):
         lines.append("Questions:")
-        for item in data["worksheet_items"]:
-            lines.append(str(item))
+        for idx, item in enumerate(data["worksheet_items"], start=1):
+            normalized = _normalize_question_spacing(str(item), data.get("activity_type", ""), idx)
+            lines.append(normalized)
             lines.append("")
-        if lines and lines[-1] == "":
+        if lines[-1] == "":
             lines.pop()
 
     if data.get("answer_key"):
         lines.append("")
         lines.append("Answer Key:")
-        for item in data["answer_key"]:
-            lines.append(_format_answer_key_item(str(item)))
+        for idx, item in enumerate(data["answer_key"], start=1):
+            lines.append(_normalize_answer_key_item(str(item), idx))
             lines.append("")
-        if lines and lines[-1] == "":
+        if lines[-1] == "":
             lines.pop()
 
     if include_mark_scheme and data.get("mark_scheme"):
         lines.append("")
         lines.append("Mark Scheme:")
-        for item in data["mark_scheme"]:
-            lines.append(str(item))
+        for idx, item in enumerate(data["mark_scheme"], start=1):
+            lines.append(f"{idx}. {_clean_string(item)}")
             lines.append("")
-        if lines and lines[-1] == "":
+        if lines[-1] == "":
             lines.pop()
 
     return "\n".join(lines).strip()
@@ -584,6 +442,10 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
             objectives_text = "\n".join(f"- {obj}" for obj in ctx["objectives"])
 
     sections_text = json.dumps(ctx["sections"], indent=2) if ctx["sections"] else "{}"
+    table_rules = _force_table_instruction(
+        ctx["subject"],
+        ctx["topic"],
+    )
 
     prompt = PROMPT_TEMPLATE.format(
         mode=ctx["mode"],
@@ -604,6 +466,7 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
             ctx["grade_level"],
             ctx["curriculum"],
         ),
+        table_rules=table_rules,
     )
 
     try:
@@ -635,17 +498,14 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
     if not include_mark_scheme:
         data.pop("mark_scheme", None)
 
-    normalized = _normalize_activity_json(
-        data,
-        include_answer_key=include_answer_key,
-        include_mark_scheme=include_mark_scheme,
-        activity_type=activity_type,
-    )
+    data["activity_type"] = activity_type
+
+    content = _to_text(data, include_mark_scheme=include_mark_scheme)
 
     return {
-        "title": normalized.get("title", title),
+        "title": data.get("title", title),
         "activity_type": activity_type,
-        "content": _to_text(normalized, include_mark_scheme=include_mark_scheme),
+        "content": content,
         "lesson_snippet": "",
-        "raw": normalized,
+        "raw": data,
     }
