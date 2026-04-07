@@ -250,6 +250,7 @@ def _fallback_activity(
 ) -> Dict[str, Any]:
     topic = ctx.get("topic", "the topic")
     subject = ctx.get("subject", "the subject")
+    grade_level = ctx.get("grade_level", "")
     title = f"{ACTIVITY_LABELS.get(activity_type, 'Activity')} - {topic}"
 
     items: List[str] = []
@@ -266,21 +267,35 @@ def _fallback_activity(
             "Total Variable Cost | | | $650",
             "Fixed Cost | | | $150",
             "Total Cost | | | $800",
-            f"{count}. Calculate revenue and profit using the budget above."
-        ][:max(8, count)]
-
+        ]
+        while len(items) < count:
+            idx = len(items) - 7
+            items.append(f"{idx}. Use the budget table above to answer a question about revenue, total cost, or profit.")
         if include_answer_key:
             answers = [
-                "1. Use the table values provided.",
-                "2. Revenue = Price per unit × Quantity sold.",
+                "1. Use the cost figures shown in the table.",
+                "2. Revenue = Price per unit * Quantity sold.",
                 "3. Profit = Revenue - Total Cost.",
             ]
+        if include_mark_scheme:
+            mark_scheme = [
+                "1. Award marks for correct use of table values.",
+                "2. Award marks for correct formula and substitution.",
+                "3. Award marks for correct final answer.",
+            ]
+    elif activity_type == "math_problem_solving":
+        for i in range(1, count + 1):
+            items.append(f"{i}. Solve a problem related to {topic}. Show all working clearly.")
+            if include_answer_key:
+                answers.append(f"{i}. Accept a correct worked solution related to {topic}, with clear method and correct final answer.")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. Award marks for method, working, and correct final answer.")
     elif activity_type == "mcq":
         for i in range(1, count + 1):
             items.append(
-                f"{i}. Which statement best relates to {topic}?\n"
+                f"{i}. Which statement best relates to {topic} in {subject} for {grade_level}?\n"
                 f"   A. Unrelated idea\n"
-                f"   B. Correct idea about {topic}\n"
+                f"   B. Core idea about {topic}\n"
                 f"   C. Incorrect detail\n"
                 f"   D. Random option"
             )
@@ -288,19 +303,71 @@ def _fallback_activity(
                 answers.append(f"{i}. B")
             if include_mark_scheme:
                 mark_scheme.append(f"{i}. 1 mark for selecting the correct option.")
+    elif activity_type == "short_answer":
+        for i in range(1, count + 1):
+            items.append(f"{i}. Give a short response about {topic}.")
+            if include_answer_key:
+                answers.append(f"{i}. Accept any relevant and accurate response connected to {topic}.")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. 1 mark for a relevant response.")
+    elif activity_type == "essay":
+        for i in range(1, count + 1):
+            items.append(f"{i}. Write a paragraph response about {topic}, using clear examples.")
+            if include_answer_key:
+                answers.append(f"{i}. Accept any well-developed and accurate response connected to {topic}.")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. Award marks for relevance, development, accuracy, and clarity.")
+    elif activity_type == "case_study":
+        items = [
+            f"Case Study: Read the scenario below about {topic} and answer the questions that follow.",
+            f"1. Explain the main issue shown in the case study about {topic}.",
+            f"2. Identify two important details from the case study.",
+            f"3. Suggest one practical response or solution.",
+        ][:count]
+        if include_answer_key:
+            answers = [
+                "1. Accept a clear explanation of the main issue in the scenario.",
+                "2. Accept any two relevant and accurate details.",
+                "3. Accept any practical and relevant response.",
+            ][: len(items)]
+        if include_mark_scheme:
+            mark_scheme = [
+                "1. Award marks for a clear and relevant explanation.",
+                "2. Award marks for two accurate details.",
+                "3. Award marks for a practical and relevant suggestion.",
+            ][: len(items)]
+    elif activity_type == "exit_ticket":
+        for i in range(1, count + 1):
+            items.append(f"{i}. Give a brief answer related to {topic}.")
+            if include_answer_key:
+                answers.append(f"{i}. Accept a brief correct response related to {topic}.")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. 1 mark for a correct response.")
+    elif activity_type == "homework_sheet":
+        for i in range(1, count + 1):
+            label = ""
+            if i <= max(2, count // 4):
+                label = "Starter: "
+            elif i == count:
+                label = "Challenge: "
+            items.append(f"{i}. {label}Complete a homework task related to {topic}.")
+            if include_answer_key:
+                answers.append(f"{i}. Accept any correct and relevant response or working.")
+            if include_mark_scheme:
+                mark_scheme.append(f"{i}. Award marks for accuracy, method, and completeness where relevant.")
     else:
         for i in range(1, count + 1):
-            items.append(f"{i}. Complete a task related to {topic}.")
+            items.append(f"{i}. Write a short response about {topic} in {subject}.")
             if include_answer_key:
-                answers.append(f"{i}. Accept any correct and relevant response related to {topic}.")
+                answers.append(f"{i}. Accept a relevant answer connected to {topic}.")
             if include_mark_scheme:
-                mark_scheme.append(f"{i}. Award marks for accuracy and relevance.")
+                mark_scheme.append(f"{i}. Award 1 mark for a relevant and accurate response.")
 
     data: Dict[str, Any] = {
         "title": title,
         "student_instructions": [
             f"Complete this {ACTIVITY_LABELS.get(activity_type, 'activity').lower()} on {topic}.",
-            "Write clearly and follow the instructions for each question.",
+            "Write clearly and use full working where needed.",
         ],
         "worksheet_items": items,
         "answer_key": answers if include_answer_key else [],
@@ -381,6 +448,23 @@ def _normalize_answer_key_item(text: str, number: int) -> str:
     return f"{number}. {clean}" if clean else f"{number}."
 
 
+def _normalize_activity_json(data: Dict[str, Any], include_answer_key: bool, include_mark_scheme: bool) -> Dict[str, Any]:
+    normalized = {
+        "title": _clean_string(data.get("title", "Activity")),
+        "student_instructions": [_clean_string(x) for x in data.get("student_instructions", []) if _clean_string(x)],
+        "worksheet_items": [_clean_string(x) for x in data.get("worksheet_items", []) if _clean_string(x)],
+        "answer_key": [_clean_string(x) for x in data.get("answer_key", []) if _clean_string(x)],
+    }
+
+    if include_mark_scheme:
+        normalized["mark_scheme"] = [_clean_string(x) for x in data.get("mark_scheme", []) if _clean_string(x)]
+
+    if not include_answer_key:
+        normalized["answer_key"] = []
+
+    return normalized
+
+
 def _to_text(data: Dict[str, Any], include_mark_scheme: bool) -> str:
     lines: List[str] = []
 
@@ -399,7 +483,7 @@ def _to_text(data: Dict[str, Any], include_mark_scheme: bool) -> str:
             normalized = _normalize_question_spacing(str(item), data.get("activity_type", ""), idx)
             lines.append(normalized)
             lines.append("")
-        if lines[-1] == "":
+        if lines and lines[-1] == "":
             lines.pop()
 
     if data.get("answer_key"):
@@ -408,7 +492,7 @@ def _to_text(data: Dict[str, Any], include_mark_scheme: bool) -> str:
         for idx, item in enumerate(data["answer_key"], start=1):
             lines.append(_normalize_answer_key_item(str(item), idx))
             lines.append("")
-        if lines[-1] == "":
+        if lines and lines[-1] == "":
             lines.pop()
 
     if include_mark_scheme and data.get("mark_scheme"):
@@ -417,7 +501,7 @@ def _to_text(data: Dict[str, Any], include_mark_scheme: bool) -> str:
         for idx, item in enumerate(data["mark_scheme"], start=1):
             lines.append(f"{idx}. {_clean_string(item)}")
             lines.append("")
-        if lines[-1] == "":
+        if lines and lines[-1] == "":
             lines.pop()
 
     return "\n".join(lines).strip()
@@ -442,10 +526,6 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
             objectives_text = "\n".join(f"- {obj}" for obj in ctx["objectives"])
 
     sections_text = json.dumps(ctx["sections"], indent=2) if ctx["sections"] else "{}"
-    table_rules = _force_table_instruction(
-        ctx["subject"],
-        ctx["topic"],
-    )
 
     prompt = PROMPT_TEMPLATE.format(
         mode=ctx["mode"],
@@ -466,7 +546,10 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
             ctx["grade_level"],
             ctx["curriculum"],
         ),
-        table_rules=table_rules,
+        table_rules=_force_table_instruction(
+            ctx["subject"],
+            ctx["topic"],
+        ),
     )
 
     try:
@@ -486,6 +569,7 @@ def generate_activity(payload: Dict[str, Any]) -> Dict[str, Any]:
             if start != -1 and end != -1 and end > start:
                 raw_text = raw_text[start : end + 1]
             data = json.loads(raw_text)
+            data = _normalize_activity_json(data, include_answer_key, include_mark_scheme)
         except Exception:
             data = _fallback_activity(ctx, activity_type, count, include_answer_key, include_mark_scheme)
 

@@ -202,7 +202,9 @@ def export_to_docx(title: str, content: str):
                 table.style = "Table Grid"
 
                 for j, cell in enumerate(rows[0]):
-                    run = table.rows[0].cells[j].paragraphs[0].add_run(cell)
+                    paragraph = table.rows[0].cells[j].paragraphs[0]
+                    paragraph.clear()
+                    run = paragraph.add_run(cell)
                     run.bold = True
 
                 for row in rows[1:]:

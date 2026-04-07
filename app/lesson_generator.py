@@ -66,22 +66,6 @@ def _clean_math_text(text: str) -> str:
     return cleaned.strip()
 
 
-def _inject_table_examples(subject: str, topic: str) -> str:
-    s = (subject or "").lower()
-
-    if s in {"business basics", "accounts", "accounting", "agriculture"}:
-        return f"""
-If including calculations, budgets, or cost breakdowns for {topic}, format like:
-
-Table: Example
-Item | Qty | Unit price | Cost
-Example item | 2 | $5 | $10
-
-Then show calculations below clearly.
-"""
-    return ""
-
-
 def _clean_math_list(items):
     if not isinstance(items, list):
         return items
@@ -183,6 +167,8 @@ def _looks_like_math_working(text: str) -> bool:
         "moles =",
         "speed =",
         "density =",
+        "profit =",
+        "revenue =",
     ]
     return any(token in t for token in triggers)
 
@@ -198,7 +184,6 @@ def _format_math_steps(text: str) -> str:
     if not _looks_like_math_working(text):
         return text
 
-    # Prepare breakpoints for common working lines
     working = text
     working = working.replace("=>", "\n")
     working = re.sub(r"\bthen\b", "\nThen ", working, flags=re.IGNORECASE)
@@ -232,16 +217,6 @@ def _format_math_steps(text: str) -> str:
             formatted.append(f"{step}. Simplify: {part[len('Simplify:'):].strip()}")
         elif lower.startswith("answer:"):
             formatted.append(f"{step}. Answer: {part[len('Answer:'):].strip()}")
-        elif lower.startswith("then "):
-            formatted.append(f"{step}. {part}")
-        elif lower.startswith("so "):
-            formatted.append(f"{step}. {part}")
-        elif lower.startswith("therefore "):
-            formatted.append(f"{step}. {part}")
-        elif lower.startswith("step "):
-            formatted.append(f"{step}. {part}")
-        elif "=" in part or "±" in part or "√" in part or "^2" in part:
-            formatted.append(f"{step}. {part}")
         else:
             formatted.append(f"{step}. {part}")
 
@@ -257,6 +232,28 @@ def _format_math_list(items: List[str]) -> List[str]:
         if clean:
             formatted.append(_format_math_steps(clean))
     return formatted
+
+
+def _inject_table_examples(subject: str, topic: str) -> str:
+    s = (subject or "").strip().lower()
+    if s in {"business basics", "accounts", "accounting", "agricultural science", "agriculture"}:
+        return f"""
+If including calculations, budgets, cost breakdowns, revenue, profit, or farming inputs for {topic}, format like this:
+
+Table: Sample budget
+Item | Qty | Unit price | Cost
+Seed | 10 kg | $20/kg | $200
+Fertiliser | 5 bags | $50/bag | $250
+Labour | 20 hours | $10/hour | $200
+Total Variable Cost | | | $650
+Fixed Cost | | | $150
+Total Cost | | | $800
+
+Then write calculation lines below the table, for example:
+Revenue = Price per unit * Quantity sold
+Profit = Revenue - Total Cost
+"""
+    return ""
 
 
 def _prior_questions(topic: str, subject: str, difficulty: str) -> List[str]:
@@ -419,6 +416,7 @@ def _build_4c_sections(topic: str, subject: str, lesson_type: str, difficulty: s
         communication[0] = f"Students explain choices, behaviours, movement skills, or health ideas connected to {topic}."
     elif group == "enterprise":
         critical_thinking[0] = f"Students analyse a practical money, business, or entrepreneurial situation related to {topic}."
+        collaboration[0] = f"Students examine a budget, cost table, or enterprise scenario linked to {topic}."
     elif group == "creative_arts":
         creativity[1] = f"Students explore ways to express ideas about {topic} through creative or performance-based responses."
 
@@ -492,15 +490,16 @@ def _build_5e_sections(topic: str, subject: str, lesson_type: str, difficulty: s
         explanation[0] = f"Teacher clarifies the process, system, design ideas, or technical vocabulary related to {topic}."
     elif group == "agriculture":
         engagement[0] = f"Use photos, farm scenarios, local examples, samples, or sorting activities to introduce {topic}."
-        exploration[0] = f"Students examine examples, images, fact cards, or comparison charts linked to {topic}, with emphasis on Caribbean agriculture."
-        explanation[0] = f"Teacher clarifies important terms, characteristics, and practical agricultural uses linked to {topic}."
+        exploration[0] = f"Students examine examples, images, fact cards, comparison charts, or costing tables linked to {topic}, with emphasis on Caribbean agriculture."
+        explanation[0] = f"Teacher clarifies important terms, characteristics, practical agricultural uses, and any cost or input tables linked to {topic}."
         extension[0] = f"Students apply learning on {topic} to Caribbean farming needs, management choices, or small-scale enterprise ideas."
     elif group == "wellness_life":
         exploration[0] = f"Students explore {topic} through scenarios, demonstrations, movement tasks, reflection prompts, or guided discussion."
         explanation[0] = f"Teacher clarifies healthy choices, safe practice, social skills, or life skills related to {topic}."
     elif group == "enterprise":
-        exploration[0] = f"Students explore {topic} through simple enterprise, budgeting, planning, or decision-making tasks."
-        explanation[0] = f"Teacher clarifies key business, money, or entrepreneurship ideas related to {topic}."
+        exploration[0] = f"Students explore {topic} through simple enterprise, budgeting, planning, decision-making tasks, or cost tables."
+        explanation[0] = f"Teacher clarifies key business, money, entrepreneurship ideas, and any table-based examples related to {topic}."
+        evaluation[0] = f"Use a budget table, costing example, mini quiz, oral questioning, or short applied task to assess understanding of {topic}."
     elif group == "creative_arts":
         exploration[0] = f"Students explore {topic} through performance, art-making, listening, viewing, rehearsal, or creative response."
         explanation[0] = f"Teacher clarifies the techniques, vocabulary, and creative choices linked to {topic}."
@@ -555,11 +554,11 @@ def _build_reflection(topic: str, subject: str, difficulty: str) -> List[str]:
     elif group == "technology_design":
         reflection.append(f"Were students able to apply practical thinking, design steps, digital skills, or safe procedures related to {topic}?")
     elif group == "agriculture":
-        reflection.append(f"Were students able to connect the content to Caribbean agriculture, safe practice, or farm decision-making?")
+        reflection.append(f"Were students able to connect the content to Caribbean agriculture, safe practice, costing, or farm decision-making?")
     elif group == "wellness_life":
         reflection.append(f"Were students able to relate {topic} to healthy living, safe practice, personal development, or responsible behaviour?")
     elif group == "enterprise":
-        reflection.append(f"Were students able to apply {topic} to practical business, money, or entrepreneurial situations?")
+        reflection.append(f"Were students able to apply {topic} to practical business, money, budgeting, or entrepreneurial situations?")
     elif group == "creative_arts":
         reflection.append(f"Were students able to express ideas creatively and use techniques, skills, or performance choices related to {topic}?")
 
@@ -824,6 +823,7 @@ def generate_lesson(payload: dict) -> dict:
             objectives=objective_text,
             strand=match.get("strand", "General Strand"),
             resource_suggestions=fallback_resources,
+            table_rules=_inject_table_examples(payload["subject"], payload["topic"]),
         )
 
         if ai_parts:
