@@ -189,6 +189,7 @@ Formatting rules for output:
 - each answer_key item must begin with the matching number, e.g. "1. ..."
 - keep answer_key concise and readable
 - if worked solutions are needed, use short clear step lines
+- for mixed ability worksheets, include a sensible progression from accessible to standard to challenge items
 - if activity_type is MCQ, include options inside worksheet_items
 - if activity_type is math_problem_solving, use plain-text mathematical notation only
 - do not output markdown
@@ -236,7 +237,12 @@ def _fallback_activity(
 
     if activity_type == "math_problem_solving":
         for i in range(1, count + 1):
-            items.append(f"{i}. Solve a problem related to {topic}. Show all working clearly.")
+            label = ""
+            if i <= max(2, count // 4):
+                label = "Starter: "
+            elif i == count:
+                label = "Challenge: "
+            items.append(f"{i}. {label}Solve a problem related to {topic}. Show all working clearly.")
             if include_answer_key:
                 answers.append(f"{i}. Accept any correct worked solution related to {topic}, with clear method and correct final answer.")
             if include_mark_scheme:
@@ -344,12 +350,74 @@ def _ensure_numbered_items(items: List[str]) -> List[str]:
     return numbered
 
 
+def _clean_student_instructions(items: List[str]) -> List[str]:
+    cleaned = [_clean_string(x) for x in items if _clean_string(x)]
+    result: List[str] = []
+
+    for item in cleaned:
+        if len(item) > 260 and ". " in item:
+            parts = [p.strip() for p in item.split(". ") if p.strip()]
+            for part in parts:
+                if not part.endswith("."):
+                    part = f"{part}."
+                result.append(part)
+        else:
+            result.append(item)
+
+    return result[:4]
+
+
+def _normalize_question_spacing(text: str) -> str:
+    clean = _clean_string(text)
+    clean = re.sub(r"\s*\n\s*", "\n", clean)
+    clean = re.sub(r"\n{3,}", "\n\n", clean)
+    return clean.strip()
+
+
+def _normalize_answer_key_item(text: str, number: int) -> str:
+    clean = _clean_string(text)
+
+    clean = re.sub(r"^(\d+)\.\s*", "", clean).strip()
+
+    step_markers = [
+        "Step 1:",
+        "Step 2:",
+        "Step 3:",
+        "Step 4:",
+        "Step 5:",
+    ]
+    for marker in step_markers:
+        clean = clean.replace(marker, f"\n{marker}")
+
+    clean = clean.replace(" Method:", "\nMethod:")
+    clean = clean.replace(" Steps:", "\nSteps:")
+    clean = clean.replace(" Final:", "\nFinal:")
+    clean = clean.replace(" Answer:", "\nAnswer:")
+
+    clean = re.sub(r"\n{3,}", "\n\n", clean).strip()
+
+    if not clean:
+        return f"{number}."
+
+    return f"{number}. {clean}"
+
+
 def _normalize_activity_json(data: Dict[str, Any], include_answer_key: bool, include_mark_scheme: bool) -> Dict[str, Any]:
+    worksheet_items = [_normalize_question_spacing(x) for x in data.get("worksheet_items", []) if _clean_string(x)]
+    worksheet_items = _ensure_numbered_items(worksheet_items)
+
+    answer_key_raw = data.get("answer_key", []) if include_answer_key else []
+    normalized_answers = [
+        _normalize_answer_key_item(item, idx)
+        for idx, item in enumerate(answer_key_raw, start=1)
+        if _clean_string(item)
+    ]
+
     normalized = {
         "title": _clean_string(data.get("title", "Activity")),
-        "student_instructions": [_clean_string(x) for x in data.get("student_instructions", []) if _clean_string(x)],
-        "worksheet_items": _ensure_numbered_items(data.get("worksheet_items", [])),
-        "answer_key": _ensure_numbered_items(data.get("answer_key", [])),
+        "student_instructions": _clean_student_instructions(data.get("student_instructions", [])),
+        "worksheet_items": worksheet_items,
+        "answer_key": normalized_answers,
     }
 
     if include_mark_scheme:
@@ -379,10 +447,7 @@ def _format_answer_key_item(text: str) -> str:
 
     indented = [first]
     for part in rest:
-        if re.match(r"^Step\s*\d+[:.]", part, flags=re.IGNORECASE):
-            indented.append(f"   {part}")
-        else:
-            indented.append(f"   {part}")
+        indented.append(f"   {part}")
 
     return "\n".join(indented)
 
