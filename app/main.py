@@ -539,8 +539,6 @@ def lesson_generate(request: Request, payload: LessonRequest):
     payload_data = payload.model_dump()
     payload_data["teacher_profile"] = profile
 
-    # Explicit builder values always win.
-    # Profile is only a fallback if user leaves a field blank.
     if not payload_data.get("curriculum") and profile.get("curriculum"):
         payload_data["curriculum"] = profile["curriculum"]
 
@@ -664,7 +662,7 @@ def export_docx(request: Request, payload: ExportRequest):
 
 
 @app.post("/api/export/pdf")
-def export_pdf(request: Request, payload: dict):
+def export_pdf(request: Request, payload: ExportRequest):
     user = require_user(request)
 
     if not can_export_pdf(user):
@@ -673,15 +671,14 @@ def export_pdf(request: Request, payload: dict):
             detail="PDF export is not available on your current plan.",
         )
 
-    html = payload.get("html")
-    if not html:
+    if not payload.content:
         raise HTTPException(
             status_code=400,
-            detail="No rendered content provided for export.",
+            detail="No content provided for export.",
         )
 
     try:
-        path = export_to_pdf(html)
+        path = export_to_pdf(payload.title, payload.content)
         return FileResponse(
             path,
             media_type="application/pdf",
