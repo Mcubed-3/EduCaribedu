@@ -1168,3 +1168,4 @@ async function init() {
     setStatus(`Failed to load app config: ${e.message}`, "error");
   }
 }
+document.addEventListener("DOMContentLoaded", init);
