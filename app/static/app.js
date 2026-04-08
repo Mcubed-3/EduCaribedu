@@ -2,6 +2,23 @@ let currentLessonData = null;
 let currentUserContext = null;
 let currentActivityText = "";
 
+// ==========================
+// 🔥 GUEST MODE (ADD THIS)
+// ==========================
+function getGuestGenerations() {
+  return parseInt(localStorage.getItem("guest_generations") || "0");
+}
+
+function incrementGuestGenerations() {
+  const count = getGuestGenerations() + 1;
+  localStorage.setItem("guest_generations", count);
+}
+
+function isGuestLimitReached() {
+  return getGuestGenerations() >= 2;
+}
+// ==========================
+
 function byId(id) {
   return document.getElementById(id);
 }
@@ -981,6 +998,13 @@ async function init() {
     const lessonForm = byId("lessonForm");
     lessonForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
+
+      // 🔒 GUEST LIMIT CHECK
+      if (!currentUserContext && isGuestLimitReached()) {
+        showUpgradeModal();
+        return;
+      }
+
       setStatus("Generating lesson plan...");
       try {
         const data = await fetchJSON("/api/lesson/generate", {
@@ -992,6 +1016,10 @@ async function init() {
         if (currentLessonId) currentLessonId.value = "";
 
         renderLesson(data);
+      // 🔥 increment guest usage AFTER success
+      if (!currentUserContext) {
+        incrementGuestGenerations();
+      }
         await loadCurrentUserContext();
         await loadDashboardSummary();
         scrollToBuilder();
