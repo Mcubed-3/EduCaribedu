@@ -484,7 +484,6 @@ def config(request: Request):
         "profile": profile,
     }
 
-
 @app.get("/api/feedback")
 def feedback_list(request: Request):
     user = require_user(request)
