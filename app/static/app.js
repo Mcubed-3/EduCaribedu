@@ -177,6 +177,14 @@ async function loadCurrentUserContext() {
   }
 }
 
+function isAuthenticatedUser() {
+  return !!(
+    currentUserContext &&
+    currentUserContext.user &&
+    currentUserContext.user.role !== "guest"
+  );
+}
+
 function isDocxLocked() {
   return !(currentUserContext?.plan_status?.docx_export);
 }
@@ -186,7 +194,7 @@ function canGenerateActivities() {
 }
 
 function updateGuestGenerationDisplay() {
-  if (currentUserContext) return;
+  if (isAuthenticatedUser()) return;
 
   const used = getGuestGenerations();
   const limit = 2;
@@ -1014,7 +1022,7 @@ async function init() {
     await loadCurrentUserContext();
     await loadConfig();
 
-    if (currentUserContext) {
+    if (isAuthenticatedUser()) {
       await loadSavedLessons();
       await loadDashboardSummary();
     } else {
@@ -1040,7 +1048,7 @@ async function init() {
     lessonForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      if (!currentUserContext && isGuestLimitReached()) {
+      if (!isAuthenticatedUser() && isGuestLimitReached()) {
         showUpgradeModal();
         return;
       }
@@ -1061,13 +1069,13 @@ async function init() {
 
         renderLesson(data);
 
-        if (!currentUserContext) {
+        if (!isAuthenticatedUser()) {
           incrementGuestGenerations();
           updateGuestGenerationDisplay();
         }
 
         await loadCurrentUserContext();
-        if (currentUserContext) {
+        if (isAuthenticatedUser()) {
           await loadDashboardSummary();
         }
 
@@ -1108,7 +1116,7 @@ async function init() {
     byId("refreshLessonsBtn")?.addEventListener("click", async () => {
       try {
         await loadCurrentUserContext();
-        if (currentUserContext) {
+        if (isAuthenticatedUser()) {
           await loadSavedLessons();
           await loadDashboardSummary();
         }
