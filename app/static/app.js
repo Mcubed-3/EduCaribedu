@@ -992,20 +992,38 @@ async function init() {
   try {
     await loadCurrentUserContext();
     await loadConfig();
-    await loadSavedLessons();
-    await loadDashboardSummary();
+
+    if (currentUserContext) {
+      await loadSavedLessons();
+      await loadDashboardSummary();
+    } else {
+      const savedLessonsList = byId("savedLessonsList");
+      if (savedLessonsList) {
+        savedLessonsList.innerHTML = "<p class='muted'>Create a free account to save lessons.</p>";
+      }
+
+      const recentLessonsList = byId("recentLessonsList");
+      if (recentLessonsList) {
+        recentLessonsList.innerHTML = "<p class='muted'>Recent lessons are available after signup.</p>";
+      }
+
+      const savedCount = byId("savedCount");
+      if (savedCount) {
+        savedCount.textContent = "0";
+      }
+    }
 
     const lessonForm = byId("lessonForm");
     lessonForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      // 🔒 GUEST LIMIT CHECK
       if (!currentUserContext && isGuestLimitReached()) {
         showUpgradeModal();
         return;
       }
 
       setStatus("Generating lesson plan...");
+
       try {
         const data = await fetchJSON("/api/lesson/generate", {
           method: "POST",
@@ -1014,16 +1032,21 @@ async function init() {
           },
           body: JSON.stringify(formPayload()),
         });
+
         const currentLessonId = byId("currentLessonId");
         if (currentLessonId) currentLessonId.value = "";
 
         renderLesson(data);
-      // 🔥 increment guest usage AFTER success
-      if (!currentUserContext) {
-        incrementGuestGenerations();
-      }
+
+        if (!currentUserContext) {
+          incrementGuestGenerations();
+        }
+
         await loadCurrentUserContext();
-        await loadDashboardSummary();
+        if (currentUserContext) {
+          await loadDashboardSummary();
+        }
+
         scrollToBuilder();
 
         if (typeof gtag === "function") {
@@ -1035,14 +1058,118 @@ async function init() {
 
         setStatus("Lesson plan generated.", "success");
       } catch (e) {
-        if ((e.message || "").toLowerCase().includes("monthly lesson generation limit")) {
-          setStatus("Free limit reached.", "error");
+        const msg = (e.message || "").toLowerCase();
+
+        if (msg.includes("guest limit reached") || msg.includes("monthly lesson generation limit")) {
           showUpgradeModal();
           return;
         }
+
         setStatus(e.message, "error");
       }
     });
+
+    byId("saveLessonBtn")?.addEventListener("click", saveCurrentLesson);
+    byId("updateLessonBtn")?.addEventListener("click", updateCurrentLesson);
+    byId("toggleEditBtn")?.addEventListener("click", toggleEditMode);
+
+    byId("output")?.addEventListener("input", () => {
+      const output = byId("output");
+      if (output) output.value = cleanupMathForEditMode(output.value);
+    });
+
+    byId("activityOutput")?.addEventListener("input", () => {
+      const output = byId("activityOutput");
+      if (output) output.value = cleanupMathForEditMode(output.value);
+    });
+
+    byId("refreshLessonsBtn")?.addEventListener("click", async () => {
+      try {
+        await loadCurrentUserContext();
+        if (currentUserContext) {
+          await loadSavedLessons();
+          await loadDashboardSummary();
+        }
+        setStatus("Workspace refreshed.", "success");
+      } catch (e) {
+        setStatus(e.message, "error");
+      }
+    });
+
+    byId("exportDocxBtn")?.addEventListener("click", async () => {
+      try {
+        await downloadLessonExport("docx");
+      } catch (e) {
+        setStatus(e.message, "error");
+      }
+    });
+
+    byId("exportPdfBtn")?.addEventListener("click", async () => {
+      try {
+        await downloadLessonExport("pdf");
+      } catch (e) {
+        setStatus(e.message, "error");
+      }
+    });
+
+    byId("generateActivityBtn")?.addEventListener("click", generateActivity);
+    byId("insertActivitySnippetBtn")?.addEventListener("click", insertActivitySnippetIntoLesson);
+
+    byId("exportActivityPdfBtn")?.addEventListener("click", async () => {
+      try {
+        await downloadActivityExport("pdf");
+      } catch (e) {
+        setStatus(e.message, "error");
+      }
+    });
+
+    byId("exportActivityDocxBtn")?.addEventListener("click", async () => {
+      try {
+        await downloadActivityExport("docx");
+      } catch (e) {
+        setStatus(e.message, "error");
+      }
+    });
+
+    byId("newLessonBtn")?.addEventListener("click", () => {
+      clearBuilderForm();
+      scrollToBuilder();
+    });
+
+    byId("heroNewLessonBtn")?.addEventListener("click", () => {
+      clearBuilderForm();
+      scrollToBuilder();
+    });
+
+    byId("activity_source_mode")?.addEventListener("change", updateActivityModeUI);
+
+    byId("saveProfileBtn")?.addEventListener("click", saveProfileFromModal);
+    byId("closeProfileModal")?.addEventListener("click", hideProfileModal);
+    byId("editProfileSidebarBtn")?.addEventListener("click", () => {
+      populateProfileModal(currentUserContext?.profile || {});
+      showProfileModal();
+    });
+    byId("editProfileBannerBtn")?.addEventListener("click", () => {
+      populateProfileModal(currentUserContext?.profile || {});
+      showProfileModal();
+    });
+
+    byId("closeUpgradeModal")?.addEventListener("click", hideUpgradeModal);
+    byId("dismissUpgradeModal")?.addEventListener("click", hideUpgradeModal);
+
+    const output = byId("output");
+    if (output) output.readOnly = true;
+
+    updateActivityModeUI();
+    hidePreviewBlocks();
+    syncLessonPreviewToText();
+    syncActivityPreviewToText();
+    setStatus("Ready.");
+  } catch (e) {
+    console.error("Init failed:", e);
+    setStatus(`Failed to load app config: ${e.message}`, "error");
+  }
+}
 
     byId("saveLessonBtn")?.addEventListener("click", saveCurrentLesson);
     byId("updateLessonBtn")?.addEventListener("click", updateCurrentLesson);
@@ -1102,6 +1229,11 @@ async function init() {
       } catch (e) {
         setStatus(e.message, "error");
       }
+    });
+
+    byId("newLessonBtn")?.addEventListener("click", () => {
+      clearBuilderForm();
+      scrollToBuilder();
     });
 
     byId("newLessonBtn")?.addEventListener("click", () => {
