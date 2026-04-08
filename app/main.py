@@ -412,10 +412,53 @@ def admin_users_page(request: Request):
 
 @app.get("/api/me")
 def me(request: Request):
-    user = require_user(request)
+    user = get_current_user_optional(request)
+
+    if not user:
+        return {
+            "user": {
+                "email": "",
+                "role": "guest",
+                "plan": "guest",
+            },
+            "profile": {},
+            "plan_status": {
+                "plan": "guest",
+                "role": "guest",
+                "subscription_status": "guest",
+                "payment_provider": "",
+                "monthly_generations": {
+                    "used": 0,
+                    "limit": 2,
+                    "remaining": 2,
+                    "allowed": True,
+                },
+                "saved_lessons": {
+                    "used": 0,
+                    "limit": 0,
+                    "remaining": 0,
+                    "allowed": False,
+                },
+                "activity_generations": {
+                    "used": 0,
+                    "limit": 0,
+                    "remaining": 0,
+                    "allowed": False,
+                },
+                "docx_export": False,
+                "pdf_export": True,
+                "ads_enabled": True,
+                "activity_generation": False,
+            },
+        }
+
     saved_count = len(list_lessons(user["email"]))
-    profile = get_user_profile(user["id"]) if user else {}
-    return {"user": user, "profile": profile, "plan_status": get_plan_status(user, saved_count)}
+    profile = get_user_profile(user["id"])
+    return {
+        "user": user,
+        "profile": profile,
+        "plan_status": get_plan_status(user, saved_count),
+    }
 
 
 @app.get("/api/profile")
