@@ -1009,9 +1009,11 @@ async function init() {
       try {
         const data = await fetchJSON("/api/lesson/generate", {
           method: "POST",
+          headers: {
+            "X-Guest-Count": getGuestGenerations()
+          },
           body: JSON.stringify(formPayload()),
         });
-
         const currentLessonId = byId("currentLessonId");
         if (currentLessonId) currentLessonId.value = "";
 

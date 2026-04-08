@@ -157,18 +157,40 @@ def ads_txt():
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     user = get_current_user(request)
-    if not user:
-        return RedirectResponse(url="/login", status_code=302)
 
-    dashboard = _dashboard_summary(user["email"])
-    plan_status = get_plan_status(user, dashboard["saved_count"])
+    if user:
+        dashboard = _dashboard_summary(user["email"])
+        plan_status = get_plan_status(user, dashboard["saved_count"])
+    else:
+        dashboard = {
+            "saved_count": 0,
+            "framework_count": 0,
+            "subject_count": 0,
+            "curriculum_count": 0,
+            "level_count": 0,
+            "subjects": [],
+            "recent_lessons": [],
+        }
+        plan_status = {
+            "monthly_generations": {"used": 0, "limit": 2},
+            "saved_lessons": {"used": 0, "limit": 0},
+            "docx_export": False,
+            "pdf_export": False,
+            "activity_generation": False,
+            "ads_enabled": True,
+            "subscription_status": "guest",
+        }
 
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
             "dashboard": dashboard,
-            "current_user": user,
+            "current_user": user or {
+                "email": "",
+                "role": "guest",
+                "plan": "guest",
+            },
             "plan_status": plan_status,
             "site_url": "https://educaribedu.org",
         },
@@ -423,8 +445,8 @@ def dashboard_data(request: Request):
 
 @app.get("/api/config")
 def config(request: Request):
-    user = require_user(request)
-    profile = get_user_profile(user["id"])
+    user = get_current_user_optional(request)
+    profile = get_user_profile(user["id"]) if user else {}
 
     subjects = sorted({
         item.get("subject", "").strip()
