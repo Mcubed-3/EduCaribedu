@@ -541,16 +541,16 @@ def lesson_generate(request: Request, payload: LessonRequest):
         if guest_count >= 2:
             raise HTTPException(status_code=403, detail="Guest limit reached")
     if user:
-    usage = can_generate_lessons(user)
+        usage = can_generate_lessons(user)
 
-    if not usage["allowed"]:
-        raise HTTPException(
-            status_code=403,
-            detail=f"Monthly lesson generation limit reached for your {user['plan']} plan.",
-        )
+        if not usage["allowed"]:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Monthly lesson generation limit reached for your {user['plan']} plan.",
+            )
             
 
-    profile = get_user_profile(user["id"])
+    profile = get_user_profile(user["id"]) if user else {}
     payload_data = payload.model_dump()
     payload_data["teacher_profile"] = profile
 
