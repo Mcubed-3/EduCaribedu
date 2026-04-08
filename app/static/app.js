@@ -876,6 +876,14 @@ async function generateActivity() {
 
     syncActivityPreviewToText();
     await loadCurrentUserContext();
+
+    if (typeof gtag === "function") {
+      gtag("event", "generate_activity", {
+        event_category: "engagement",
+        event_label: "activity_generated",
+      });
+    }
+
     setStatus("Activity generated.", "success");
   } catch (e) {
     if ((e.message || "").toLowerCase().includes("plus")) {
@@ -987,6 +995,14 @@ async function init() {
         await loadCurrentUserContext();
         await loadDashboardSummary();
         scrollToBuilder();
+
+        if (typeof gtag === "function") {
+          gtag("event", "generate_lesson", {
+            event_category: "engagement",
+            event_label: "lesson_generated",
+          });
+        }
+
         setStatus("Lesson plan generated.", "success");
       } catch (e) {
         if ((e.message || "").toLowerCase().includes("monthly lesson generation limit")) {

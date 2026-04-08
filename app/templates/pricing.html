@@ -20,6 +20,37 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6817907304188010"
      crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/static/styles.css" />
+  <!-- Google Analytics + Consent Mode -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EN7H098QM8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+
+    gtag('consent', 'default', {
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      functionality_storage: 'granted',
+      security_storage: 'granted',
+      wait_for_update: 500
+    });
+
+    try {
+      const savedConsent = localStorage.getItem('educarib_cookie_consent');
+      if (savedConsent === 'accepted') {
+        gtag('consent', 'update', {
+          analytics_storage: 'granted',
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied'
+        });
+      }
+    } catch (e) {}
+
+    gtag('js', new Date());
+    gtag('config', 'G-EN7H098QM8');
+  </script>
 </head>
 <body class="pricing-body">
   <div class="pricing-shell">
@@ -179,5 +210,73 @@
   </div>
 
   <script src="/static/pricing.js"></script>
+  <div id="cookieBanner" style="position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:980px;margin:0 auto;background:#111827;color:#ffffff;padding:16px 18px;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.24);display:none;">
+    <div style="display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;">
+      <div style="flex:1;min-width:240px;line-height:1.5;">
+        <strong style="display:block;margin-bottom:6px;">Cookie notice</strong>
+        <span>EduCarib AI uses cookies for analytics so we can understand site usage and improve the platform. Read our <a href="/privacy" style="color:#93c5fd;text-decoration:underline;">Privacy Policy</a>.</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button type="button" onclick="rejectEduCaribCookies()" style="border:1px solid #4b5563;background:transparent;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;">Only necessary</button>
+        <button type="button" onclick="acceptEduCaribCookies()" style="border:none;background:#2563eb;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600;">Accept analytics</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const banner = document.getElementById('cookieBanner');
+      if (!banner) return;
+
+      function hideBanner() {
+        banner.style.display = 'none';
+      }
+
+      function showBanner() {
+        banner.style.display = 'block';
+      }
+
+      window.acceptEduCaribCookies = function () {
+        try {
+          localStorage.setItem('educarib_cookie_consent', 'accepted');
+        } catch (e) {}
+        if (typeof gtag === 'function') {
+          gtag('consent', 'update', {
+            analytics_storage: 'granted',
+            ad_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied'
+          });
+        }
+        hideBanner();
+      };
+
+      window.rejectEduCaribCookies = function () {
+        try {
+          localStorage.setItem('educarib_cookie_consent', 'rejected');
+        } catch (e) {}
+        if (typeof gtag === 'function') {
+          gtag('consent', 'update', {
+            analytics_storage: 'denied',
+            ad_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied'
+          });
+        }
+        hideBanner();
+      };
+
+      let savedConsent = null;
+      try {
+        savedConsent = localStorage.getItem('educarib_cookie_consent');
+      } catch (e) {}
+
+      if (!savedConsent) {
+        showBanner();
+      } else {
+        hideBanner();
+      }
+    })();
+  </script>
 </body>
 </html>

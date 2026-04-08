@@ -52,6 +52,13 @@ async function changePlan(plan) {
 async function startStripeCheckout(targetPlan) {
   setPricingStatus(`Redirecting to Stripe for ${targetPlan}...`);
 
+  if (typeof gtag === "function") {
+    gtag("event", "begin_checkout", {
+      event_category: "conversion",
+      event_label: targetPlan,
+    });
+  }
+
   try {
     const data = await fetchJSON("/api/stripe/create-checkout-session", {
       method: "POST",
@@ -98,6 +105,15 @@ function showCheckoutStateFromUrl() {
         : plan === "pro"
         ? "Pro Teacher"
         : "your new plan";
+
+    if (typeof gtag === "function") {
+      gtag("event", "purchase", {
+        event_category: "conversion",
+        event_label: plan || "unknown",
+        value: plan === "plus" ? 15 : 10,
+        currency: "USD",
+      });
+    }
 
     setPricingStatus(
       `Payment completed for ${planName}. Your account will update in a few moments.`,
