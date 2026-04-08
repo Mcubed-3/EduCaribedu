@@ -185,6 +185,27 @@ function canGenerateActivities() {
   return !!(currentUserContext?.plan_status?.activity_generation);
 }
 
+function updateGuestGenerationDisplay() {
+  if (currentUserContext) return;
+
+  const used = getGuestGenerations();
+  const limit = 2;
+
+  const generationsCard = document.querySelector(".stat-card .stat-value, #generationCount, [data-generations-used]");
+  if (generationsCard) {
+    generationsCard.textContent = `${used} / ${limit}`;
+  }
+
+  const statCards = document.querySelectorAll(".stat-card");
+  statCards.forEach((card) => {
+    const label = card.textContent.toLowerCase();
+    if (label.includes("generation")) {
+      const valueEl = card.querySelector(".stat-value");
+      if (valueEl) valueEl.textContent = `${used} / ${limit}`;
+    }
+  });
+}
+
 function formPayload() {
   return {
     curriculum: byId("curriculum")?.value || "",
@@ -1013,6 +1034,8 @@ async function init() {
       }
     }
 
+    updateGuestGenerationDisplay();
+
     const lessonForm = byId("lessonForm");
     lessonForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -1040,6 +1063,7 @@ async function init() {
 
         if (!currentUserContext) {
           incrementGuestGenerations();
+          updateGuestGenerationDisplay();
         }
 
         await loadCurrentUserContext();
