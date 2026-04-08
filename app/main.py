@@ -97,6 +97,13 @@ def get_current_user(request: Request):
     return get_user_by_session(token)
 
 
+def get_current_user_optional(request: Request):
+    try:
+        return get_current_user(request)
+    except:
+        return None
+
+
 def require_user(request: Request):
     user = get_current_user(request)
     if not user:
@@ -385,7 +392,7 @@ def admin_users_page(request: Request):
 def me(request: Request):
     user = require_user(request)
     saved_count = len(list_lessons(user["email"]))
-    profile = get_user_profile(user["id"])
+    profile = get_user_profile(user["id"]) if user else {}
     return {"user": user, "profile": profile, "plan_status": get_plan_status(user, saved_count)}
 
 
@@ -526,7 +533,14 @@ def objective_suggest(request: Request, payload: ObjectiveRequest):
 
 @app.post("/api/lesson/generate")
 def lesson_generate(request: Request, payload: LessonRequest):
-    user = require_user(request)
+    user = get_current_user_optional(request)
+
+    # 🔒 Guest limit protection
+    if not user:
+        guest_count = int(request.headers.get("X-Guest-Count", 0))
+        if guest_count >= 2:
+            raise HTTPException(status_code=403, detail="Guest limit reached")
+    if user:
     usage = can_generate_lessons(user)
 
     if not usage["allowed"]:
@@ -534,6 +548,7 @@ def lesson_generate(request: Request, payload: LessonRequest):
             status_code=403,
             detail=f"Monthly lesson generation limit reached for your {user['plan']} plan.",
         )
+            
 
     profile = get_user_profile(user["id"])
     payload_data = payload.model_dump()
@@ -550,7 +565,8 @@ def lesson_generate(request: Request, payload: LessonRequest):
 
     try:
         result = generate_lesson(payload_data)
-        increment_generation_count(user["id"])
+        if user:
+            increment_generation_count(user["id"])
         return result
     except Exception as e:
         print("LESSON GENERATE ERROR:", type(e).__name__, str(e))
