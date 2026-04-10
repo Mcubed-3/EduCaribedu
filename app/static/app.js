@@ -3,15 +3,16 @@ let currentUserContext = null;
 let currentActivityText = "";
 
 // ==========================
-// 🔥 GUEST MODE (ADD THIS)
+// GUEST MODE
 // ==========================
 function getGuestGenerations() {
-  return parseInt(localStorage.getItem("guest_generations") || "0");
+  return parseInt(localStorage.getItem("guest_generations") || "0", 10);
 }
 
 function incrementGuestGenerations() {
   const count = getGuestGenerations() + 1;
-  localStorage.setItem("guest_generations", count);
+  localStorage.setItem("guest_generations", String(count));
+  return count;
 }
 
 function isGuestLimitReached() {
@@ -199,17 +200,15 @@ function updateGuestGenerationDisplay() {
   const used = getGuestGenerations();
   const limit = 5;
 
-  const generationsCard = document.querySelector(".stat-card .stat-value, #generationCount, [data-generations-used]");
-  if (generationsCard) {
-    generationsCard.textContent = `${used} / ${limit}`;
-  }
+  const miniStats = document.querySelectorAll(".mini-stat");
+  miniStats.forEach((card) => {
+    const labelEl = card.querySelector(".mini-label");
+    const valueEl = card.querySelector("strong");
+    if (!labelEl || !valueEl) return;
 
-  const statCards = document.querySelectorAll(".stat-card");
-  statCards.forEach((card) => {
-    const label = card.textContent.toLowerCase();
-    if (label.includes("generation")) {
-      const valueEl = card.querySelector(".stat-value");
-      if (valueEl) valueEl.textContent = `${used} / ${limit}`;
+    const label = labelEl.textContent.trim().toLowerCase();
+    if (label === "generations") {
+      valueEl.textContent = `${used} / ${limit}`;
     }
   });
 }
@@ -1049,6 +1048,7 @@ async function init() {
       event.preventDefault();
 
       if (!isAuthenticatedUser() && isGuestLimitReached()) {
+        setStatus("You’ve used all 5 free lesson generations. Upgrade to continue.", "error");
         showUpgradeModal();
         return;
       }
@@ -1070,18 +1070,16 @@ async function init() {
         renderLesson(data);
 
         if (!isAuthenticatedUser()) {
-          incrementGuestGenerations();
+          const used = incrementGuestGenerations();
           updateGuestGenerationDisplay();
 
-          const used = getGuestGenerations();
-
           if (used === 3 || used === 4) {
-            setStatus(
-              "🔥 You’re getting great results. Upgrade for more lesson plans and premium features.",
-              "success"
-            );
-            showUpgradeModal();
+            setStatus("You’re getting great results. Upgrade for unlimited lesson plans.", "success");
+          } else {
+            setStatus("Lesson plan generated.", "success");
           }
+        } else {
+          setStatus("Lesson plan generated.", "success");
         }
 
         await loadCurrentUserContext();
@@ -1097,8 +1095,6 @@ async function init() {
             event_label: "lesson_generated",
           });
         }
-
-        setStatus("Lesson plan generated.", "success");
       } catch (e) {
         const msg = (e.message || "").toLowerCase();
         if (msg.includes("guest limit reached") || msg.includes("monthly lesson generation limit")) {
@@ -1131,6 +1127,7 @@ async function init() {
           await loadSavedLessons();
           await loadDashboardSummary();
         }
+        updateGuestGenerationDisplay();
         setStatus("Workspace refreshed.", "success");
       } catch (e) {
         setStatus(e.message, "error");
@@ -1211,4 +1208,5 @@ async function init() {
     setStatus(`Failed to load app config: ${e.message}`, "error");
   }
 }
+
 document.addEventListener("DOMContentLoaded", init);
