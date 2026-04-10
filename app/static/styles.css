@@ -218,10 +218,10 @@ textarea:focus {
 
 .dashboard-shell {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 18px;
-  padding: 16px;
-  max-width: 1480px;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 14px;
+  padding: 12px;
+  max-width: 1360px;
   margin: 0 auto;
 }
 
@@ -260,7 +260,7 @@ textarea:focus {
 .panel,
 .stat-card,
 .upgrade-banner {
-  padding: 14px;
+  padding: 12px;
 }
 
 .brand-lockup {
@@ -431,12 +431,12 @@ textarea:focus {
 
 .main-content {
   display: grid;
-  gap: 18px;
+  gap: 12px;
   min-width: 0;
 }
 
 .hero-card {
-  padding: 20px 22px;
+  padding: 16px 18px;
   display: flex;
   justify-content: space-between;
   gap: 14px;
@@ -487,7 +487,7 @@ textarea:focus {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
