@@ -15,7 +15,7 @@ function incrementGuestGenerations() {
 }
 
 function isGuestLimitReached() {
-  return getGuestGenerations() >= 2;
+  return getGuestGenerations() >= 5;
 }
 // ==========================
 
@@ -197,7 +197,7 @@ function updateGuestGenerationDisplay() {
   if (isAuthenticatedUser()) return;
 
   const used = getGuestGenerations();
-  const limit = 2;
+  const limit = 5;
 
   const generationsCard = document.querySelector(".stat-card .stat-value, #generationCount, [data-generations-used]");
   if (generationsCard) {
@@ -1028,12 +1028,12 @@ async function init() {
     } else {
       const savedLessonsList = byId("savedLessonsList");
       if (savedLessonsList) {
-        savedLessonsList.innerHTML = "<p class='muted'>Create a free account to save lessons.</p>";
+        savedLessonsList.innerHTML = "<p class='muted'>Upgrade to save lessons and unlock more generations.</p>";
       }
 
       const recentLessonsList = byId("recentLessonsList");
       if (recentLessonsList) {
-        recentLessonsList.innerHTML = "<p class='muted'>Recent lessons are available after signup.</p>";
+        recentLessonsList.innerHTML = "<p class='muted'>Recent lesson history is available on paid plans.</p>";
       }
 
       const savedCount = byId("savedCount");
@@ -1072,6 +1072,16 @@ async function init() {
         if (!isAuthenticatedUser()) {
           incrementGuestGenerations();
           updateGuestGenerationDisplay();
+
+          const used = getGuestGenerations();
+
+          if (used === 3 || used === 4) {
+            setStatus(
+              "🔥 You’re getting great results. Upgrade for more lesson plans and premium features.",
+              "success"
+            );
+            showUpgradeModal();
+          }
         }
 
         await loadCurrentUserContext();
@@ -1092,6 +1102,7 @@ async function init() {
       } catch (e) {
         const msg = (e.message || "").toLowerCase();
         if (msg.includes("guest limit reached") || msg.includes("monthly lesson generation limit")) {
+          setStatus("You’ve used all 5 free lesson generations. Upgrade to continue.", "error");
           showUpgradeModal();
           return;
         }

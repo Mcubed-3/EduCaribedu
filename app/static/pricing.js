@@ -50,6 +50,11 @@ async function changePlan(plan) {
 }
 
 async function startStripeCheckout(targetPlan) {
+  if (userIsGuest()) {
+    window.location.href = `/signup?next=/pricing&plan=${encodeURIComponent(targetPlan)}`;
+    return;
+  }
+
   setPricingStatus(`Redirecting to Stripe for ${targetPlan}...`);
 
   if (typeof gtag === "function") {
@@ -172,6 +177,17 @@ function initPricing() {
   bindCheckoutButtons();
   bindPlanChangeButtons();
   bindBillingPortalButton();
+}
+function pricingMeta() {
+  const el = document.getElementById("pricingPageMeta");
+  return {
+    role: el?.dataset.role || "",
+    plan: el?.dataset.plan || "",
+  };
+}
+
+function userIsGuest() {
+  return pricingMeta().role === "guest";
 }
 
 document.addEventListener("DOMContentLoaded", initPricing);

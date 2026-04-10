@@ -172,7 +172,7 @@ def home(request: Request):
             "recent_lessons": [],
         }
         plan_status = {
-            "monthly_generations": {"used": 0, "limit": 2},
+            "monthly_generations": {"used": 0, "limit": 5},
             "saved_lessons": {"used": 0, "limit": 0},
             "docx_export": False,
             "pdf_export": False,
@@ -200,17 +200,51 @@ def home(request: Request):
 @app.get("/pricing", response_class=HTMLResponse)
 def pricing_page(request: Request):
     user = get_current_user(request)
-    if not user:
-        return RedirectResponse(url="/login", status_code=302)
 
-    saved_count = len(list_lessons(user["email"]))
-    plan_status = get_plan_status(user, saved_count)
+    if user:
+        saved_count = len(list_lessons(user["email"]))
+        plan_status = get_plan_status(user, saved_count)
+        current_user = user
+    else:
+        plan_status = {
+            "plan": "free",
+            "role": "guest",
+            "subscription_status": "guest",
+            "payment_provider": "",
+            "monthly_generations": {
+                "used": 0,
+                "limit": 5,
+                "remaining": 5,
+                "allowed": True,
+            },
+            "saved_lessons": {
+                "used": 0,
+                "limit": 0,
+                "remaining": 0,
+                "allowed": False,
+            },
+            "activity_generations": {
+                "used": 0,
+                "limit": 0,
+                "remaining": 0,
+                "allowed": False,
+            },
+            "docx_export": False,
+            "pdf_export": True,
+            "ads_enabled": True,
+            "activity_generation": False,
+        }
+        current_user = {
+            "email": "",
+            "role": "guest",
+            "plan": "free",
+        }
 
     return templates.TemplateResponse(
         "pricing.html",
         {
             "request": request,
-            "current_user": user,
+            "current_user": current_user,
             "plan_status": plan_status,
             "site_url": "https://educaribedu.org",
         },
@@ -429,8 +463,8 @@ def me(request: Request):
                 "payment_provider": "",
                 "monthly_generations": {
                     "used": 0,
-                    "limit": 2,
-                    "remaining": 2,
+                    "limit": 5,
+                    "remaining": 5,
                     "allowed": True,
                 },
                 "saved_lessons": {
@@ -593,7 +627,7 @@ def lesson_generate(request: Request, payload: LessonRequest):
     # 🔒 Guest limit protection
     if not user:
         guest_count = int(request.headers.get("X-Guest-Count", 0))
-        if guest_count >= 2:
+        if guest_count >= 5:
             raise HTTPException(status_code=403, detail="Guest limit reached")
     if user:
         usage = can_generate_lessons(user)

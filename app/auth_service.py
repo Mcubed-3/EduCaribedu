@@ -28,7 +28,7 @@ SESSION_DAYS = 14
 
 PLAN_LIMITS = {
     "free": {
-        "monthly_generations": 10,
+        "monthly_generations": 5,
         "saved_lessons": 5,
         "docx_export": False,
         "pdf_export": True,
