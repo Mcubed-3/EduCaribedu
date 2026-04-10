@@ -34,7 +34,6 @@
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
   <link rel="stylesheet" href="/static/styles.css" />
-  <!-- Google Analytics + Consent Mode -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-EN7H098QM8"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -90,14 +89,13 @@
         {% endif %}
 
         <div class="badge-row">
-          {% if current_user.plan == "guest" %}
+          {% if current_user.role == "guest" or current_user.plan == "guest" %}
             <span class="pill pill-accent">FREE PLAN</span>
           {% else %}
             <span class="pill pill-dark">{{ current_user.role|upper }}</span>
             <span class="pill pill-accent">{{ current_user.plan|upper }}</span>
-            {% endif %}
+          {% endif %}
         </div>
-          
 
         <div class="mini-grid">
           <div class="mini-stat">
@@ -141,9 +139,11 @@
           <button type="button" id="newLessonBtn" class="btn btn-primary">New lesson</button>
           <button type="button" id="refreshLessonsBtn" class="btn btn-secondary">Refresh workspace</button>
           <a href="/pricing" class="btn btn-secondary btn-link">Pricing</a>
+          {% if current_user.role != "guest" %}
           <a href="/feedback" class="btn btn-secondary btn-link">Feedback</a>
+          {% endif %}
           {% if current_user.role == "admin" %}
-            <a href="/admin" class="btn btn-secondary btn-link">Curriculum admin</a>
+          <a href="/admin" class="btn btn-secondary btn-link">Curriculum admin</a>
           {% endif %}
           {% if current_user.role != "guest" %}
           <a href="/logout" class="btn btn-secondary btn-link">Log out</a>
@@ -173,17 +173,11 @@
       <section class="sidebar-card sidebar-lessons">
         <div class="sidebar-kicker">Library</div>
         <h3 class="sidebar-title">Saved lessons</h3>
-
         <div id="savedLessonsList" class="saved-lessons-list">
           <p class="muted">No saved lessons yet.</p>
         </div>
       </section>
       {% endif %}
-        <h3 class="sidebar-title">Saved lessons</h3>
-        <div id="savedLessonsList" class="saved-lessons-list">
-          <p class="muted">No saved lessons yet.</p>
-        </div>
-      </section>
     </aside>
 
     <main class="main-content">
@@ -200,7 +194,7 @@
         </div>
       </header>
 
-      {% if current_user.plan == "guest" %}
+      {% if current_user.role == "guest" or current_user.plan == "guest" %}
       <section class="upgrade-banner">
         <div>
           <strong>Free access:</strong>
@@ -220,6 +214,7 @@
       </section>
       {% endif %}
 
+      {% if current_user.role != "guest" %}
       <section class="stats-grid">
         <article class="stat-card">
           <span class="stat-label">Saved lessons</span>
@@ -227,12 +222,12 @@
           <small>Reusable teaching plans</small>
         </article>
       </section>
+      {% endif %}
 
       <section class="content-grid">
         {% if current_user.role != "guest" %}
         <article class="panel">
-        </article>
-        {% endif %}
+          <div class="panel-head">
             <div>
               <div class="panel-kicker">Recent activity</div>
               <h2>Recent lessons</h2>
@@ -241,16 +236,17 @@
           <div id="recentLessonsList" class="recent-lessons-list">
             {% if dashboard.recent_lessons %}
               {% for lesson in dashboard.recent_lessons %}
-                <div class="recent-lesson-item">
-                  <strong>{{ lesson.title }}</strong>
-                  <small>{{ lesson.subject }} • {{ lesson.grade_level }} • {{ lesson.topic }}</small>
-                </div>
+              <div class="recent-lesson-item">
+                <strong>{{ lesson.title }}</strong>
+                <small>{{ lesson.subject }} • {{ lesson.grade_level }} • {{ lesson.topic }}</small>
+              </div>
               {% endfor %}
             {% else %}
               <p class="muted">No recent lessons yet.</p>
             {% endif %}
           </div>
         </article>
+        {% endif %}
 
         <article class="panel">
           <div class="panel-head">
@@ -287,7 +283,6 @@
           <h2>Create a lesson</h2>
           <p>Select the lesson context, define the topic, then generate, save, and export.</p>
         </div>
-        
 
         <div class="builder-grid">
           <form id="lessonForm" class="panel">
@@ -370,6 +365,7 @@
                 <p class="muted">Edit the raw text if needed, then review the rendered preview below for proper maths.</p>
               </div>
 
+              {% if current_user.role != "guest" %}
               <div class="output-actions">
                 <button type="button" id="saveLessonBtn" class="btn btn-primary">Save</button>
                 <button type="button" id="updateLessonBtn" class="btn btn-secondary">Update saved</button>
@@ -383,6 +379,7 @@
                 </button>
                 <button type="button" id="exportPdfBtn" class="btn btn-secondary">Export PDF</button>
               </div>
+              {% endif %}
             </div>
 
             <textarea id="output" class="output-textarea" rows="18" readonly>Your curriculum-aligned lesson plan will appear here.</textarea>
@@ -391,6 +388,14 @@
               <div class="panel-kicker">Rendered preview</div>
               <div id="outputPreview" class="math-preview-box">Generated lesson preview will appear here.</div>
             </div>
+
+            {% if current_user.role == "guest" %}
+            <div class="locked-card">
+              <strong>Save, export, and classroom activity tools are available on paid plans.</strong>
+              <p>Generate your lesson free first, then upgrade when you want exports, saved lesson history, and classroom-ready activity generation.</p>
+              <a href="/pricing" class="btn btn-primary btn-link">See plans</a>
+            </div>
+            {% endif %}
 
             <div class="activity-panel">
               <div class="panel-kicker">Optional extension</div>
@@ -410,7 +415,7 @@
                 <label class="field">
                   <span>Activity type</span>
                   <select id="activity_type" name="activity_type">
-                    <option value="">Select activity type</option>
+                    <option value="">Select activity type...</option>
                     <option value="mixed_quiz">Mixed quiz</option>
                     <option value="mcq">MCQ only</option>
                     <option value="short_answer">Short answer</option>
@@ -519,7 +524,7 @@
         <label class="field field-full">
           <span>Primary curriculum</span>
           <select id="profile_curriculum">
-            <option value="">Select curriculum</option>
+            <option value="">Select curriculum...</option>
             <option value="NSC">NSC</option>
             <option value="CSEC">CSEC</option>
             <option value="APSE">APSE</option>
@@ -557,6 +562,7 @@
       </div>
     </div>
   </div>
+
   <div id="cookieBanner" style="position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:980px;margin:0 auto;background:#111827;color:#ffffff;padding:16px 18px;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.24);display:none;">
     <div style="display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;">
       <div style="flex:1;min-width:240px;line-height:1.5;">
