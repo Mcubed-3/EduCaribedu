@@ -88,9 +88,14 @@
         <div class="account-email">{{ current_user.email }}</div>
 
         <div class="badge-row">
-          <span class="pill pill-dark">{{ current_user.role|upper }}</span>
-          <span class="pill pill-accent">{{ current_user.plan|upper }}</span>
+          {% if current_user.plan == "guest" %}
+            <span class="pill pill-accent">FREE PLAN</span>
+          {% else %}
+            <span class="pill pill-dark">{{ current_user.role|upper }}</span>
+            <span class="pill pill-accent">{{ current_user.plan|upper }}</span>
+            {% endif %}
         </div>
+          
 
         <div class="mini-grid">
           <div class="mini-stat">
@@ -138,7 +143,9 @@
           {% if current_user.role == "admin" %}
             <a href="/admin" class="btn btn-secondary btn-link">Curriculum admin</a>
           {% endif %}
+          {% if current_user.role != "guest" %}
           <a href="/logout" class="btn btn-secondary btn-link">Log out</a>
+          {% endif %}
           <a href="/about" class="btn btn-secondary btn-link">About</a>
         </div>
       </section>
@@ -160,7 +167,11 @@
       </section>
       {% endif %}
 
+      {% if current_user.role != "guest" %}
       <section class="sidebar-card sidebar-lessons">
+...
+      </section>
+      {% endif %}
         <div class="sidebar-kicker">Library</div>
         <h3 class="sidebar-title">Saved lessons</h3>
         <div id="savedLessonsList" class="saved-lessons-list">
@@ -183,13 +194,13 @@
         </div>
       </header>
 
-      {% if current_user.plan == "free" %}
+      {% if current_user.plan == "guest" %}
       <section class="upgrade-banner">
         <div>
-          <strong>Free plan:</strong>
-          <span>10 lesson generations per month. Upgrade to Pro Teacher for unlimited planning and DOCX export, or Pro Teacher Plus for classroom activities too.</span>
+          <strong>Free access:</strong>
+          <span>You can generate up to 5 lesson plans. Upgrade anytime for unlimited access and exports.</span>
         </div>
-        <a href="/pricing" class="btn btn-primary btn-link">Explore upgrades</a>
+        <a href="/pricing" class="btn btn-primary btn-link">See plans</a>
       </section>
       {% endif %}
 
@@ -212,8 +223,11 @@
       </section>
 
       <section class="content-grid">
+        {% if current_user.role != "guest" %}
         <article class="panel">
-          <div class="panel-head">
+        ...
+        </article>
+        {% endif %}
             <div>
               <div class="panel-kicker">Recent activity</div>
               <h2>Recent lessons</h2>
