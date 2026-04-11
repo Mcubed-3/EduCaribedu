@@ -151,7 +151,7 @@ def sitemap_xml():
 
 @app.get("/ads.txt")
 def ads_txt():
-    return FileResponse(BASE_DIR / "static" / "ads.txt", media_type="text/plain")
+    return FileResponse("app/static/ads.txt", media_type="text/plain")
 
 
 @app.get("/", response_class=HTMLResponse)
