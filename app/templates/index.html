@@ -139,6 +139,7 @@
           <button type="button" id="newLessonBtn" class="btn btn-primary">New lesson</button>
           <button type="button" id="refreshLessonsBtn" class="btn btn-secondary">Refresh workspace</button>
           <a href="/pricing" class="btn btn-secondary btn-link">Pricing</a>
+          <a href="/lesson-examples" class="btn btn-secondary btn-link">Lesson examples</a>
           {% if current_user.role != "guest" %}
           <a href="/feedback" class="btn btn-secondary btn-link">Feedback</a>
           {% endif %}
@@ -194,7 +195,8 @@
         </div>
       </header>
 
-      <section class="info-section">
+      <section class="panel info-section">
+        <div class="panel-kicker">For teachers</div>
         <h2>How EduCarib AI Helps Caribbean Teachers</h2>
         <p>
           EduCarib AI is designed to support teachers across the Caribbean by simplifying lesson planning and improving classroom efficiency. Instead of spending hours creating structured lesson plans, teachers can generate curriculum-aligned content in seconds.
@@ -204,11 +206,11 @@
           Whether you are teaching CSEC, lower secondary, or primary levels, EduCarib AI helps you build lessons that include objectives, activities, and assessments tailored to your subject and grade level.
         </p>
 
-        <ul>
-          <li>✔ Generate structured lesson plans instantly</li>
-          <li>✔ Align content with Caribbean curricula</li>
-          <li>✔ Save time on planning and focus on teaching</li>
-          <li>✔ Export lessons for classroom use</li>
+        <ul class="info-list">
+          <li>Generate structured lesson plans instantly</li>
+          <li>Align content with Caribbean curricula</li>
+          <li>Save time on planning and focus on teaching</li>
+          <li>Export lessons for classroom use</li>
         </ul>
 
         <p>
