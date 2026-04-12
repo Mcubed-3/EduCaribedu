@@ -1049,7 +1049,7 @@ def admin_update_user_billing(request: Request, user_id: int, payload: AdminBill
 
     return {"message": "User billing updated.", "user": updated}
 
-    @app.get("/lesson-examples", response_class=HTMLResponse)
+@app.get("/lesson-examples", response_class=HTMLResponse)
 def lesson_examples_page(request: Request):
     return templates.TemplateResponse(
         "lesson-examples.html",
