@@ -444,6 +444,33 @@ def admin_users_page(request: Request):
         },
     )
 
+@app.get("/blog", response_class=HTMLResponse)
+def blog_page(request: Request):
+    return templates.TemplateResponse(
+        "blog.html",
+        {
+            "request": request,
+            "posts": get_all_posts(),
+            "site_url": "https://educaribedu.org",
+        },
+    )
+
+
+@app.get("/blog/{slug}", response_class=HTMLResponse)
+def blog_post_page(request: Request, slug: str):
+    post = get_post_by_slug(slug)
+
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    return templates.TemplateResponse(
+        "blog_post.html",
+        {
+            "request": request,
+            "post": post,
+            "site_url": "https://educaribedu.org",
+        },
+    )
 
 @app.get("/api/me")
 def me(request: Request):
