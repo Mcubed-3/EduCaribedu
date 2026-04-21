@@ -21,3 +21,23 @@
     <priority>0.5</priority>
   </url>
 </urlset>
+<url>
+    <loc>https://educaribedu.org/blog</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://educaribedu.org/blog/how-to-write-learning-objectives-caribbean-teachers</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://educaribedu.org/blog/lesson-planning-mistakes-caribbean-teachers</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://educaribedu.org/blog/curriculum-alignment-caribbean-teachers</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>

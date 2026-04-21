@@ -72,6 +72,10 @@ from .storage_service import (
     save_new_lesson,
     update_existing_lesson,
 )
+from .blog_posts import ( 
+    get_all_posts, 
+    get_post_by_slug
+)
 from .stripe_service import (
     create_checkout_session,
     create_portal_session,
@@ -949,6 +953,29 @@ def about_page(request: Request):
             "site_url": "https://educaribedu.org",
         },
     )
+
+
+@app.get("/blog", response_class=HTMLResponse)
+def blog_index(request: Request):
+    return templates.TemplateResponse("blog.html", {
+        "request": request,
+        "site_url": "https://educaribedu.org",
+        "posts": get_all_posts(),
+    })
+
+@app.get("/blog/{slug}", response_class=HTMLResponse)
+def blog_post(request: Request, slug: str):
+    post = get_post_by_slug(slug)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    all_posts = get_all_posts()
+    related = [p for p in all_posts if p["slug"] != slug][:2]
+    return templates.TemplateResponse("blog_post.html", {
+        "request": request,
+        "site_url": "https://educaribedu.org",
+        "post": post,
+        "related": related,
+    })
 
 
 @app.get("/api/admin/frameworks")
