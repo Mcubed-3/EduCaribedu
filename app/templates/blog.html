@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog – EduCarib AI | Resources for Caribbean Teachers</title>
+  <meta name="description" content="Practical articles on lesson planning, curriculum alignment, and teaching strategies for Caribbean educators." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="{{ site_url }}/blog" />
+  <meta property="og:title" content="Blog – EduCarib AI" />
+  <meta property="og:description" content="Practical articles on lesson planning, curriculum alignment, and teaching strategies for Caribbean educators." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="{{ site_url }}/blog" />
+  <meta property="og:image" content="{{ site_url }}/static/logo.png" />
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css" />
+  <meta name="google-adsense-account" content="ca-pub-6817907304188010">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6817907304188010" crossorigin="anonymous"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EN7H098QM8"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      analytics_storage: 'denied', ad_storage: 'denied',
+      ad_user_data: 'denied', ad_personalization: 'denied',
+      functionality_storage: 'granted', security_storage: 'granted',
+      wait_for_update: 500
+    });
+    try {
+      const savedConsent = localStorage.getItem('educarib_cookie_consent');
+      if (savedConsent === 'accepted') {
+        gtag('consent', 'update', { analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+      }
+    } catch (e) {}
+    gtag('js', new Date());
+    gtag('config', 'G-EN7H098QM8');
+  </script>
+  <style>
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin-top: 32px;
+    }
+    .blog-card {
+      background: var(--card-bg, #ffffff);
+      border: 1px solid var(--border, #e5e7eb);
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: box-shadow 0.18s ease, transform 0.18s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    .blog-card:hover {
+      box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+      transform: translateY(-2px);
+    }
+    .blog-card-kicker {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #2563eb;
+    }
+    .blog-card-title {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--heading, #111827);
+      margin: 0;
+    }
+    .blog-card-desc {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--muted, #6b7280);
+      margin: 0;
+      flex: 1;
+    }
+    .blog-card-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted, #6b7280);
+      margin-top: 4px;
+    }
+    .blog-card-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .blog-card-cta {
+      font-size: 13px;
+      font-weight: 600;
+      color: #2563eb;
+      margin-top: 4px;
+    }
+    .blog-hero-sub {
+      font-size: 17px;
+      color: var(--muted, #6b7280);
+      max-width: 600px;
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body class="pricing-body">
+  <div class="pricing-shell">
+
+    <!-- Nav -->
+    <section class="pricing-topbar">
+      <a href="/" class="pricing-brand-lockup">
+        <div class="pricing-brand-icon-wrap">
+          <img src="/static/logo.png" alt="EduCarib AI logo" class="pricing-brand-icon" />
+        </div>
+        <div>
+          <div class="pricing-brand-name">EduCarib AI</div>
+          <div class="pricing-brand-subtitle">Built for Caribbean classrooms</div>
+        </div>
+      </a>
+      <div class="pricing-topbar-actions">
+        <a href="/" class="btn btn-secondary btn-link">Dashboard</a>
+        <a href="/pricing" class="btn btn-secondary btn-link">Pricing</a>
+        <a href="/blog" class="btn btn-secondary btn-link">Blog</a>
+        <a href="/about" class="btn btn-secondary btn-link">About</a>
+      </div>
+    </section>
+
+    <!-- Hero -->
+    <section class="pricing-hero">
+      <div class="section-kicker">Teaching resources</div>
+      <h1>Ideas and guides for Caribbean educators</h1>
+      <p class="blog-hero-sub">Practical articles on lesson planning, curriculum alignment, and classroom strategies — written for teachers in the Caribbean.</p>
+    </section>
+
+    <!-- AdSense banner slot -->
+    <div style="text-align:center; margin: 0 0 32px 0;">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-6817907304188010"
+           data-ad-slot="auto"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <!-- Blog post cards -->
+    <section>
+      <div class="blog-grid">
+        {% for post in posts %}
+        <a href="/blog/{{ post.slug }}" class="blog-card">
+          <div class="blog-card-kicker">{{ post.category }}</div>
+          <h2 class="blog-card-title">{{ post.title }}</h2>
+          <p class="blog-card-desc">{{ post.description }}</p>
+          <div class="blog-card-meta">
+            <span>{{ post.date_display }}</span>
+            <span>·</span>
+            <span>{{ post.read_time }}</span>
+          </div>
+          <div class="blog-card-cta">Read article →</div>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="pricing-info-card" style="margin-top: 48px;">
+      <div class="section-kicker">Try the platform</div>
+      <h2>Generate your next lesson plan in minutes</h2>
+      <p class="plan-copy">EduCarib AI creates curriculum-aligned lesson plans and classroom activities built for Caribbean teachers. Free to try — no credit card required.</p>
+      <div class="action-row">
+        <a href="/" class="btn btn-primary btn-link">Go to Dashboard</a>
+        <a href="/lesson-examples" class="btn btn-secondary btn-link">See example lessons</a>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Cookie banner -->
+  <div id="cookieBanner" style="position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;max-width:980px;margin:0 auto;background:#111827;color:#ffffff;padding:16px 18px;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,0.24);display:none;">
+    <div style="display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;">
+      <div style="flex:1;min-width:240px;line-height:1.5;">
+        <strong style="display:block;margin-bottom:6px;">Cookie notice</strong>
+        <span>EduCarib AI uses cookies for analytics so we can understand site usage and improve the platform. Read our <a href="/privacy" style="color:#93c5fd;text-decoration:underline;">Privacy Policy</a>.</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button type="button" onclick="rejectEduCaribCookies()" style="border:1px solid #4b5563;background:transparent;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;">Only necessary</button>
+        <button type="button" onclick="acceptEduCaribCookies()" style="border:none;background:#2563eb;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600;">Accept analytics</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const banner = document.getElementById('cookieBanner');
+      if (!banner) return;
+      window.acceptEduCaribCookies = function () {
+        try { localStorage.setItem('educarib_cookie_consent', 'accepted'); } catch (e) {}
+        if (typeof gtag === 'function') { gtag('consent', 'update', { analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' }); }
+        banner.style.display = 'none';
+      };
+      window.rejectEduCaribCookies = function () {
+        try { localStorage.setItem('educarib_cookie_consent', 'rejected'); } catch (e) {}
+        if (typeof gtag === 'function') { gtag('consent', 'update', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' }); }
+        banner.style.display = 'none';
+      };
+      let savedConsent = null;
+      try { savedConsent = localStorage.getItem('educarib_cookie_consent'); } catch (e) {}
+      if (!savedConsent) { banner.style.display = 'block'; }
+    })();
+  </script>
+</body>
+</html>
