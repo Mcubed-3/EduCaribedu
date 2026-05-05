@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, Form, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -72,7 +72,21 @@ from .storage_service import (
     save_new_lesson,
     update_existing_lesson,
 )
-from .blog_posts import get_all_posts, get_post_by_slug
+from .blog_service import (
+    init_blog_db,
+    create_post,
+    update_post,
+    delete_post,
+    get_post_by_id,
+    get_post_by_slug,
+    get_related_posts,
+    increment_view,
+    list_posts,
+    make_visitor_key,
+    save_image,
+    set_reaction,
+    delete_image,
+)
 from .stripe_service import (
     create_checkout_session,
     create_portal_session,
@@ -91,6 +105,7 @@ SESSION_COOKIE = "educarib_session"
 
 init_auth_db()
 init_feedback_db()
+init_blog_db()
 
 
 def get_current_user(request: Request):
@@ -116,6 +131,14 @@ def require_admin(request: Request):
     user = require_user(request)
     if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
+
+def require_blog_access(request: Request):
+    """Allow admin or blog_editor roles to access blog management."""
+    user = require_user(request)
+    if user.get("role") not in ("admin", "blog_editor"):
+        raise HTTPException(status_code=403, detail="Blog editor access required")
     return user
 
 
@@ -444,33 +467,6 @@ def admin_users_page(request: Request):
         },
     )
 
-@app.get("/blog", response_class=HTMLResponse)
-def blog_page(request: Request):
-    return templates.TemplateResponse(
-        "blog.html",
-        {
-            "request": request,
-            "posts": get_all_posts(),
-            "site_url": "https://educaribedu.org",
-        },
-    )
-
-
-@app.get("/blog/{slug}", response_class=HTMLResponse)
-def blog_post_page(request: Request, slug: str):
-    post = get_post_by_slug(slug)
-
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-
-    return templates.TemplateResponse(
-        "blog_post.html",
-        {
-            "request": request,
-            "post": post,
-            "site_url": "https://educaribedu.org",
-        },
-    )
 
 @app.get("/api/me")
 def me(request: Request):
@@ -977,6 +973,226 @@ def about_page(request: Request):
             "site_url": "https://educaribedu.org",
         },
     )
+
+# ─────────────────────────────────────────────────────────────
+# PUBLIC BLOG ROUTES
+# ─────────────────────────────────────────────────────────────
+
+@app.get("/blog", response_class=HTMLResponse)
+def blog_index(request: Request):
+    return templates.TemplateResponse(
+        "blog.html",
+        {
+            "request": request,
+            "site_url": "https://educaribedu.org",
+            "posts": list_posts(published_only=True),
+        },
+    )
+
+
+@app.get("/blog/{slug}", response_class=HTMLResponse)
+def blog_post_page(request: Request, slug: str):
+    post = get_post_by_slug(slug, published_only=True)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    increment_view(slug)
+    post = get_post_by_slug(slug, published_only=True) or post
+
+    return templates.TemplateResponse(
+        "blog_post.html",
+        {
+            "request": request,
+            "site_url": "https://educaribedu.org",
+            "post": post,
+            "related": get_related_posts(slug),
+        },
+    )
+
+
+@app.post("/api/blog/{slug}/reaction")
+async def blog_reaction(request: Request, slug: str):
+    payload = await request.json()
+    reaction = str(payload.get("reaction", "")).strip().lower()
+    ip = request.client.host if request.client else ""
+    user_agent = request.headers.get("user-agent", "")
+    visitor_key = make_visitor_key(ip=ip, user_agent=user_agent)
+
+    try:
+        return set_reaction(slug=slug, visitor_key=visitor_key, reaction=reaction)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Post not found")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+# ─────────────────────────────────────────────────────────────
+# ADMIN BLOG MANAGEMENT PAGES
+# ─────────────────────────────────────────────────────────────
+
+@app.get("/admin/blog", response_class=HTMLResponse)
+def admin_blog_page(request: Request):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/login", status_code=302)
+    if user.get("role") not in ("admin", "blog_editor"):
+        return RedirectResponse(url="/", status_code=302)
+
+    return templates.TemplateResponse(
+        "admin_blog.html",
+        {
+            "request": request,
+            "current_user": user,
+            "site_url": "https://educaribedu.org",
+            "posts": list_posts(published_only=False),
+        },
+    )
+
+
+@app.get("/admin/blog/editors", response_class=HTMLResponse)
+def admin_blog_editors_page(request: Request):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/login", status_code=302)
+    if user.get("role") != "admin":
+        return RedirectResponse(url="/admin/blog", status_code=302)
+
+    return templates.TemplateResponse(
+        "admin_blog_editors.html",
+        {
+            "request": request,
+            "current_user": user,
+            "site_url": "https://educaribedu.org",
+            "users": list_users(),
+        },
+    )
+
+
+# ─────────────────────────────────────────────────────────────
+# BLOG API ROUTES
+# ─────────────────────────────────────────────────────────────
+
+@app.post("/api/admin/blog")
+async def api_create_post(request: Request, image: UploadFile | None = File(default=None)):
+    user = require_blog_access(request)
+    form = await request.form()
+    image_path = ""
+
+    if image and image.filename:
+        data = await image.read()
+        try:
+            image_path = save_image(image.filename, data)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
+
+    try:
+        post = create_post(
+            title=str(form.get("title", "")).strip(),
+            description=str(form.get("description", "")).strip(),
+            category=str(form.get("category", "General")).strip(),
+            content=str(form.get("content", "")).strip(),
+            author=str(form.get("author", user.get("email", "EduCarib AI Team"))).strip(),
+            image_path=image_path,
+            image_alt=str(form.get("image_alt", "")).strip(),
+            status=str(form.get("status", "draft")).strip(),
+        )
+    except ValueError as exc:
+        if image_path:
+            delete_image(image_path)
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    return JSONResponse({"ok": True, "post": post})
+
+
+@app.put("/api/admin/blog/{post_id}")
+async def api_update_post(request: Request, post_id: int, image: UploadFile | None = File(default=None)):
+    user = require_blog_access(request)
+    form = await request.form()
+    existing = get_post_by_id(post_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    existing_image = str(form.get("existing_image_path", existing.get("image_path", ""))).strip()
+    image_path = existing_image
+
+    if image and image.filename:
+        data = await image.read()
+        try:
+            image_path = save_image(image.filename, data)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
+
+    try:
+        post = update_post(
+            post_id=post_id,
+            title=str(form.get("title", "")).strip(),
+            description=str(form.get("description", "")).strip(),
+            category=str(form.get("category", "General")).strip(),
+            content=str(form.get("content", "")).strip(),
+            author=str(form.get("author", user.get("email", "EduCarib AI Team"))).strip(),
+            image_path=image_path,
+            image_alt=str(form.get("image_alt", "")).strip(),
+            status=str(form.get("status", "draft")).strip(),
+        )
+    except ValueError as exc:
+        if image_path and image_path != existing.get("image_path"):
+            delete_image(image_path)
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    if image_path and image_path != existing.get("image_path"):
+        delete_image(existing.get("image_path", ""))
+
+    return JSONResponse({"ok": True, "post": post})
+
+
+@app.delete("/api/admin/blog/{post_id}")
+def api_delete_post(request: Request, post_id: int):
+    require_blog_access(request)
+    ok = delete_post(post_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return JSONResponse({"ok": True})
+
+
+@app.post("/api/admin/blog/editors")
+async def api_create_blog_editor(request: Request):
+    require_admin(request)
+    body = await request.json()
+    email = (body.get("email") or "").strip().lower()
+    password = (body.get("password") or "").strip()
+
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email and password are required.")
+    if len(password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters.")
+    if get_user_by_email(email):
+        raise HTTPException(status_code=409, detail="An account with that email already exists.")
+
+    editor = create_user(email, password, role="blog_editor", plan="free")
+    return JSONResponse({"ok": True, "user_id": editor["id"]})
+
+
+@app.delete("/api/admin/blog/editors/{user_id}")
+def api_revoke_blog_editor(request: Request, user_id: int):
+    require_admin(request)
+
+    existing = next((u for u in list_users() if int(u.get("id")) == int(user_id)), None)
+    if not existing:
+        raise HTTPException(status_code=404, detail="User not found")
+    if existing.get("role") == "admin":
+        raise HTTPException(status_code=403, detail="Admin accounts cannot be revoked here")
+    if existing.get("role") != "blog_editor":
+        raise HTTPException(status_code=400, detail="This user is not a blog editor")
+
+    # Keep the account, but remove blog editor permissions.
+    updated = update_user_role_plan(user_id, "user", existing.get("plan", "free"))
+    if not updated:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return JSONResponse({"ok": True, "user": updated})
 
 
 @app.get("/api/admin/frameworks")

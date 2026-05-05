@@ -3,22 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Teaching Blog | EduCarib AI</title>
-  <meta name="description" content="Teaching articles, Caribbean education updates, lesson planning tips, and classroom ideas from EduCarib AI." />
-  <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="{{ site_url }}/blog" />
-  <meta property="og:title" content="Teaching Blog | EduCarib AI" />
-  <meta property="og:description" content="Teaching articles, Caribbean education updates, lesson planning tips, and classroom ideas from EduCarib AI." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="{{ site_url }}/blog" />
-  <meta property="og:image" content="{{ site_url }}/static/logo.png" />
-  <meta name="google-adsense-account" content="ca-pub-6817907304188010">
+  <title>Blog Editors | EduCarib AI Admin</title>
+  <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" type="image/png" href="/static/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/styles.css" />
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6817907304188010" crossorigin="anonymous"></script>
   <style>
     /* BLOG PRODUCTION PACK */
     .blog-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
@@ -96,93 +87,130 @@
   </style>
 
 </head>
-<body class="dashboard-body">
-  <div class="dashboard-shell">
-    <aside class="sidebar">
-      <div class="brand-card">
-        <a href="/" class="brand-lockup">
-          <div class="brand-mark-wrap">
-            <img src="/static/logo.png" alt="EduCarib AI logo" class="brand-mark-img" />
-          </div>
-          <div class="brand-copy-wrap">
-            <div class="brand-title">EduCarib AI</div>
-            <div class="brand-subtitle">Teaching resources and AI lesson planning</div>
-          </div>
-        </a>
+<body class="blog-admin-body">
+  <div class="blog-admin-shell">
+    <aside class="blog-admin-sidebar">
+      <a href="/" class="blog-admin-brand">
+        <img src="/static/logo.png" alt="EduCarib AI logo" />
+        <div><strong>EduCarib AI</strong><span>Blog Manager</span></div>
+      </a>
+      <nav class="blog-admin-nav" aria-label="Blog admin navigation">
+        <a href="/admin/blog">All posts</a>
+        <a href="/admin/blog/editors" class="active">Blog editors</a>
+        <a href="/admin">Curriculum admin</a>
+        <a href="/admin/users">User admin</a>
+        <a href="/logout">Log out</a>
+      </nav>
+      <div class="blog-admin-user">
+        <span>{{ current_user.role }}</span>
+        <strong>{{ current_user.email }}</strong>
       </div>
-
-      <section class="sidebar-card">
-        <div class="sidebar-kicker">Explore</div>
-        <h3 class="sidebar-title">Teaching blog</h3>
-        <div class="sidebar-actions">
-          <a href="/" class="btn btn-secondary btn-link">Dashboard</a>
-          <a href="/lesson-examples" class="btn btn-secondary btn-link">Lesson examples</a>
-          <a href="/pricing" class="btn btn-secondary btn-link">Pricing</a>
-          <a href="/about" class="btn btn-secondary btn-link">About</a>
-        </div>
-      </section>
-
-      <section class="sidebar-card">
-        <div class="sidebar-kicker">Topics</div>
-        <p class="muted">Read practical articles about teaching, curriculum alignment, CSEC, classroom life, and AI in education.</p>
-      </section>
     </aside>
 
-    <main class="main-content">
-      <header class="hero-card">
-        <div class="hero-text">
-          <div class="hero-kicker">EduCarib Blog</div>
-          <h1>Teaching ideas, education updates, and lesson planning help</h1>
-          <p>Articles for Caribbean teachers and education-minded readers, with practical ideas that connect back to classroom planning.</p>
+    <main class="blog-admin-main">
+      <header class="blog-admin-header">
+        <div>
+          <div class="section-kicker">Admin users</div>
+          <h1>Blog Editors</h1>
+          <p>Create limited blog-editor accounts. Editors can manage blog posts only; they cannot access user billing or curriculum admin.</p>
         </div>
-        <div class="hero-actions">
-          <a href="/" class="btn btn-secondary btn-link">Try the tool</a>
-          <a href="/lesson-examples" class="btn btn-primary btn-link">View examples</a>
-        </div>
+        <a href="/admin/blog" class="btn btn-secondary btn-link">Back to posts</a>
       </header>
 
-      {% if posts %}
-      <section class="blog-grid" aria-label="Blog posts">
-        {% for post in posts %}
-        <article class="panel blog-card">
-          {% if post.image_path %}
-          <a href="/blog/{{ post.slug }}" class="blog-card-image-link" aria-label="Read {{ post.title }}">
-            <img src="{{ post.image_path }}" alt="{{ post.image_alt or post.title }}" class="blog-card-image" />
-          </a>
-          {% endif %}
-          <div class="panel-kicker">{{ post.category }}</div>
-          <h2>{{ post.title }}</h2>
-          <p>{{ post.description }}</p>
-          <div class="blog-card-meta">
-            <span>{{ post.date_display }}</span>
-            <span>•</span>
-            <span>{{ post.read_time }}</span>
-          </div>
-          <div class="blog-card-reactions" aria-label="Article reactions">
-            <span>👍 {{ post.likes }}</span>
-            <span>👎 {{ post.dislikes }}</span>
-          </div>
-          <a href="/blog/{{ post.slug }}" class="btn btn-secondary btn-link">Read article</a>
-        </article>
-        {% endfor %}
-      </section>
-      {% else %}
-      <section class="panel info-section">
-        <div class="panel-kicker">Coming soon</div>
-        <h2>Blog posts are being prepared</h2>
-        <p>EduCarib AI will publish practical teaching articles, classroom ideas, and Caribbean education updates here.</p>
-        <a href="/" class="btn btn-primary btn-link">Try EduCarib AI</a>
-      </section>
-      {% endif %}
+      <div id="blogAdminAlert" class="blog-admin-alert" aria-live="polite"></div>
 
-      <section class="upgrade-banner">
-        <div>
-          <strong>Need lesson plans faster?</strong>
-          <span>Use EduCarib AI to generate curriculum-aligned lesson drafts, edit them, and upgrade for exports and advanced tools.</span>
+      <section class="blog-admin-card">
+        <h2>Create blog editor</h2>
+        <div class="blog-form-grid two">
+          <label class="field">
+            <span>Email</span>
+            <input type="email" id="editorEmail" placeholder="editor@example.com" />
+          </label>
+          <label class="field">
+            <span>Temporary password</span>
+            <input type="password" id="editorPassword" placeholder="At least 8 characters" />
+          </label>
         </div>
-        <a href="/pricing" class="btn btn-primary btn-link">See plans</a>
+        <button type="button" class="btn btn-primary" onclick="createEditor()">Create editor account</button>
+      </section>
+
+      <section class="blog-admin-card">
+        <h2>Current admin/editor accounts</h2>
+        <div class="blog-admin-table-wrap">
+          <table class="blog-admin-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Plan</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+                {% if user.role in ["admin", "blog_editor"] %}
+                <tr>
+                  <td><strong>{{ user.email }}</strong></td>
+                  <td><span class="blog-status blog-status-{{ user.role }}">{{ user.role }}</span></td>
+                  <td>{{ user.plan }}</td>
+                  <td>
+                    {% if user.role == "blog_editor" %}
+                    <button type="button" class="btn btn-secondary small-btn" onclick='revokeEditor({{ user.id }}, {{ user.email | tojson }})'>Revoke editor role</button>
+                    {% else %}
+                    <span class="muted">Admin protected</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </section>
     </main>
   </div>
+
+  <script>
+    function showAlert(message, type = "success") {
+      const el = document.getElementById("blogAdminAlert");
+      el.textContent = message;
+      el.className = "blog-admin-alert " + type;
+      el.style.display = "block";
+      setTimeout(() => { el.style.display = "none"; }, 6000);
+    }
+
+    async function createEditor() {
+      const email = document.getElementById("editorEmail").value.trim();
+      const password = document.getElementById("editorPassword").value.trim();
+      if (!email || !password) return showAlert("Email and password are required.", "error");
+      if (password.length < 8) return showAlert("Password must be at least 8 characters.", "error");
+      try {
+        const res = await fetch("/api/admin/blog/editors", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({email, password})
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to create editor.");
+        showAlert("Blog editor created.", "success");
+        setTimeout(() => window.location.reload(), 900);
+      } catch (err) {
+        showAlert(err.message || "Failed to create editor.", "error");
+      }
+    }
+
+    async function revokeEditor(userId, email) {
+      if (!confirm(`Revoke blog editor access for ${email}? Their account will become a normal free user.`)) return;
+      try {
+        const res = await fetch(`/api/admin/blog/editors/${userId}`, {method: "DELETE"});
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Failed to revoke editor.");
+        showAlert("Editor access revoked.", "success");
+        setTimeout(() => window.location.reload(), 900);
+      } catch (err) {
+        showAlert(err.message || "Failed to revoke editor.", "error");
+      }
+    }
+  </script>
 </body>
 </html>
