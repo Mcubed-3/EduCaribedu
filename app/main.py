@@ -467,6 +467,36 @@ def admin_users_page(request: Request):
         },
     )
 
+@app.get("/admin/dashboard", response_class=HTMLResponse)
+def admin_dashboard(request: Request):
+    user = require_user(request)
+
+    if user.get("role") != "admin":
+        return RedirectResponse(url="/editor/dashboard", status_code=302)
+
+    return templates.TemplateResponse(
+        "admin_dashboard.html",
+        {
+            "request": request,
+            "current_user": user,
+        },
+    )
+
+
+@app.get("/editor/dashboard", response_class=HTMLResponse)
+def editor_dashboard(request: Request):
+    user = require_user(request)
+
+    if user.get("role") not in ["admin", "editor"]:
+        return RedirectResponse(url="/", status_code=302)
+
+    return templates.TemplateResponse(
+        "editor_dashboard.html",
+        {
+            "request": request,
+            "current_user": user,
+        },
+    )
 
 @app.get("/api/me")
 def me(request: Request):

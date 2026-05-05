@@ -144,7 +144,13 @@
           <a href="/feedback" class="btn btn-secondary btn-link">Feedback</a>
           {% endif %}
           {% if current_user.role == "admin" %}
-          <a href="/admin" class="btn btn-secondary btn-link">Curriculum admin</a>
+          <hr>
+          <div>ADMIN</div>
+          <a href="/admin/dashboard" class="btn btn-secondary btn-link">Dashboard</a>
+          {% elif current_user.role == "editor" %}
+          <hr>
+          <div>EDITOR</div>
+          <a href="/editor/dashboard" class="btn btn-secondary btn-link">Dashboard</a>
           {% endif %}
           {% if current_user.role != "guest" %}
           <a href="/logout" class="btn btn-secondary btn-link">Log out</a>
