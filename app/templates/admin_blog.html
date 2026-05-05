@@ -164,8 +164,21 @@
                     {% if post.status == "published" %}
                     <a href="/blog/{{ post.slug }}" class="btn btn-secondary btn-link small-btn" target="_blank" rel="noopener">View</a>
                     {% endif %}
-                    <button type="button" class="btn btn-secondary small-btn" onclick='openEditor({{ post | tojson | safe }})'>Edit</button>
-                    <button type="button" class="btn btn-secondary small-btn" onclick='deletePost({{ post.id }}, {{ post.title | tojson }})'>Delete</button>
+                    <button 
+                      type="button" 
+                      class="btn btn-secondary small-btn"
+                      onclick="openEditorFromButton(this)"
+                      data-post='{{ post | tojson | safe }}'
+                    >
+                    <button 
+                      type="button" 
+                      class="btn btn-secondary small-btn" 
+                      onclick="deletePostFromButton(this)"
+                      data-id="{{ post.id }}"
+                      data-title="{{ post.title }}"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -250,17 +263,11 @@
 
         <label class="field">
           <span>Article content</span>
-          <div class="blog-editor-toolbar">
-            <button type="button" onclick="insertTag('h2')">H2</button>
-            <button type="button" onclick="insertTag('h3')">H3</button>
-            <button type="button" onclick="insertTag('p')">Paragraph</button>
-            <button type="button" onclick="insertTag('strong')">Bold</button>
-            <button type="button" onclick="insertTag('em')">Italic</button>
-            <button type="button" onclick="insertList('ul')">List</button>
-            <button type="button" onclick="insertLink()">Link</button>
-            <button type="button" onclick="insertBlockquote()">Quote</button>
-          </div>
-          <textarea id="postContent" rows="18" required placeholder="Write your article here using simple HTML tags like <p>, <h2>, <ul>, <li>, <strong>, and <a>."></textarea>
+          <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+          <div id="editor" style="height:320px;background:#fff;border-radius:12px;"></div>
+
+          <input type="hidden" id="postContent">
           <small class="muted">Allowed HTML is cleaned before saving. Avoid copying full news articles; write your own commentary and link sources.</small>
         </label>
 
@@ -284,6 +291,12 @@
       setTimeout(() => { el.style.display = "none"; }, 6000);
     }
 
+    function openEditorFromButton(btn) {
+      const postData = btn.getAttribute("data-post");
+      const post = JSON.parse(postData);
+      openEditor(post);
+    }
+
     function openEditor(post = null) {
       document.getElementById("editorModal").classList.remove("hidden");
       document.getElementById("postForm").reset();
@@ -303,7 +316,7 @@
         document.getElementById("postAuthor").value = post.author || "EduCarib AI Team";
         document.getElementById("postStatus").value = post.status || "draft";
         document.getElementById("postImageAlt").value = post.image_alt || "";
-        document.getElementById("postContent").value = post.content || "";
+        initEditor(post ? post.content : "");
         currentImagePath = post.image_path || "";
         document.getElementById("existingImagePath").value = currentImagePath;
         if (currentImagePath) {
@@ -341,7 +354,7 @@
       formData.append("category", document.getElementById("postCategory").value);
       formData.append("author", document.getElementById("postAuthor").value.trim() || "EduCarib AI Team");
       formData.append("status", forceStatus || document.getElementById("postStatus").value);
-      formData.append("content", document.getElementById("postContent").value.trim());
+      formData.append("content", quill.root.innerHTML.trim());
       formData.append("image_alt", document.getElementById("postImageAlt").value.trim());
       formData.append("existing_image_path", currentImagePath);
 
@@ -374,6 +387,12 @@
       } catch (err) {
         showAlert(err.message || "Delete failed", "error");
       }
+    }
+
+    function deletePostFromButton(btn) {
+      const id = btn.getAttribute("data-id");
+      const title = btn.getAttribute("data-title");
+      deletePost(id, title);
     }
 
     function insertTag(tag) {
@@ -412,5 +431,29 @@
       ta.focus();
     }
   </script>
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<script>
+let quill;
+
+function initEditor(content = "") {
+  if (!quill) {
+    quill = new Quill('#editor', {
+      theme: 'snow',
+      placeholder: 'Write your article here...',
+      modules: {
+        toolbar: [
+          [{ header: [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline'],
+          ['link', 'blockquote'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['clean']
+        ]
+      }
+    });
+  }
+  quill.root.innerHTML = content || "";
+}
+</script>
 </body>
 </html>
