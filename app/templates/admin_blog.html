@@ -298,32 +298,24 @@
     }
 
     function openEditor(post = null) {
-      document.getElementById("editorModal").classList.remove("hidden");
-      document.getElementById("postForm").reset();
-      document.getElementById("postId").value = "";
-      document.getElementById("postAuthor").value = "EduCarib AI Team";
-      document.getElementById("postStatus").value = "draft";
-      currentImagePath = "";
-      document.getElementById("existingImagePath").value = "";
-      document.getElementById("imagePreviewWrap").classList.add("hidden");
-      document.getElementById("imagePreview").src = "";
+      const modal = document.getElementById("editorModal");
+      modal.classList.remove("hidden");
 
-      if (post) {
-        document.getElementById("postId").value = post.id || "";
-        document.getElementById("postTitle").value = post.title || "";
-        document.getElementById("postDescription").value = post.description || "";
-        document.getElementById("postCategory").value = post.category || "General";
-        document.getElementById("postAuthor").value = post.author || "EduCarib AI Team";
-        document.getElementById("postStatus").value = post.status || "draft";
-        document.getElementById("postImageAlt").value = post.image_alt || "";
-        initEditor(post ? post.content : "");
-        currentImagePath = post.image_path || "";
-        document.getElementById("existingImagePath").value = currentImagePath;
-        if (currentImagePath) {
-          document.getElementById("imagePreview").src = currentImagePath;
-          document.getElementById("imagePreviewWrap").classList.remove("hidden");
+      setTimeout(() => {
+        if (post) {
+          document.getElementById("postId").value = post.id || "";
+          document.getElementById("postTitle").value = post.title || "";
+          document.getElementById("postDescription").value = post.description || "";
+          document.getElementById("postStatus").value = post.status || "draft";
+          initEditor(post.content || "");
+        } else {
+          document.getElementById("postId").value = "";
+          document.getElementById("postTitle").value = "";
+          document.getElementById("postDescription").value = "";
+          document.getElementById("postStatus").value = "draft";
+          initEditor("");
         }
-      }
+      }, 100);
     }
 
     function closeEditor() {
@@ -437,10 +429,14 @@
 let quill;
 
 function initEditor(content = "") {
+  if (!window.Quill) {
+    console.error("Quill not loaded");
+    return;
+  }
+
   if (!quill) {
     quill = new Quill('#editor', {
       theme: 'snow',
-      placeholder: 'Write your article here...',
       modules: {
         toolbar: [
           [{ header: [1, 2, 3, false] }],
@@ -452,6 +448,7 @@ function initEditor(content = "") {
       }
     });
   }
+
   quill.root.innerHTML = content || "";
 }
 </script>
